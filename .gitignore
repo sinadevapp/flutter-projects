@@ -1,19 +1,18 @@
-# Flutter / Dart
+# Flutter / Dart - Global
 .dart_tool/
 .packages
 build/
 .pub-cache/
 .pub/
 
-# Android
+# Android - Global
 android/**/gradle-app.setting
-android/**/local.properties
 android/**/GeneratedPluginRegistrant.java
 android/**/*.aar
 android/**/*.ap_
 android/**/build/
 
-# iOS
+# iOS - Global
 ios/**/Pods/
 ios/**/.symlinks/
 ios/**/Flutter/Flutter.framework
@@ -21,10 +20,16 @@ ios/**/Flutter/Flutter.podspec
 ios/**/GeneratedPluginRegistrant.h
 ios/**/GeneratedPluginRegistrant.m
 
-# IDE & OS
+# IDE & OS - Global
 .idea/
 .vscode/
 *.iml
 .DS_Store
 Thumbs.db
 *.swp
+*.metadata
+
+# Project-specific (to include in git - DO NOT IGNORE)
+# Note: local.properties contains cmake.dir path needed for build
+# We'll add a template instead
+android/local.properties

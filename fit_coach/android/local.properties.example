@@ -1,0 +1,6 @@
+# Android SDK and Flutter SDK paths (Windows)
+sdk.dir=D:\\Andriod\\sdk
+flutter.sdk=E:\\Flutter\\flutter
+
+# Fix for missing CMake 3.22.1 - use system CMake
+cmake.dir=D:\\Andriod\\sdk\\cmake\\4.1.1
