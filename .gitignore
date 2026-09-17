@@ -1,0 +1,30 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.pub-cache/
+.pub/
+
+# Android
+android/**/gradle-app.setting
+android/**/local.properties
+android/**/GeneratedPluginRegistrant.java
+android/**/*.aar
+android/**/*.ap_
+android/**/build/
+
+# iOS
+ios/**/Pods/
+ios/**/.symlinks/
+ios/**/Flutter/Flutter.framework
+ios/**/Flutter/Flutter.podspec
+ios/**/GeneratedPluginRegistrant.h
+ios/**/GeneratedPluginRegistrant.m
+
+# IDE & OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.swp
