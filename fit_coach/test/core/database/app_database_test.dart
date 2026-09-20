@@ -1,11 +1,12 @@
 import 'package:fit_coach/core/database/app_database.dart';
+import 'package:fit_coach/core/database/test_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   late AppDatabase db;
 
   setUp(() {
-    db = AppDatabase.inMemory();
+    db = createTestDatabase();
   });
 
   tearDown(() async {

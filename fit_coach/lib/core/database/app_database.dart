@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
+// NOTE: do NOT import drift/native.dart or drift/wasm.dart here —
+// this file is shared across native and web; dart:ffi breaks dart2js.
 import 'package:drift_flutter/drift_flutter.dart';
 
 part 'app_database.g.dart';
@@ -18,10 +19,11 @@ class Users extends Table {
 
 @DriftDatabase(tables: [Users])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
-
-  /// In-memory constructor for tests.
-  AppDatabase.inMemory() : super(NativeDatabase.memory());
+  /// Platform-appropriate connection:
+  /// native (Android/Windows) uses the bundled sqlite3,
+  /// web uses the WASM build via web/sqlite3.wasm + web/drift_worker.js.
+  AppDatabase({QueryExecutor? executor})
+      : super(executor ?? _openConnection());
 
   @override
   int get schemaVersion => 1;
@@ -32,5 +34,11 @@ class AppDatabase extends _$AppDatabase {
 }
 
 QueryExecutor _openConnection() {
-  return driftDatabase(name: 'fit_coach');
+  return driftDatabase(
+    name: 'fit_coach',
+    web: DriftWebOptions(
+      sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+      driftWorker: Uri.parse('drift_worker.js'),
+    ),
+  );
 }

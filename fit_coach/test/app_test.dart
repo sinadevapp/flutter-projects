@@ -1,6 +1,6 @@
 import 'package:fit_coach/app/fit_coach_app.dart';
 import 'package:fit_coach/app/router.dart';
-import 'package:fit_coach/core/database/app_database.dart';
+import 'package:fit_coach/core/database/test_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('app builds with Material 3 theme and renders its start screen',
       (tester) async {
-    final db = AppDatabase.inMemory();
+    final db = createTestDatabase();
     addTearDown(db.close);
 
     await tester.pumpWidget(

@@ -1,5 +1,6 @@
 import 'package:fit_coach/app/router.dart';
 import 'package:fit_coach/core/database/app_database.dart';
+import 'package:fit_coach/core/database/test_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/features/auth/presentation/role_picker_screen.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ void main() {
       'router with no active user shows role picker; '
       'tapping a role saves the user and lands on home', (tester) async {
     // Shared in-memory DB so the test can verify persistence.
-    final db = AppDatabase.inMemory();
+    final db = createTestDatabase();
     addTearDown(db.close);
 
     await tester.pumpWidget(
