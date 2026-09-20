@@ -1,4 +1,3 @@
-import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/features/auth/presentation/role_picker_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
