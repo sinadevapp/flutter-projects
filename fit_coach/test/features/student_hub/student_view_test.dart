@@ -71,7 +71,7 @@ void main() {
     await tester.tap(find.text('برنامه حجم'));
     await tester.pumpAndSettle();
     expect(find.text('اسکوات'), findsOneWidget);
-    expect(find.text('4 × 10'), findsOneWidget);
+    expect(find.text('۴ × ۱۰'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();

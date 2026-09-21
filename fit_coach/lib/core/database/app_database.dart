@@ -52,7 +52,30 @@ class Sessions extends Table {
   IntColumn get studentId => integer().nullable().references(Users, #id)();
 }
 
-@DriftDatabase(tables: [Users, WorkoutPlans, Exercises, Sessions])
+/// One performed workout: opened when the student starts training and closed
+/// with [finishedAt]. An open row (finishedAt == null) is the workout in
+/// progress — it lives on disk so closing the app mid-workout resumes it.
+class WorkoutSessions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get planId => integer().references(WorkoutPlans, #id)();
+  IntColumn get studentId => integer().references(Users, #id)();
+  DateTimeColumn get startedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get finishedAt => dateTime().nullable()();
+}
+
+/// One completed set inside a [WorkoutSessions] row.
+class SetLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get sessionId => integer().references(WorkoutSessions, #id)();
+  IntColumn get exerciseId => integer().references(Exercises, #id)();
+  IntColumn get setNumber => integer()();
+  DateTimeColumn get completedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+}
+
+@DriftDatabase(
+  tables: [Users, WorkoutPlans, Exercises, Sessions, WorkoutSessions, SetLogs],
+)
 class AppDatabase extends _$AppDatabase {
   /// Platform-appropriate connection:
   /// native (Android/Windows) uses the bundled sqlite3,
@@ -61,7 +84,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -81,6 +104,10 @@ class AppDatabase extends _$AppDatabase {
               'ALTER TABLE sessions ADD COLUMN student_id INTEGER '
               'REFERENCES users(id)',
             );
+          }
+          if (from < 5) {
+            await m.createTable(workoutSessions);
+            await m.createTable(setLogs);
           }
         },
         beforeOpen: (details) async {
@@ -143,6 +170,55 @@ class AppDatabase extends _$AppDatabase {
 
   /// Signs out. Students and plans are untouched.
   Future<void> clearActiveRole() => delete(sessions).go();
+
+  /// Opens a workout session for [studentId] on [planId].
+  Future<int> startWorkoutSession({
+    required int planId,
+    required int studentId,
+  }) =>
+      into(workoutSessions).insert(
+        WorkoutSessionsCompanion.insert(
+          planId: planId,
+          studentId: studentId,
+        ),
+      );
+
+  /// The student's unfinished workout, if any — the one to resume on launch.
+  Future<WorkoutSession?> getActiveWorkoutSession(int studentId) async {
+    final rows = await (select(workoutSessions)
+          ..where((s) => s.studentId.equals(studentId) & s.finishedAt.isNull())
+          ..orderBy([(s) => OrderingTerm.desc(s.startedAt)])
+          ..limit(1))
+        .get();
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  /// Records one finished set.
+  Future<int> logSet({
+    required int sessionId,
+    required int exerciseId,
+    required int setNumber,
+  }) =>
+      into(setLogs).insert(
+        SetLogsCompanion.insert(
+          sessionId: sessionId,
+          exerciseId: exerciseId,
+          setNumber: setNumber,
+        ),
+      );
+
+  /// Every set logged so far in one workout, oldest first.
+  Future<List<SetLog>> getSetLogs(int sessionId) =>
+      (select(setLogs)
+            ..where((l) => l.sessionId.equals(sessionId))
+            ..orderBy([(l) => OrderingTerm.asc(l.id)]))
+          .get();
+
+  /// Closes the workout.
+  Future<void> finishWorkoutSession(int sessionId) =>
+      (update(workoutSessions)..where((s) => s.id.equals(sessionId))).write(
+        WorkoutSessionsCompanion(finishedAt: Value(DateTime.now())),
+      );
 }
 
 QueryExecutor _openConnection() {

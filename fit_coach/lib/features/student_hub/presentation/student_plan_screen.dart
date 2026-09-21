@@ -1,29 +1,12 @@
-import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
+import 'package:fit_coach/core/database/plan_providers.dart';
+import 'package:fit_coach/core/utils/persian_digits.dart';
 import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
+import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
+import 'package:fit_coach/features/workout_active/presentation/active_workout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/// Live stream of one student's training plans (student-side view).
-final myPlansProvider =
-    StreamProvider.autoDispose.family<List<WorkoutPlan>, int>((ref, studentId) {
-  final db = ref.watch(appDatabaseProvider);
-  return (db.select(db.workoutPlans)
-        ..where((p) => p.studentId.equals(studentId))
-        ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))
-      .watch();
-});
-
-/// The movements of one plan.
-final planExercisesProvider =
-    StreamProvider.autoDispose.family<List<Exercise>, int>((ref, planId) {
-  final db = ref.watch(appDatabaseProvider);
-  return (db.select(db.exercises)
-        ..where((e) => e.planId.equals(planId))
-        ..orderBy([(e) => OrderingTerm.asc(e.position)]))
-      .watch();
-});
 
 /// What the student sees: the plans their coach built for them.
 class StudentPlanScreen extends ConsumerWidget {
@@ -33,7 +16,7 @@ class StudentPlanScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final plans = ref.watch(myPlansProvider(studentId));
+    final plans = ref.watch(plansForStudentProvider(studentId));
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +46,7 @@ class StudentPlanScreen extends ConsumerWidget {
   }
 }
 
-/// The movements of one plan, in order (e.g. squat — 4 × 10).
+/// The movements of one plan, and the way to start (or resume) training it.
 class PlanDetailScreen extends ConsumerWidget {
   const PlanDetailScreen({super.key, required this.plan});
 
@@ -72,6 +55,8 @@ class PlanDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final exercises = ref.watch(planExercisesProvider(plan.id));
+    // An unfinished workout on this plan means the student is mid-session.
+    final active = ref.watch(activeWorkoutProvider(plan.studentId));
 
     return Scaffold(
       appBar: AppBar(title: Text(plan.title)),
@@ -80,13 +65,45 @@ class PlanDetailScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('$e')),
         data: (list) => list.isEmpty
             ? const Center(child: Text('این برنامه حرکتی ندارد'))
-            : ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (context, i) => ListTile(
-                  title: Text(list[i].name),
-                  trailing: Text('${list[i].sets} × ${list[i].reps}'),
-                ),
+            : ListView(
+                children: [
+                  for (final exercise in list)
+                    ListTile(
+                      title: Text(exercise.name),
+                      trailing: Text(
+                        '${fa(exercise.sets)} × ${fa(exercise.reps)}',
+                      ),
+                    ),
+                ],
               ),
+      ),
+      floatingActionButton: active.when(
+        loading: () => null,
+        error: (_, __) => null,
+        data: (session) => FloatingActionButton.extended(
+          onPressed: () => _start(context, ref, session),
+          label: Text(session == null ? 'شروع تمرین' : 'ادامه تمرین'),
+          icon: const Icon(Icons.play_arrow),
+        ),
+      ),
+    );
+  }
+
+  /// Resumes the open session, or opens a new one, then shows the workout.
+  Future<void> _start(
+    BuildContext context,
+    WidgetRef ref,
+    WorkoutSession? session,
+  ) async {
+    final sessionId = session?.id ??
+        await ref.read(appDatabaseProvider).startWorkoutSession(
+              planId: plan.id,
+              studentId: plan.studentId,
+            );
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ActiveWorkoutScreen(sessionId: sessionId, plan: plan),
       ),
     );
   }
