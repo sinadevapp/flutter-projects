@@ -79,6 +79,52 @@ void main() {
     await upgraded.setActiveRole(UserRole.coach);
     expect(await upgraded.getActiveRole(), UserRole.coach);
   });
+  test('a database created at schema 3 upgrades and can store a student id',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('fit_coach_upgrade3');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File('${dir.path}/legacy3.sqlite');
+
+    // Schema 3: sessions existed, but without the student_id column.
+    final legacy = NativeDatabase(file);
+    await legacy.ensureOpen(_NoopUser());
+    await legacy.runCustom(
+      'CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'name TEXT NOT NULL, role INTEGER NOT NULL)',
+      const [],
+    );
+    await legacy.runCustom(
+      'CREATE TABLE workout_plans (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'student_id INTEGER NOT NULL REFERENCES users(id), '
+      'title TEXT NOT NULL, created_at INTEGER NOT NULL)',
+      const [],
+    );
+    await legacy.runCustom(
+      'CREATE TABLE exercises (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'plan_id INTEGER NOT NULL REFERENCES workout_plans(id), '
+      'name TEXT NOT NULL, sets INTEGER NOT NULL, reps INTEGER NOT NULL, '
+      'position INTEGER NOT NULL DEFAULT 0)',
+      const [],
+    );
+    await legacy.runCustom(
+      'CREATE TABLE sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+      'role INTEGER NOT NULL)',
+      const [],
+    );
+    await legacy.runCustom('PRAGMA user_version = 3', const []);
+    await legacy.close();
+
+    final upgraded = AppDatabase(executor: NativeDatabase(file));
+    addTearDown(upgraded.close);
+
+    final studentId = await upgraded.insertUser(
+      UsersCompanion.insert(name: 'علی', role: UserRole.student),
+    );
+    await upgraded.setActiveRole(UserRole.student, studentId: studentId);
+
+    expect(await upgraded.getActiveRole(), UserRole.student);
+    expect(await upgraded.getActiveStudentId(), studentId);
+  });
 }
 
 /// The legacy connection only needs to open; no query callbacks are used.
@@ -90,5 +136,5 @@ class _NoopUser implements QueryExecutorUser {
   ) async {}
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 }

@@ -970,8 +970,22 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         type: DriftSqlType.int,
         requiredDuringInsert: true,
       ).withConverter<UserRole>($SessionsTable.$converterrole);
+  static const VerificationMeta _studentIdMeta = const VerificationMeta(
+    'studentId',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, role];
+  late final GeneratedColumn<int> studentId = GeneratedColumn<int>(
+    'student_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, role, studentId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -986,6 +1000,12 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('student_id')) {
+      context.handle(
+        _studentIdMeta,
+        studentId.isAcceptableOrUnknown(data['student_id']!, _studentIdMeta),
+      );
     }
     return context;
   }
@@ -1006,6 +1026,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
           data['${effectivePrefix}role'],
         )!,
       ),
+      studentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}student_id'],
+      ),
     );
   }
 
@@ -1021,7 +1045,8 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
 class Session extends DataClass implements Insertable<Session> {
   final int id;
   final UserRole role;
-  const Session({required this.id, required this.role});
+  final int? studentId;
+  const Session({required this.id, required this.role, this.studentId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1029,11 +1054,20 @@ class Session extends DataClass implements Insertable<Session> {
     {
       map['role'] = Variable<int>($SessionsTable.$converterrole.toSql(role));
     }
+    if (!nullToAbsent || studentId != null) {
+      map['student_id'] = Variable<int>(studentId);
+    }
     return map;
   }
 
   SessionsCompanion toCompanion(bool nullToAbsent) {
-    return SessionsCompanion(id: Value(id), role: Value(role));
+    return SessionsCompanion(
+      id: Value(id),
+      role: Value(role),
+      studentId: studentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(studentId),
+    );
   }
 
   factory Session.fromJson(
@@ -1046,6 +1080,7 @@ class Session extends DataClass implements Insertable<Session> {
       role: $SessionsTable.$converterrole.fromJson(
         serializer.fromJson<int>(json['role']),
       ),
+      studentId: serializer.fromJson<int?>(json['studentId']),
     );
   }
   @override
@@ -1056,15 +1091,24 @@ class Session extends DataClass implements Insertable<Session> {
       'role': serializer.toJson<int>(
         $SessionsTable.$converterrole.toJson(role),
       ),
+      'studentId': serializer.toJson<int?>(studentId),
     };
   }
 
-  Session copyWith({int? id, UserRole? role}) =>
-      Session(id: id ?? this.id, role: role ?? this.role);
+  Session copyWith({
+    int? id,
+    UserRole? role,
+    Value<int?> studentId = const Value.absent(),
+  }) => Session(
+    id: id ?? this.id,
+    role: role ?? this.role,
+    studentId: studentId.present ? studentId.value : this.studentId,
+  );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
       id: data.id.present ? data.id.value : this.id,
       role: data.role.present ? data.role.value : this.role,
+      studentId: data.studentId.present ? data.studentId.value : this.studentId,
     );
   }
 
@@ -1072,42 +1116,59 @@ class Session extends DataClass implements Insertable<Session> {
   String toString() {
     return (StringBuffer('Session(')
           ..write('id: $id, ')
-          ..write('role: $role')
+          ..write('role: $role, ')
+          ..write('studentId: $studentId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, role);
+  int get hashCode => Object.hash(id, role, studentId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Session && other.id == this.id && other.role == this.role);
+      (other is Session &&
+          other.id == this.id &&
+          other.role == this.role &&
+          other.studentId == this.studentId);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<int> id;
   final Value<UserRole> role;
+  final Value<int?> studentId;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.role = const Value.absent(),
+    this.studentId = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
     required UserRole role,
+    this.studentId = const Value.absent(),
   }) : role = Value(role);
   static Insertable<Session> custom({
     Expression<int>? id,
     Expression<int>? role,
+    Expression<int>? studentId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (role != null) 'role': role,
+      if (studentId != null) 'student_id': studentId,
     });
   }
 
-  SessionsCompanion copyWith({Value<int>? id, Value<UserRole>? role}) {
-    return SessionsCompanion(id: id ?? this.id, role: role ?? this.role);
+  SessionsCompanion copyWith({
+    Value<int>? id,
+    Value<UserRole>? role,
+    Value<int?>? studentId,
+  }) {
+    return SessionsCompanion(
+      id: id ?? this.id,
+      role: role ?? this.role,
+      studentId: studentId ?? this.studentId,
+    );
   }
 
   @override
@@ -1121,6 +1182,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
         $SessionsTable.$converterrole.toSql(role.value),
       );
     }
+    if (studentId.present) {
+      map['student_id'] = Variable<int>(studentId.value);
+    }
     return map;
   }
 
@@ -1128,7 +1192,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   String toString() {
     return (StringBuffer('SessionsCompanion(')
           ..write('id: $id, ')
-          ..write('role: $role')
+          ..write('role: $role, ')
+          ..write('studentId: $studentId')
           ..write(')'))
         .toString();
   }
@@ -1187,6 +1252,25 @@ final class $$UsersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$SessionsTable, List<Session>> _sessionsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.sessions,
+    aliasName: $_aliasNameGenerator(db.users.id, db.sessions.studentId),
+  );
+
+  $$SessionsTableProcessedTableManager get sessionsRefs {
+    final manager = $$SessionsTableTableManager(
+      $_db,
+      $_db.sessions,
+    ).filter((f) => f.studentId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sessionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
@@ -1229,6 +1313,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
           }) => $$WorkoutPlansTableFilterComposer(
             $db: $db,
             $table: $db.workoutPlans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> sessionsRefs(
+    Expression<bool> Function($$SessionsTableFilterComposer f) f,
+  ) {
+    final $$SessionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessions,
+      getReferencedColumn: (t) => t.studentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -1306,6 +1415,31 @@ class $$UsersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> sessionsRefs<T extends Object>(
+    Expression<T> Function($$SessionsTableAnnotationComposer a) f,
+  ) {
+    final $$SessionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessions,
+      getReferencedColumn: (t) => t.studentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -1321,7 +1455,7 @@ class $$UsersTableTableManager
           $$UsersTableUpdateCompanionBuilder,
           (User, $$UsersTableReferences),
           User,
-          PrefetchHooks Function({bool workoutPlansRefs})
+          PrefetchHooks Function({bool workoutPlansRefs, bool sessionsRefs})
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -1352,31 +1486,59 @@ class $$UsersTableTableManager
                     (e.readTable(table), $$UsersTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({workoutPlansRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (workoutPlansRefs) db.workoutPlans],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (workoutPlansRefs)
-                    await $_getPrefetchedData<User, $UsersTable, WorkoutPlan>(
-                      currentTable: table,
-                      referencedTable: $$UsersTableReferences
-                          ._workoutPlansRefsTable(db),
-                      managerFromTypedResult: (p0) => $$UsersTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).workoutPlansRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.studentId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({workoutPlansRefs = false, sessionsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (workoutPlansRefs) db.workoutPlans,
+                    if (sessionsRefs) db.sessions,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (workoutPlansRefs)
+                        await $_getPrefetchedData<
+                          User,
+                          $UsersTable,
+                          WorkoutPlan
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._workoutPlansRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).workoutPlansRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.studentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (sessionsRefs)
+                        await $_getPrefetchedData<User, $UsersTable, Session>(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._sessionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).sessionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.studentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -1393,7 +1555,7 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableUpdateCompanionBuilder,
       (User, $$UsersTableReferences),
       User,
-      PrefetchHooks Function({bool workoutPlansRefs})
+      PrefetchHooks Function({bool workoutPlansRefs, bool sessionsRefs})
     >;
 typedef $$WorkoutPlansTableCreateCompanionBuilder =
     WorkoutPlansCompanion Function({
@@ -2109,9 +2271,40 @@ typedef $$ExercisesTableProcessedTableManager =
       PrefetchHooks Function({bool planId})
     >;
 typedef $$SessionsTableCreateCompanionBuilder =
-    SessionsCompanion Function({Value<int> id, required UserRole role});
+    SessionsCompanion Function({
+      Value<int> id,
+      required UserRole role,
+      Value<int?> studentId,
+    });
 typedef $$SessionsTableUpdateCompanionBuilder =
-    SessionsCompanion Function({Value<int> id, Value<UserRole> role});
+    SessionsCompanion Function({
+      Value<int> id,
+      Value<UserRole> role,
+      Value<int?> studentId,
+    });
+
+final class $$SessionsTableReferences
+    extends BaseReferences<_$AppDatabase, $SessionsTable, Session> {
+  $$SessionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _studentIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.sessions.studentId, db.users.id),
+  );
+
+  $$UsersTableProcessedTableManager? get studentId {
+    final $_column = $_itemColumn<int>('student_id');
+    if ($_column == null) return null;
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_studentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$SessionsTableFilterComposer
     extends Composer<_$AppDatabase, $SessionsTable> {
@@ -2132,6 +2325,29 @@ class $$SessionsTableFilterComposer
         column: $table.role,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  $$UsersTableFilterComposer get studentId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.studentId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$SessionsTableOrderingComposer
@@ -2152,6 +2368,29 @@ class $$SessionsTableOrderingComposer
     column: $table.role,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$UsersTableOrderingComposer get studentId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.studentId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$SessionsTableAnnotationComposer
@@ -2168,6 +2407,29 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<UserRole, int> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get studentId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.studentId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$SessionsTableTableManager
@@ -2181,9 +2443,9 @@ class $$SessionsTableTableManager
           $$SessionsTableAnnotationComposer,
           $$SessionsTableCreateCompanionBuilder,
           $$SessionsTableUpdateCompanionBuilder,
-          (Session, BaseReferences<_$AppDatabase, $SessionsTable, Session>),
+          (Session, $$SessionsTableReferences),
           Session,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool studentId})
         > {
   $$SessionsTableTableManager(_$AppDatabase db, $SessionsTable table)
     : super(
@@ -2200,16 +2462,67 @@ class $$SessionsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<UserRole> role = const Value.absent(),
-              }) => SessionsCompanion(id: id, role: role),
+                Value<int?> studentId = const Value.absent(),
+              }) => SessionsCompanion(id: id, role: role, studentId: studentId),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required UserRole role,
-              }) => SessionsCompanion.insert(id: id, role: role),
+                Value<int?> studentId = const Value.absent(),
+              }) => SessionsCompanion.insert(
+                id: id,
+                role: role,
+                studentId: studentId,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$SessionsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({studentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (studentId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.studentId,
+                                referencedTable: $$SessionsTableReferences
+                                    ._studentIdTable(db),
+                                referencedColumn: $$SessionsTableReferences
+                                    ._studentIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -2224,9 +2537,9 @@ typedef $$SessionsTableProcessedTableManager =
       $$SessionsTableAnnotationComposer,
       $$SessionsTableCreateCompanionBuilder,
       $$SessionsTableUpdateCompanionBuilder,
-      (Session, BaseReferences<_$AppDatabase, $SessionsTable, Session>),
+      (Session, $$SessionsTableReferences),
       Session,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool studentId})
     >;
 
 class $AppDatabaseManager {

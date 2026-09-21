@@ -42,9 +42,14 @@ class Exercises extends Table {
 /// This is *session* state, deliberately separate from [Users]: switching role
 /// must never touch the coach's students or their plans. Empty table = nobody
 /// is signed in, so the role picker shows.
+///
+/// When the role is [UserRole.student], [studentId] is the student record this
+/// device is acting as (phase 1 has no real login, so the student picks their
+/// own name once).
 class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get role => intEnum<UserRole>()();
+  IntColumn get studentId => integer().nullable().references(Users, #id)();
 }
 
 @DriftDatabase(tables: [Users, WorkoutPlans, Exercises, Sessions])
@@ -56,7 +61,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,7 +71,16 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(exercises);
           }
           if (from < 3) {
+            // Created with the current definition, student_id included.
             await m.createTable(sessions);
+          }
+          if (from == 3) {
+            // Only an install that already had schema-3 sessions lacks the
+            // column — a from<3 upgrade just created the table complete.
+            await customStatement(
+              'ALTER TABLE sessions ADD COLUMN student_id INTEGER '
+              'REFERENCES users(id)',
+            );
           }
         },
         beforeOpen: (details) async {
@@ -112,10 +126,19 @@ class AppDatabase extends _$AppDatabase {
     return rows.isEmpty ? null : rows.first.role;
   }
 
+  /// The student record the signed-in student is acting as (null for coaches).
+  Future<int?> getActiveStudentId() async {
+    final rows = await select(sessions).get();
+    return rows.isEmpty ? null : rows.first.studentId;
+  }
+
   /// Signs in; replaces any previous session.
-  Future<void> setActiveRole(UserRole role) => transaction(() async {
+  Future<void> setActiveRole(UserRole role, {int? studentId}) =>
+      transaction(() async {
         await delete(sessions).go();
-        await into(sessions).insert(SessionsCompanion.insert(role: role));
+        await into(sessions).insert(
+          SessionsCompanion.insert(role: role, studentId: Value(studentId)),
+        );
       });
 
   /// Signs out. Students and plans are untouched.

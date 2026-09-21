@@ -1,18 +1,9 @@
 import 'package:fit_coach/features/coach_hub/presentation/add_student_screen.dart';
 import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
 import 'package:fit_coach/features/workout_builder/presentation/student_detail_screen.dart';
-import 'package:fit_coach/core/database/app_database.dart';
-import 'package:fit_coach/core/database/database_provider.dart';
+import 'package:fit_coach/core/database/students_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/// Live stream of the students table for the coach dashboard.
-final studentsProvider = StreamProvider.autoDispose<List<User>>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return (db.select(db.users)
-        ..where((u) => u.role.equalsValue(UserRole.student)))
-      .watch();
-});
 
 /// Coach dashboard: list of students and (later) workout management.
 class CoachHubScreen extends ConsumerWidget {

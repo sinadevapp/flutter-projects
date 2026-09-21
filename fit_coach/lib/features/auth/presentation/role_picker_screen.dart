@@ -1,5 +1,5 @@
 import 'package:fit_coach/core/database/app_database.dart';
-import 'package:fit_coach/features/auth/application/active_role_provider.dart';
+import 'package:fit_coach/features/auth/application/active_session_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +11,7 @@ class RolePickerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Future<void> pick(UserRole role) async {
-      await ref.read(activeRoleProvider.notifier).pickRole(role);
+      await ref.read(activeSessionProvider.notifier).pickRole(role);
       if (context.mounted) context.go('/');
     }
 
