@@ -58,11 +58,11 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a persisted user skips the role picker on launch',
+  testWidgets('a persisted session skips the role picker on launch',
       (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
-    await db.insertUser(UsersCompanion.insert(name: 'coach', role: UserRole.coach));
+    await db.setActiveRole(UserRole.coach);
 
     await pumpApp(tester, db);
 

@@ -45,10 +45,10 @@ void main() {
     expect(find.byType(RolePickerScreen), findsNothing);
     expect(find.byType(CoachHubScreen), findsOneWidget);
 
-    // Persistence verified: the picked user is in the database.
-    final users = await db.getAllUsers();
-    expect(users.length, 1);
-    expect(users.first.role, UserRole.coach);
+    // Persistence verified: the session role is stored, and picking a role
+    // does NOT create a user row (students are the coach's data, not session).
+    expect(await db.getActiveRole(), UserRole.coach);
+    expect(await db.getAllUsers(), isEmpty);
 
     // Unmount inside fake-async so the drift watch stream's disposal timer
     // fires before the test framework checks for pending timers.

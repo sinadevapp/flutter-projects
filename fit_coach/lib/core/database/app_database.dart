@@ -37,7 +37,17 @@ class Exercises extends Table {
   IntColumn get position => integer().withDefault(const Constant(0))();
 }
 
-@DriftDatabase(tables: [Users, WorkoutPlans, Exercises])
+/// Which role the device is currently acting as.
+///
+/// This is *session* state, deliberately separate from [Users]: switching role
+/// must never touch the coach's students or their plans. Empty table = nobody
+/// is signed in, so the role picker shows.
+class Sessions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get role => intEnum<UserRole>()();
+}
+
+@DriftDatabase(tables: [Users, WorkoutPlans, Exercises, Sessions])
 class AppDatabase extends _$AppDatabase {
   /// Platform-appropriate connection:
   /// native (Android/Windows) uses the bundled sqlite3,
@@ -46,7 +56,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,6 +64,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.createTable(workoutPlans);
             await m.createTable(exercises);
+          }
+          if (from < 3) {
+            await m.createTable(sessions);
           }
         },
         beforeOpen: (details) async {
@@ -92,6 +105,21 @@ class AppDatabase extends _$AppDatabase {
             ..where((e) => e.planId.equals(planId))
             ..orderBy([(e) => OrderingTerm.asc(e.position)]))
           .get();
+
+  /// The role this device is acting as, or null when nobody is signed in.
+  Future<UserRole?> getActiveRole() async {
+    final rows = await select(sessions).get();
+    return rows.isEmpty ? null : rows.first.role;
+  }
+
+  /// Signs in; replaces any previous session.
+  Future<void> setActiveRole(UserRole role) => transaction(() async {
+        await delete(sessions).go();
+        await into(sessions).insert(SessionsCompanion.insert(role: role));
+      });
+
+  /// Signs out. Students and plans are untouched.
+  Future<void> clearActiveRole() => delete(sessions).go();
 }
 
 QueryExecutor _openConnection() {
