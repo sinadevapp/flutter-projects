@@ -1,3 +1,4 @@
+import 'package:fit_coach/features/coach_hub/presentation/add_student_screen.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,18 @@ class CoachHubScreen extends ConsumerWidget {
     final students = ref.watch(studentsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('مربی')),
+      appBar: AppBar(
+        title: const Text('مربی'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_add),
+            tooltip: 'افزودن شاگرد',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AddStudentScreen()),
+            ),
+          ),
+        ],
+      ),
       body: students.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
