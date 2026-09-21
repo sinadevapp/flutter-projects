@@ -38,6 +38,32 @@ void main() {
     expect(exercises.first.reps, 10);
   });
 
+  test('clearing the local user also clears their plans and exercises',
+      () async {
+    final db = createTestDatabase();
+    addTearDown(db.close);
+
+    final studentId = await db.insertUser(
+      UsersCompanion.insert(name: 'علی', role: UserRole.student),
+    );
+    final planId = await db.insertWorkoutPlan(
+      WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه حجم'),
+    );
+    await db.insertExercise(ExercisesCompanion.insert(
+      planId: planId,
+      name: 'اسکوات',
+      sets: 4,
+      reps: 10,
+    ));
+
+    // Must not trip the users <- workout_plans foreign key.
+    await db.deleteAllUsers();
+
+    expect(await db.getAllUsers(), isEmpty);
+    expect(await db.getPlansForStudent(studentId), isEmpty);
+    expect(await db.getExercisesForPlan(planId), isEmpty);
+  });
+
   test('plans are scoped to their student', () async {
     final db = createTestDatabase();
     addTearDown(db.close);

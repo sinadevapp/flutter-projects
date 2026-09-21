@@ -65,7 +65,15 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<User>> getAllUsers() => select(users).get();
 
-  Future<int> deleteAllUsers() => delete(users).go();
+  /// Resets the local identity: drops every user *and* everything that hangs
+  /// off them (plans, exercises) — deleting users first would trip the
+  /// `workout_plans.studentId` foreign key. One transaction so a failure
+  /// leaves the database untouched.
+  Future<void> deleteAllUsers() => transaction(() async {
+        await delete(exercises).go();
+        await delete(workoutPlans).go();
+        await delete(users).go();
+      });
 
   Future<int> insertWorkoutPlan(WorkoutPlansCompanion entry) =>
       into(workoutPlans).insert(entry);
