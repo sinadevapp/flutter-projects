@@ -1,0 +1,37 @@
+import 'package:fit_coach/core/database/app_database.dart';
+import 'package:fit_coach/core/database/database_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Live stream of the students table for the coach dashboard.
+final studentsProvider = StreamProvider.autoDispose<List<User>>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.users)
+        ..where((u) => u.role.equalsValue(UserRole.student)))
+      .watch();
+});
+
+/// Coach dashboard: list of students and (later) workout management.
+class CoachHubScreen extends ConsumerWidget {
+  const CoachHubScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final students = ref.watch(studentsProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('مربی')),
+      body: students.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('$e')),
+        data: (list) => list.isEmpty
+            ? const Center(child: Text('هنوز شاگردی اضافه نشده'))
+            : ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (context, i) =>
+                    ListTile(leading: const Icon(Icons.person), title: Text(list[i].name)),
+              ),
+      ),
+    );
+  }
+}
