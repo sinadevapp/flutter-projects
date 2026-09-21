@@ -1,5 +1,6 @@
 import 'package:fit_coach/features/coach_hub/presentation/add_student_screen.dart';
 import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
+import 'package:fit_coach/features/workout_builder/presentation/student_detail_screen.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:flutter/material.dart';
@@ -42,8 +43,16 @@ class CoachHubScreen extends ConsumerWidget {
             ? const Center(child: Text('هنوز شاگردی اضافه نشده'))
             : ListView.builder(
                 itemCount: list.length,
-                itemBuilder: (context, i) =>
-                    ListTile(leading: const Icon(Icons.person), title: Text(list[i].name)),
+                itemBuilder: (context, i) => ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text(list[i].name),
+                  trailing: const Icon(Icons.chevron_left),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => StudentDetailScreen(student: list[i]),
+                    ),
+                  ),
+                ),
               ),
       ),
     );
