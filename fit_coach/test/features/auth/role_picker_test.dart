@@ -3,6 +3,7 @@ import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/test_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/features/auth/presentation/role_picker_screen.dart';
+import 'package:fit_coach/features/coach_hub/presentation/coach_hub_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,16 +38,21 @@ void main() {
     // No user yet -> role picker is shown at '/'.
     expect(find.byType(RolePickerScreen), findsOneWidget);
 
-    await tester.tap(find.text('مربی'));
+    await tester.tap(find.widgetWithText(FilledButton, 'مربی'));
     await tester.pumpAndSettle();
 
-    // Navigated past the gate to home.
+    // Navigated past the gate to the coach dashboard.
     expect(find.byType(RolePickerScreen), findsNothing);
-    expect(find.text('FitCoach'), findsWidgets);
+    expect(find.byType(CoachHubScreen), findsOneWidget);
 
     // Persistence verified: the picked user is in the database.
     final users = await db.getAllUsers();
     expect(users.length, 1);
     expect(users.first.role, UserRole.coach);
+
+    // Unmount inside fake-async so the drift watch stream's disposal timer
+    // fires before the test framework checks for pending timers.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }

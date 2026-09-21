@@ -31,6 +31,8 @@ class AppDatabase extends _$AppDatabase {
   Future<int> insertUser(UsersCompanion entry) => into(users).insert(entry);
 
   Future<List<User>> getAllUsers() => select(users).get();
+
+  Future<int> deleteAllUsers() => delete(users).go();
 }
 
 QueryExecutor _openConnection() {

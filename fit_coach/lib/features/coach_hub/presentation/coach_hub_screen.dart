@@ -1,4 +1,5 @@
 import 'package:fit_coach/features/coach_hub/presentation/add_student_screen.dart';
+import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class CoachHubScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const AddStudentScreen()),
             ),
           ),
+          const SwitchRoleButton(),
         ],
       ),
       body: students.when(

@@ -1,0 +1,109 @@
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+> Task :app:DebugMinSdkCheck
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:compileFlutterBuildDebug
+> Task :app:packJniLibsflutterBuildDebug UP-TO-DATE
+> Task :path_provider_android:preBuild UP-TO-DATE
+> Task :path_provider_android:preDebugBuild UP-TO-DATE
+> Task :path_provider_android:writeDebugAarMetadata UP-TO-DATE
+> Task :sqlite3_flutter_libs:preBuild UP-TO-DATE
+> Task :sqlite3_flutter_libs:preDebugBuild UP-TO-DATE
+> Task :sqlite3_flutter_libs:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:cleanMergeDebugAssets
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :path_provider_android:mergeDebugShaders UP-TO-DATE
+> Task :path_provider_android:compileDebugShaders NO-SOURCE
+> Task :path_provider_android:generateDebugAssets UP-TO-DATE
+> Task :path_provider_android:packageDebugAssets UP-TO-DATE
+> Task :sqlite3_flutter_libs:mergeDebugShaders UP-TO-DATE
+> Task :sqlite3_flutter_libs:compileDebugShaders NO-SOURCE
+> Task :sqlite3_flutter_libs:generateDebugAssets UP-TO-DATE
+> Task :sqlite3_flutter_libs:packageDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:copyFlutterAssetsDebug
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :path_provider_android:generateDebugResValues UP-TO-DATE
+> Task :path_provider_android:generateDebugResources UP-TO-DATE
+> Task :path_provider_android:packageDebugResources UP-TO-DATE
+> Task :sqlite3_flutter_libs:generateDebugResValues UP-TO-DATE
+> Task :sqlite3_flutter_libs:generateDebugResources UP-TO-DATE
+> Task :sqlite3_flutter_libs:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :path_provider_android:extractDeepLinksDebug UP-TO-DATE
+> Task :path_provider_android:processDebugManifest UP-TO-DATE
+> Task :sqlite3_flutter_libs:extractDeepLinksDebug UP-TO-DATE
+> Task :sqlite3_flutter_libs:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :path_provider_android:compileDebugLibraryResources UP-TO-DATE
+> Task :path_provider_android:parseDebugLocalResources UP-TO-DATE
+> Task :path_provider_android:generateDebugRFile UP-TO-DATE
+> Task :sqlite3_flutter_libs:compileDebugLibraryResources UP-TO-DATE
+> Task :sqlite3_flutter_libs:parseDebugLocalResources UP-TO-DATE
+> Task :sqlite3_flutter_libs:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :path_provider_android:javaPreCompileDebug UP-TO-DATE
+> Task :path_provider_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :path_provider_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :sqlite3_flutter_libs:javaPreCompileDebug UP-TO-DATE
+> Task :sqlite3_flutter_libs:compileDebugJavaWithJavac UP-TO-DATE
+> Task :sqlite3_flutter_libs:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugKotlin
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :path_provider_android:processDebugJavaRes NO-SOURCE
+> Task :sqlite3_flutter_libs:processDebugJavaRes NO-SOURCE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:preProfileBuild UP-TO-DATE
+> Task :sqlite3_flutter_libs:bundleLibRuntimeToJarDebug
+> Task :path_provider_android:bundleLibRuntimeToJarDebug
+> Task :app:desugarDebugFileDependencies
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :app:compileDebugJavaWithJavac
+> Task :app:processDebugJavaRes
+> Task :app:mergeDebugJavaResource
+> Task :app:mergeLibDexDebug
+> Task :app:dexBuilderDebug
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeExtDexDebug
+> Task :app:configureCMakeDebug[armeabi-v7a]
+> Task :app:buildCMakeDebug[armeabi-v7a]
+> Task :app:configureCMakeDebug[x86]
+> Task :app:buildCMakeDebug[x86]
+> Task :app:configureCMakeDebug[x86_64]
+> Task :app:buildCMakeDebug[x86_64]
+> Task :app:mergeDebugJniLibFolders
+> Task :path_provider_android:mergeDebugJniLibFolders
+> Task :path_provider_android:mergeDebugNativeLibs NO-SOURCE
+> Task :path_provider_android:copyDebugJniLibsProjectOnly
+> Task :sqlite3_flutter_libs:mergeDebugJniLibFolders
+> Task :sqlite3_flutter_libs:mergeDebugNativeLibs NO-SOURCE
+> Task :sqlite3_flutter_libs:copyDebugJniLibsProjectOnly
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :path_provider_android:stripDebugDebugSymbols NO-SOURCE
+> Task :path_provider_android:copyDebugJniLibsProjectAndLocalJars
+> Task :app:mergeDebugNativeLibs

@@ -31,6 +31,13 @@ class ActiveUserNotifier extends AsyncNotifier<User?> {
       role: role,
     ));
   }
+
+  /// Drops the local user and returns to the role picker.
+  Future<void> clear() async {
+    final db = ref.read(appDatabaseProvider);
+    await db.deleteAllUsers();
+    state = const AsyncData(null);
+  }
 }
 
 /// Screen shown when there is no active user yet.

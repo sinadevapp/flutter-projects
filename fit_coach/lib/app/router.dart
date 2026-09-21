@@ -1,4 +1,7 @@
+import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/features/auth/presentation/role_picker_screen.dart';
+import 'package:fit_coach/features/coach_hub/presentation/coach_hub_screen.dart';
+import 'package:fit_coach/features/student_hub/presentation/student_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +22,8 @@ GoRouter buildAppRouter() {
   );
 }
 
-/// Shows the role picker until an active user exists, then home.
+/// Shows the role picker until an active user exists, then the home screen
+/// that belongs to that user's role.
 class _HomeGate extends ConsumerWidget {
   const _HomeGate();
 
@@ -32,20 +36,11 @@ class _HomeGate extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
-      data: (user) =>
-          user == null ? const RolePickerScreen() : const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('FitCoach')),
-      body: const Center(child: Text('FitCoach')),
+      data: (user) => switch (user?.role) {
+        null => const RolePickerScreen(),
+        UserRole.coach => const CoachHubScreen(),
+        UserRole.student => const StudentHomeScreen(),
+      },
     );
   }
 }
