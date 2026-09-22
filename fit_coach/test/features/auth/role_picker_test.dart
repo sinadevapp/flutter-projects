@@ -8,11 +8,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/localized_app.dart';
+
 void main() {
   testWidgets('role picker shows coach and student choices',
       (tester) async {
+    // The language switcher reads the settings row, so a database is required.
+    final db = createTestDatabase();
+    addTearDown(db.close);
+
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: RolePickerScreen())),
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        child: testApp(home: const RolePickerScreen()),
+      ),
     );
 
     expect(find.text('نقش خود را انتخاب کنید'), findsOneWidget);
@@ -30,7 +39,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(db)],
-        child: MaterialApp.router(routerConfig: buildAppRouter()),
+        child: testRouterApp(routerConfig: buildAppRouter()),
       ),
     );
     await tester.pumpAndSettle();

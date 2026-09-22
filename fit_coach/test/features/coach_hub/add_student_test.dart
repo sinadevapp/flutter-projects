@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/localized_app.dart';
+
 void main() {
   late AppDatabase db;
 
@@ -22,7 +24,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(db)],
-        child: const MaterialApp(home: AddStudentScreen()),
+        child: testApp(home: const AddStudentScreen()),
       ),
     );
 
@@ -36,7 +38,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(db)],
-        child: const MaterialApp(home: AddStudentScreen()),
+        child: testApp(home: const AddStudentScreen()),
       ),
     );
 
@@ -58,7 +60,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(db)],
-        child: const MaterialApp(home: AddStudentScreen()),
+        child: testApp(home: const AddStudentScreen()),
       ),
     );
 

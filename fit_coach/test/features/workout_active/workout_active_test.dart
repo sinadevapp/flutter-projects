@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/localized_app.dart';
+
 void main() {
   late AppDatabase db;
   late WorkoutPlan plan;
@@ -41,7 +43,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(db)],
-        child: MaterialApp(home: PlanDetailScreen(plan: plan)),
+        child: testApp(home: PlanDetailScreen(plan: plan)),
       ),
     );
     await tester.pumpAndSettle();

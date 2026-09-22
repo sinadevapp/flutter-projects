@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/features/auth/application/active_session_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +13,7 @@ class SwitchRoleButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
       icon: const Icon(Icons.logout),
-      tooltip: 'تغییر نقش',
+      tooltip: context.l10n.switchRole,
       onPressed: () => ref.read(activeSessionProvider.notifier).clear(),
     );
   }

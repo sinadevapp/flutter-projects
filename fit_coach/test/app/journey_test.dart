@@ -13,6 +13,8 @@ void main() {
       (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
+    // The primary language, so assertions read in Persian.
+    await db.setLocaleCode('fa');
 
     await tester.pumpWidget(
       ProviderScope(
@@ -34,7 +36,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'علی');
     await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
     await tester.pumpAndSettle();
-    await tester.pageBack();
+    await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.text('علی'), findsOneWidget);
 
@@ -50,7 +52,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
     await tester.pumpAndSettle();
     expect(find.text('برنامه حجم'), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
 
     // 4. Leave the coach area and come back.

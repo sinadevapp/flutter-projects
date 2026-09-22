@@ -73,8 +73,25 @@ class SetLogs extends Table {
       dateTime().withDefault(currentDateAndTime)();
 }
 
+/// App-wide preferences that must survive a restart.
+///
+/// One row, like [Sessions]. [locale] is a language code ('fa', 'en');
+/// null means "follow the device".
+class AppSettings extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get locale => text().nullable()();
+}
+
 @DriftDatabase(
-  tables: [Users, WorkoutPlans, Exercises, Sessions, WorkoutSessions, SetLogs],
+  tables: [
+    Users,
+    WorkoutPlans,
+    Exercises,
+    Sessions,
+    WorkoutSessions,
+    SetLogs,
+    AppSettings,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   /// Platform-appropriate connection:
@@ -84,7 +101,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -108,6 +125,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             await m.createTable(workoutSessions);
             await m.createTable(setLogs);
+          }
+          if (from < 6) {
+            await m.createTable(appSettings);
           }
         },
         beforeOpen: (details) async {
@@ -219,6 +239,20 @@ class AppDatabase extends _$AppDatabase {
       (update(workoutSessions)..where((s) => s.id.equals(sessionId))).write(
         WorkoutSessionsCompanion(finishedAt: Value(DateTime.now())),
       );
+
+  /// The saved language code ('fa'/'en'), or null to follow the device.
+  Future<String?> getLocaleCode() async {
+    final rows = await select(appSettings).get();
+    return rows.isEmpty ? null : rows.first.locale;
+  }
+
+  /// Remembers the chosen language.
+  Future<void> setLocaleCode(String? code) => transaction(() async {
+        await delete(appSettings).go();
+        await into(appSettings).insert(
+          AppSettingsCompanion.insert(locale: Value(code)),
+        );
+      });
 }
 
 QueryExecutor _openConnection() {

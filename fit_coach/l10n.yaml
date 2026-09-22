@@ -1,0 +1,9 @@
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+# Generate into lib/ so the code is visible and importable as
+# package:fit_coach/l10n/app_localizations.dart
+synthetic-package: false
+output-dir: lib/l10n

@@ -31,6 +31,8 @@ void main() {
       (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
+    // The primary language, so assertions read in Persian.
+    await db.setLocaleCode('fa');
     await pumpApp(tester, db);
 
     await tester.tap(find.widgetWithText(FilledButton, 'مربی'));
@@ -46,6 +48,8 @@ void main() {
       (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
+    // The primary language, so assertions read in Persian.
+    await db.setLocaleCode('fa');
     await pumpApp(tester, db);
 
     await tester.tap(find.widgetWithText(FilledButton, 'شاگرد'));
@@ -62,6 +66,8 @@ void main() {
       (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
+    // The primary language, so assertions read in Persian.
+    await db.setLocaleCode('fa');
     await db.setActiveRole(UserRole.coach);
 
     await pumpApp(tester, db);
@@ -75,6 +81,8 @@ void main() {
   testWidgets('switching role returns to the role picker', (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
+    // The primary language, so assertions read in Persian.
+    await db.setLocaleCode('fa');
     await pumpApp(tester, db);
 
     await tester.tap(find.widgetWithText(FilledButton, 'مربی'));

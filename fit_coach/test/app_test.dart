@@ -11,6 +11,8 @@ void main() {
       (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
+    // The primary language, so assertions read in Persian.
+    await db.setLocaleCode('fa');
 
     await tester.pumpWidget(
       ProviderScope(

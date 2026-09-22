@@ -1,0 +1,103 @@
+{
+  "@@locale": "en",
+  "rolePickerTitle": "Choose your role",
+  "coach": "Coach",
+  "student": "Student",
+  "addStudent": "Add student",
+  "studentNameLabel": "Student name",
+  "nameRequired": "Enter a name",
+  "save": "Save",
+  "studentAdded": "Student added",
+  "noStudentsYet": "No students added yet",
+  "noStudentsRegistered": "No students registered yet",
+  "switchRole": "Switch role",
+  "myPlans": "My plans",
+  "plansForStudent": "Plans for {name}",
+  "@plansForStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noPlansForStudent": "No plan built yet",
+  "noPlansForMe": "No plan has been built for you yet",
+  "newPlan": "New plan",
+  "planTitleLabel": "Plan title",
+  "planTitleRequired": "Enter a plan title",
+  "movements": "Movements",
+  "addMovement": "Add movement",
+  "movementNameLabel": "Movement name",
+  "setsLabel": "Sets",
+  "repsLabel": "Reps",
+  "setsXReps": "{sets} × {reps}",
+  "@setsXReps": {
+    "placeholders": {
+      "sets": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "planHasNoMovements": "This plan has no movements",
+  "startWorkout": "Start workout",
+  "resumeWorkout": "Resume workout",
+  "completeSet": "Set done",
+  "finishWorkout": "Finish workout",
+  "workoutComplete": "Workout complete",
+  "setOf": "Set {current} of {total}",
+  "@setOf": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "setsProgress": "{done} of {total} sets",
+  "@setsProgress": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Language",
+  "myProgress": "My progress",
+  "completedWorkouts": "Workouts completed",
+  "totalSetsDone": "Total sets",
+  "weeklyTrend": "Weekly trend",
+  "volumeByMovement": "Volume by movement",
+  "noHistoryYet": "No workouts recorded yet",
+  "weekOf": "Week of {date}",
+  "@weekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "setsCount": "{count} sets",
+  "@setsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "weekStart": "Week starts: {day}",
+  "@weekStart": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  }
+}

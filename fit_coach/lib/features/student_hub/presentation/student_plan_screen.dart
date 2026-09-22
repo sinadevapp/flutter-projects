@@ -1,7 +1,9 @@
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
-import 'package:fit_coach/core/utils/persian_digits.dart';
+import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
+import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
 import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
 import 'package:fit_coach/features/workout_active/presentation/active_workout_screen.dart';
@@ -20,8 +22,19 @@ class StudentPlanScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('برنامه‌های من'),
-        actions: const [SwitchRoleButton()],
+        title: Text(context.l10n.myPlans),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.insights),
+            tooltip: context.l10n.myProgress,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ProgressScreen(studentId: studentId),
+              ),
+            ),
+          ),
+          const SwitchRoleButton(),
+        ],
       ),
       body: plans.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -64,14 +77,23 @@ class PlanDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (list) => list.isEmpty
-            ? const Center(child: Text('این برنامه حرکتی ندارد'))
+            ? Center(child: Text(context.l10n.planHasNoMovements))
             : ListView(
                 children: [
                   for (final exercise in list)
                     ListTile(
                       title: Text(exercise.name),
                       trailing: Text(
-                        '${fa(exercise.sets)} × ${fa(exercise.reps)}',
+                        context.l10n.setsXReps(
+                          localizeNumber(
+                            Localizations.localeOf(context),
+                            exercise.sets,
+                          ),
+                          localizeNumber(
+                            Localizations.localeOf(context),
+                            exercise.reps,
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -82,7 +104,7 @@ class PlanDetailScreen extends ConsumerWidget {
         error: (_, __) => null,
         data: (session) => FloatingActionButton.extended(
           onPressed: () => _start(context, ref, session),
-          label: Text(session == null ? 'شروع تمرین' : 'ادامه تمرین'),
+          label: Text(session == null ? context.l10n.startWorkout : context.l10n.resumeWorkout),
           icon: const Icon(Icons.play_arrow),
         ),
       ),

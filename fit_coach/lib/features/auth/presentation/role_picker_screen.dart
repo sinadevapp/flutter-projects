@@ -1,4 +1,6 @@
 import 'package:fit_coach/core/database/app_database.dart';
+import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/core/settings/language_button.dart';
 import 'package:fit_coach/features/auth/application/active_session_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,27 +12,32 @@ class RolePickerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
     Future<void> pick(UserRole role) async {
       await ref.read(activeSessionProvider.notifier).pickRole(role);
       if (context.mounted) context.go('/');
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('FitCoach')),
+      appBar: AppBar(
+        title: const Text('FitCoach'),
+        actions: const [LanguageButton()],
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('نقش خود را انتخاب کنید'),
+            Text(l10n.rolePickerTitle),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => pick(UserRole.coach),
-              child: const Text('مربی'),
+              child: Text(l10n.coach),
             ),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => pick(UserRole.student),
-              child: const Text('شاگرد'),
+              child: Text(l10n.student),
             ),
           ],
         ),
