@@ -134,6 +134,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noHistoryYet => 'No workouts recorded yet';
 
   @override
+  String get renamePlan => 'Rename plan';
+
+  @override
+  String get deletePlan => 'Delete plan';
+
+  @override
+  String deletePlanConfirm(String title) {
+    return 'Delete \"$title\" and every workout logged against it?';
+  }
+
+  @override
+  String get planDeleted => 'Plan deleted';
+
+  @override
+  String get editMovement => 'Edit movement';
+
+  @override
+  String get deleteMovement => 'Delete movement';
+
+  @override
+  String deleteMovementConfirm(String name) {
+    return 'Remove \"$name\" from this plan?';
+  }
+
+  @override
+  String get movementDeleted => 'Movement deleted';
+
+  @override
+  String get movementUpdated => 'Movement updated';
+
+  @override
+  String get planRenamed => 'Plan renamed';
+
+  @override
+  String get duplicatePlan => 'Copy to another student';
+
+  @override
+  String get duplicateTo => 'Copy plan to';
+
+  @override
+  String get duplicated => 'Plan copied';
+
+  @override
+  String get noOtherStudents => 'No other students';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
   String get resting => 'Rest';
 
   @override

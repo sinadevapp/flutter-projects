@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
+import 'package:fit_coach/core/database/students_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_screen.dart';
 import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
 import 'package:fit_coach/features/workout_builder/presentation/add_plan_screen.dart';
+import 'package:fit_coach/features/workout_builder/presentation/plan_detail_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,7 +58,7 @@ class StudentDetailScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'برنامه جدید',
+        tooltip: context.l10n.newPlan,
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => AddPlanScreen(student: student)),
         ),
@@ -66,15 +68,92 @@ class StudentDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (list) => list.isEmpty
-            ? const Center(child: Text('هنوز برنامه‌ای ساخته نشده'))
+            ? Center(child: Text(context.l10n.noPlansForStudent))
             : ListView.builder(
                 itemCount: list.length,
                 itemBuilder: (context, i) => ListTile(
                   leading: const Icon(Icons.fitness_center),
                   title: Text(list[i].title),
+                  trailing: PopupMenuButton<_PlanAction>(
+                    onSelected: (action) => switch (action) {
+                      _PlanAction.edit => _openPlan(context, list[i]),
+                      _PlanAction.duplicate =>
+                        _duplicate(context, ref, list[i]),
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: _PlanAction.edit,
+                        child: ListTile(
+                          leading: const Icon(Icons.edit),
+                          title: Text(context.l10n.edit),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: _PlanAction.duplicate,
+                        child: ListTile(
+                          leading: const Icon(Icons.copy),
+                          title: Text(context.l10n.duplicatePlan),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () => _openPlan(context, list[i]),
                 ),
               ),
       ),
     );
   }
+
+  void _openPlan(BuildContext context, WorkoutPlan plan) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => PlanDetailEditScreen(plan: plan)),
+    );
+  }
+
+  /// Copies a plan to another student.
+  ///
+  /// Asks which student, because a plan written for one person rarely suits
+  /// another — making the coach choose is the point, not a hurdle.
+  Future<void> _duplicate(
+    BuildContext context,
+    WidgetRef ref,
+    WorkoutPlan plan,
+  ) async {
+    final others = (await ref.read(studentsProvider.future))
+        .where((s) => s.id != student.id)
+        .toList();
+
+    if (!context.mounted) return;
+    if (others.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.noOtherStudents)),
+      );
+      return;
+    }
+
+    final target = await showDialog<User>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(context.l10n.duplicateTo),
+        children: [
+          for (final other in others)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(other),
+              child: Text(other.name),
+            ),
+        ],
+      ),
+    );
+    if (target == null || !context.mounted) return;
+
+    await ref
+        .read(appDatabaseProvider)
+        .duplicatePlan(plan.id, forStudent: target.id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.duplicated)));
+    }
+  }
 }
+
+enum _PlanAction { edit, duplicate }

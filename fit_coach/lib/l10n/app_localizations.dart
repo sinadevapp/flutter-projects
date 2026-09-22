@@ -332,6 +332,102 @@ abstract class AppLocalizations {
   /// **'No workouts recorded yet'**
   String get noHistoryYet;
 
+  /// No description provided for @renamePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename plan'**
+  String get renamePlan;
+
+  /// No description provided for @deletePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete plan'**
+  String get deletePlan;
+
+  /// No description provided for @deletePlanConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{title}\" and every workout logged against it?'**
+  String deletePlanConfirm(String title);
+
+  /// No description provided for @planDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan deleted'**
+  String get planDeleted;
+
+  /// No description provided for @editMovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit movement'**
+  String get editMovement;
+
+  /// No description provided for @deleteMovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete movement'**
+  String get deleteMovement;
+
+  /// No description provided for @deleteMovementConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{name}\" from this plan?'**
+  String deleteMovementConfirm(String name);
+
+  /// No description provided for @movementDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement deleted'**
+  String get movementDeleted;
+
+  /// No description provided for @movementUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement updated'**
+  String get movementUpdated;
+
+  /// No description provided for @planRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan renamed'**
+  String get planRenamed;
+
+  /// No description provided for @duplicatePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to another student'**
+  String get duplicatePlan;
+
+  /// No description provided for @duplicateTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy plan to'**
+  String get duplicateTo;
+
+  /// No description provided for @duplicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan copied'**
+  String get duplicated;
+
+  /// No description provided for @noOtherStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'No other students'**
+  String get noOtherStudents;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
   /// No description provided for @resting.
   ///
   /// In en, this message translates to:

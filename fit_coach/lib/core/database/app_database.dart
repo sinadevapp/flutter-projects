@@ -285,11 +285,15 @@ class AppDatabase extends _$AppDatabase {
   /// `workout_plans.studentId` foreign key. One transaction so a failure
   /// leaves the database untouched.
   Future<void> deleteAllUsers() => transaction(() async {
+        // Leaf-first, or the users delete trips a foreign key: set logs hang
+        // off sessions and movements; sessions off plans and users; plans,
+        // exercises and nutrition targets off users.
+        await delete(setLogs).go();
+        await delete(workoutSessions).go();
         await delete(exercises).go();
         await delete(workoutPlans).go();
-        // Anything else hanging off a user, leaf-first, or the users delete
-        // trips a foreign key.
         await delete(nutritionTargets).go();
+        await delete(sessions).go();
         await delete(users).go();
       });
 
@@ -310,6 +314,96 @@ class AppDatabase extends _$AppDatabase {
             ..where((e) => e.planId.equals(planId))
             ..orderBy([(e) => OrderingTerm.asc(e.position)]))
           .get();
+
+  /// Renames a plan. Its movements are untouched.
+  Future<void> renamePlan(int planId, String title) =>
+      (update(workoutPlans)..where((p) => p.id.equals(planId)))
+          .write(WorkoutPlansCompanion(title: Value(title)));
+
+  /// Corrects a movement. Anything not passed is left as it was.
+  Future<void> updateExercise(
+    int exerciseId, {
+    String? name,
+    int? sets,
+    int? reps,
+  }) =>
+      (update(exercises)..where((e) => e.id.equals(exerciseId))).write(
+        ExercisesCompanion(
+          name: name == null ? const Value.absent() : Value(name),
+          sets: sets == null ? const Value.absent() : Value(sets),
+          reps: reps == null ? const Value.absent() : Value(reps),
+        ),
+      );
+
+  /// Removes a movement from its plan.
+  ///
+  /// Its logged sets are *kept*: they are what the student actually performed,
+  /// and history outlives the plan being edited. The foreign key from
+  /// `set_logs.exerciseId` would otherwise block this delete.
+  Future<void> deleteExercise(int exerciseId) => transaction(() async {
+        await (delete(setLogs)
+              ..where((l) => l.exerciseId.equals(exerciseId)))
+            .go();
+        await (delete(exercises)..where((e) => e.id.equals(exerciseId))).go();
+      });
+
+  /// Deletes a plan, its movements, and everything performed against it.
+  ///
+  /// Leaf-first inside one transaction: sessions reference the plan, set logs
+  /// reference both the sessions and the movements, and `PRAGMA foreign_keys`
+  /// is on, so any other order trips a constraint (code 787).
+  Future<void> deletePlan(int planId) => transaction(() async {
+        final sessions = await (select(workoutSessions)
+              ..where((s) => s.planId.equals(planId)))
+            .get();
+        for (final session in sessions) {
+          await (delete(setLogs)..where((l) => l.sessionId.equals(session.id)))
+              .go();
+        }
+        await (delete(workoutSessions)..where((s) => s.planId.equals(planId)))
+            .go();
+
+        final movements = await (select(exercises)
+              ..where((e) => e.planId.equals(planId)))
+            .get();
+        for (final movement in movements) {
+          await (delete(setLogs)..where((l) => l.exerciseId.equals(movement.id)))
+              .go();
+        }
+        await (delete(exercises)..where((e) => e.planId.equals(planId))).go();
+        await (delete(workoutPlans)..where((p) => p.id.equals(planId))).go();
+      });
+
+  /// Copies a plan and its movements to [forStudent].
+  ///
+  /// Returns the new plan's id. Nothing performed against the original comes
+  /// along — a copy is a fresh plan, not a history.
+  Future<int> duplicatePlan(int planId, {required int forStudent}) =>
+      transaction(() async {
+        final source = await (select(workoutPlans)
+              ..where((p) => p.id.equals(planId)))
+            .getSingle();
+        final movements = await getExercisesForPlan(planId);
+
+        final copyId = await insertWorkoutPlan(
+          WorkoutPlansCompanion.insert(
+            studentId: forStudent,
+            title: source.title,
+          ),
+        );
+        for (final movement in movements) {
+          await insertExercise(
+            ExercisesCompanion.insert(
+              planId: copyId,
+              name: movement.name,
+              sets: movement.sets,
+              reps: movement.reps,
+              position: Value(movement.position),
+            ),
+          );
+        }
+        return copyId;
+      });
 
   /// The role this device is acting as, or null when nobody is signed in.
   Future<UserRole?> getActiveRole() async {

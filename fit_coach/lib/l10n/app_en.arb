@@ -76,6 +76,36 @@
   "weeklyTrend": "Weekly trend",
   "volumeByMovement": "Volume by movement",
   "noHistoryYet": "No workouts recorded yet",
+  "renamePlan": "Rename plan",
+  "deletePlan": "Delete plan",
+  "deletePlanConfirm": "Delete \"{title}\" and every workout logged against it?",
+  "@deletePlanConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planDeleted": "Plan deleted",
+  "editMovement": "Edit movement",
+  "deleteMovement": "Delete movement",
+  "deleteMovementConfirm": "Remove \"{name}\" from this plan?",
+  "@deleteMovementConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "movementDeleted": "Movement deleted",
+  "movementUpdated": "Movement updated",
+  "planRenamed": "Plan renamed",
+  "duplicatePlan": "Copy to another student",
+  "duplicateTo": "Copy plan to",
+  "duplicated": "Plan copied",
+  "noOtherStudents": "No other students",
+  "edit": "Edit",
+  "delete": "Delete",
   "resting": "Rest",
   "restDone": "Rest over",
   "skipRest": "Skip",

@@ -134,6 +134,58 @@ class AppLocalizationsFa extends AppLocalizations {
   String get noHistoryYet => 'هنوز تمرینی ثبت نشده';
 
   @override
+  String get renamePlan => 'تغییر نام برنامه';
+
+  @override
+  String get deletePlan => 'حذف برنامه';
+
+  @override
+  String deletePlanConfirm(String title) {
+    return 'برنامه «$title» و تمام تمرین‌های ثبت‌شده آن حذف می‌شود. مطمئنی؟';
+  }
+
+  @override
+  String get planDeleted => 'برنامه حذف شد';
+
+  @override
+  String get editMovement => 'ویرایش حرکت';
+
+  @override
+  String get deleteMovement => 'حذف حرکت';
+
+  @override
+  String deleteMovementConfirm(String name) {
+    return 'حرکت «$name» از این برنامه حذف شود؟';
+  }
+
+  @override
+  String get movementDeleted => 'حرکت حذف شد';
+
+  @override
+  String get movementUpdated => 'حرکت ویرایش شد';
+
+  @override
+  String get planRenamed => 'نام برنامه تغییر کرد';
+
+  @override
+  String get duplicatePlan => 'کپی برای شاگرد دیگر';
+
+  @override
+  String get duplicateTo => 'کپی برنامه برای';
+
+  @override
+  String get duplicated => 'برنامه کپی شد';
+
+  @override
+  String get noOtherStudents => 'شاگرد دیگری وجود ندارد';
+
+  @override
+  String get edit => 'ویرایش';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
   String get resting => 'استراحت';
 
   @override

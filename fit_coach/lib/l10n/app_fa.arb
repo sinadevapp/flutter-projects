@@ -39,6 +39,22 @@
   "weeklyTrend": "روند هفتگی",
   "volumeByMovement": "حجم به تفکیک حرکت",
   "noHistoryYet": "هنوز تمرینی ثبت نشده",
+  "renamePlan": "تغییر نام برنامه",
+  "deletePlan": "حذف برنامه",
+  "deletePlanConfirm": "برنامه «{title}» و تمام تمرین‌های ثبت‌شده آن حذف می‌شود. مطمئنی؟",
+  "planDeleted": "برنامه حذف شد",
+  "editMovement": "ویرایش حرکت",
+  "deleteMovement": "حذف حرکت",
+  "deleteMovementConfirm": "حرکت «{name}» از این برنامه حذف شود؟",
+  "movementDeleted": "حرکت حذف شد",
+  "movementUpdated": "حرکت ویرایش شد",
+  "planRenamed": "نام برنامه تغییر کرد",
+  "duplicatePlan": "کپی برای شاگرد دیگر",
+  "duplicateTo": "کپی برنامه برای",
+  "duplicated": "برنامه کپی شد",
+  "noOtherStudents": "شاگرد دیگری وجود ندارد",
+  "edit": "ویرایش",
+  "delete": "حذف",
   "resting": "استراحت",
   "restDone": "استراحت تمام شد",
   "skipRest": "رد کردن",
@@ -196,6 +212,20 @@
     }
   },
   "@enterPriceFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@deletePlanConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@deleteMovementConfirm": {
     "placeholders": {
       "name": {
         "type": "String"
