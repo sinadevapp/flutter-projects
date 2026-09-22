@@ -614,6 +614,18 @@ abstract class AppLocalizations {
   /// **'No meal plan has been set for you yet'**
   String get noStudentNutritionYet;
 
+  /// No description provided for @progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
+  /// No description provided for @studentProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress for {name}'**
+  String studentProgress(String name);
+
   /// No description provided for @proteinPlanTitle.
   ///
   /// In en, this message translates to:

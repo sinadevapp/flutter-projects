@@ -112,4 +112,23 @@ void main() {
 
     await unmount(tester);
   });
+
+  testWidgets('the coach reaches a student\'s training history from their page',
+      (tester) async {
+    final db = await pumpCoachHub(tester);
+
+    await tester.tap(find.text('علی'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('پیشرفت'));
+    await tester.pumpAndSettle();
+
+    // Framed around the student: "my progress" would be wrong for the coach.
+    expect(find.text('پیشرفت علی'), findsWidgets);
+    expect(find.text('پیشرفت من'), findsNothing);
+    expect(find.text('هنوز تمرینی ثبت نشده'), findsOneWidget);
+
+    await unmount(tester);
+    expect(db, isNotNull);
+  });
 }

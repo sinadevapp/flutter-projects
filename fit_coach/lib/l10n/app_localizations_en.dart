@@ -290,6 +290,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noStudentNutritionYet => 'No meal plan has been set for you yet';
 
   @override
+  String get progress => 'Progress';
+
+  @override
+  String studentProgress(String name) {
+    return 'Progress for $name';
+  }
+
+  @override
   String get proteinPlanTitle => 'Cheapest ways to get protein';
 
   @override

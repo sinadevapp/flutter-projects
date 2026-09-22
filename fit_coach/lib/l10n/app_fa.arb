@@ -86,6 +86,15 @@
   "kcalUnit": "{value} کالری",
   "gramUnit": "{value} گرم",
   "noStudentNutritionYet": "هنوز برنامه غذایی برایت تنظیم نشده",
+  "progress": "پیشرفت",
+  "studentProgress": "پیشرفت {name}",
+  "@studentProgress": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "proteinPlanTitle": "ارزان‌ترین راه پروتئین",
   "proteinPlanEmpty": "برای محاسبه، قیمت مواد غذایی را وارد کنید",
   "planOption": "{grams} گرم {name}",

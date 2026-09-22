@@ -5,23 +5,48 @@ import 'package:fit_coach/features/progress_tracker/domain/workout_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The student's training history: how much they have done, and when.
+/// A student's training history: how much they have done, and when.
 ///
 /// Every date and number is rendered through the language helpers, so the
 /// same data reads as Jalali/Persian in Persian and Gregorian in English.
+///
+/// The same screen serves both readers. Only the title differs, because "my
+/// progress" is wrong when a coach is the one reading it — so the coach entry
+/// point goes through [ProgressScreen.forCoach].
 class ProgressScreen extends ConsumerWidget {
-  const ProgressScreen({super.key, required this.studentId});
+  const ProgressScreen({super.key, required this.studentId}) : _studentName = null;
+
+  /// The coach's view of [studentName]'s history.
+  ///
+  /// Same data and same providers as the student's own screen; the student is
+  /// named in the title so a coach looking at several students knows whose
+  /// history this is.
+  const ProgressScreen.forCoach({
+    super.key,
+    required this.studentId,
+    required String studentName,
+  }) : _studentName = studentName;
 
   final int studentId;
+
+  /// Null when the student is reading their own history.
+  final String? _studentName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(studentStatsProvider(studentId));
     final locale = Localizations.localeOf(context);
     final l10n = context.l10n;
+    final studentName = _studentName;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myProgress)),
+      appBar: AppBar(
+        title: Text(
+          studentName == null
+              ? l10n.myProgress
+              : l10n.studentProgress(studentName),
+        ),
+      ),
       body: stats == null
           ? const Center(child: CircularProgressIndicator())
           : !stats.hasHistory
