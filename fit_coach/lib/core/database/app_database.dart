@@ -111,6 +111,39 @@ class FoodItems extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// One student's nutrition profile — the inputs a daily target is estimated
+/// from.
+///
+/// The enum values ([Sex], [ActivityLevel], [Goal]) live in the feature's pure
+/// domain, and `core/` must not depend on a feature, so they are stored here
+/// as plain ints. The feature converts at its own edge.
+///
+/// One row per student, so this carries no id of its own: [studentId] is both
+/// the identity and the foreign key. Editing a profile replaces it rather than
+/// accumulating history.
+@DataClassName('NutritionTargetsRow')
+class NutritionTargets extends Table {
+  IntColumn get studentId =>
+      integer().references(Users, #id, onDelete: KeyAction.cascade)();
+
+  /// Index into the domain's `Sex` enum.
+  IntColumn get sex => integer()();
+  IntColumn get age => integer()();
+  RealColumn get heightCm => real()();
+  RealColumn get weightKg => real()();
+
+  /// Index into the domain's `ActivityLevel` enum.
+  IntColumn get activity => integer()();
+
+  /// Index into the domain's `Goal` enum.
+  IntColumn get goal => integer()();
+
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {studentId};
+}
+
 @DriftDatabase(
   tables: [
     Users,
@@ -121,6 +154,7 @@ class FoodItems extends Table {
     SetLogs,
     AppSettings,
     FoodItems,
+    NutritionTargets,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -131,7 +165,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -162,6 +196,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 7) {
             await m.createTable(foodItems);
             await _seedFoods();
+          }
+          if (from < 8) {
+            await m.createTable(nutritionTargets);
           }
         },
         // A *fresh* install never runs onUpgrade, so the seed has to happen
@@ -250,6 +287,9 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteAllUsers() => transaction(() async {
         await delete(exercises).go();
         await delete(workoutPlans).go();
+        // Anything else hanging off a user, leaf-first, or the users delete
+        // trips a foreign key.
+        await delete(nutritionTargets).go();
         await delete(users).go();
       });
 
@@ -386,6 +426,19 @@ class AppDatabase extends _$AppDatabase {
 
   /// Removes every food. The seed is not re-applied, so an empty list sticks.
   Future<void> deleteAllFoods() => delete(foodItems).go();
+
+  /// One student's nutrition profile, or null before the coach has set one.
+  Future<NutritionTargetsRow?> getNutritionTarget(int studentId) =>
+      (select(nutritionTargets)
+            ..where((t) => t.studentId.equals(studentId)))
+          .getSingleOrNull();
+
+  /// Stores a student's profile, replacing any they already had.
+  ///
+  /// `insertOnConflictUpdate` rather than a delete+insert: one row per student
+  /// is the point, and this keeps the operation a single statement.
+  Future<void> saveNutritionTarget(NutritionTargetsCompanion entry) =>
+      into(nutritionTargets).insertOnConflictUpdate(entry);
 }
 
 QueryExecutor _openConnection() {

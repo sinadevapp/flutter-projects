@@ -2548,6 +2548,511 @@ class FoodItemsCompanion extends UpdateCompanion<FoodRow> {
   }
 }
 
+class $NutritionTargetsTable extends NutritionTargets
+    with TableInfo<$NutritionTargetsTable, NutritionTargetsRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NutritionTargetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _studentIdMeta = const VerificationMeta(
+    'studentId',
+  );
+  @override
+  late final GeneratedColumn<int> studentId = GeneratedColumn<int>(
+    'student_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _sexMeta = const VerificationMeta('sex');
+  @override
+  late final GeneratedColumn<int> sex = GeneratedColumn<int>(
+    'sex',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ageMeta = const VerificationMeta('age');
+  @override
+  late final GeneratedColumn<int> age = GeneratedColumn<int>(
+    'age',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _heightCmMeta = const VerificationMeta(
+    'heightCm',
+  );
+  @override
+  late final GeneratedColumn<double> heightCm = GeneratedColumn<double>(
+    'height_cm',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activityMeta = const VerificationMeta(
+    'activity',
+  );
+  @override
+  late final GeneratedColumn<int> activity = GeneratedColumn<int>(
+    'activity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goalMeta = const VerificationMeta('goal');
+  @override
+  late final GeneratedColumn<int> goal = GeneratedColumn<int>(
+    'goal',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    studentId,
+    sex,
+    age,
+    heightCm,
+    weightKg,
+    activity,
+    goal,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'nutrition_targets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NutritionTargetsRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('student_id')) {
+      context.handle(
+        _studentIdMeta,
+        studentId.isAcceptableOrUnknown(data['student_id']!, _studentIdMeta),
+      );
+    }
+    if (data.containsKey('sex')) {
+      context.handle(
+        _sexMeta,
+        sex.isAcceptableOrUnknown(data['sex']!, _sexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sexMeta);
+    }
+    if (data.containsKey('age')) {
+      context.handle(
+        _ageMeta,
+        age.isAcceptableOrUnknown(data['age']!, _ageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ageMeta);
+    }
+    if (data.containsKey('height_cm')) {
+      context.handle(
+        _heightCmMeta,
+        heightCm.isAcceptableOrUnknown(data['height_cm']!, _heightCmMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_heightCmMeta);
+    }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_weightKgMeta);
+    }
+    if (data.containsKey('activity')) {
+      context.handle(
+        _activityMeta,
+        activity.isAcceptableOrUnknown(data['activity']!, _activityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_activityMeta);
+    }
+    if (data.containsKey('goal')) {
+      context.handle(
+        _goalMeta,
+        goal.isAcceptableOrUnknown(data['goal']!, _goalMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_goalMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {studentId};
+  @override
+  NutritionTargetsRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NutritionTargetsRow(
+      studentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}student_id'],
+      )!,
+      sex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sex'],
+      )!,
+      age: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}age'],
+      )!,
+      heightCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}height_cm'],
+      )!,
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      )!,
+      activity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}activity'],
+      )!,
+      goal: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}goal'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $NutritionTargetsTable createAlias(String alias) {
+    return $NutritionTargetsTable(attachedDatabase, alias);
+  }
+}
+
+class NutritionTargetsRow extends DataClass
+    implements Insertable<NutritionTargetsRow> {
+  final int studentId;
+
+  /// Index into the domain's `Sex` enum.
+  final int sex;
+  final int age;
+  final double heightCm;
+  final double weightKg;
+
+  /// Index into the domain's `ActivityLevel` enum.
+  final int activity;
+
+  /// Index into the domain's `Goal` enum.
+  final int goal;
+  final DateTime updatedAt;
+  const NutritionTargetsRow({
+    required this.studentId,
+    required this.sex,
+    required this.age,
+    required this.heightCm,
+    required this.weightKg,
+    required this.activity,
+    required this.goal,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['student_id'] = Variable<int>(studentId);
+    map['sex'] = Variable<int>(sex);
+    map['age'] = Variable<int>(age);
+    map['height_cm'] = Variable<double>(heightCm);
+    map['weight_kg'] = Variable<double>(weightKg);
+    map['activity'] = Variable<int>(activity);
+    map['goal'] = Variable<int>(goal);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  NutritionTargetsCompanion toCompanion(bool nullToAbsent) {
+    return NutritionTargetsCompanion(
+      studentId: Value(studentId),
+      sex: Value(sex),
+      age: Value(age),
+      heightCm: Value(heightCm),
+      weightKg: Value(weightKg),
+      activity: Value(activity),
+      goal: Value(goal),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory NutritionTargetsRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NutritionTargetsRow(
+      studentId: serializer.fromJson<int>(json['studentId']),
+      sex: serializer.fromJson<int>(json['sex']),
+      age: serializer.fromJson<int>(json['age']),
+      heightCm: serializer.fromJson<double>(json['heightCm']),
+      weightKg: serializer.fromJson<double>(json['weightKg']),
+      activity: serializer.fromJson<int>(json['activity']),
+      goal: serializer.fromJson<int>(json['goal']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'studentId': serializer.toJson<int>(studentId),
+      'sex': serializer.toJson<int>(sex),
+      'age': serializer.toJson<int>(age),
+      'heightCm': serializer.toJson<double>(heightCm),
+      'weightKg': serializer.toJson<double>(weightKg),
+      'activity': serializer.toJson<int>(activity),
+      'goal': serializer.toJson<int>(goal),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  NutritionTargetsRow copyWith({
+    int? studentId,
+    int? sex,
+    int? age,
+    double? heightCm,
+    double? weightKg,
+    int? activity,
+    int? goal,
+    DateTime? updatedAt,
+  }) => NutritionTargetsRow(
+    studentId: studentId ?? this.studentId,
+    sex: sex ?? this.sex,
+    age: age ?? this.age,
+    heightCm: heightCm ?? this.heightCm,
+    weightKg: weightKg ?? this.weightKg,
+    activity: activity ?? this.activity,
+    goal: goal ?? this.goal,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  NutritionTargetsRow copyWithCompanion(NutritionTargetsCompanion data) {
+    return NutritionTargetsRow(
+      studentId: data.studentId.present ? data.studentId.value : this.studentId,
+      sex: data.sex.present ? data.sex.value : this.sex,
+      age: data.age.present ? data.age.value : this.age,
+      heightCm: data.heightCm.present ? data.heightCm.value : this.heightCm,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      activity: data.activity.present ? data.activity.value : this.activity,
+      goal: data.goal.present ? data.goal.value : this.goal,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NutritionTargetsRow(')
+          ..write('studentId: $studentId, ')
+          ..write('sex: $sex, ')
+          ..write('age: $age, ')
+          ..write('heightCm: $heightCm, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('activity: $activity, ')
+          ..write('goal: $goal, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    studentId,
+    sex,
+    age,
+    heightCm,
+    weightKg,
+    activity,
+    goal,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NutritionTargetsRow &&
+          other.studentId == this.studentId &&
+          other.sex == this.sex &&
+          other.age == this.age &&
+          other.heightCm == this.heightCm &&
+          other.weightKg == this.weightKg &&
+          other.activity == this.activity &&
+          other.goal == this.goal &&
+          other.updatedAt == this.updatedAt);
+}
+
+class NutritionTargetsCompanion extends UpdateCompanion<NutritionTargetsRow> {
+  final Value<int> studentId;
+  final Value<int> sex;
+  final Value<int> age;
+  final Value<double> heightCm;
+  final Value<double> weightKg;
+  final Value<int> activity;
+  final Value<int> goal;
+  final Value<DateTime> updatedAt;
+  const NutritionTargetsCompanion({
+    this.studentId = const Value.absent(),
+    this.sex = const Value.absent(),
+    this.age = const Value.absent(),
+    this.heightCm = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.activity = const Value.absent(),
+    this.goal = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  NutritionTargetsCompanion.insert({
+    this.studentId = const Value.absent(),
+    required int sex,
+    required int age,
+    required double heightCm,
+    required double weightKg,
+    required int activity,
+    required int goal,
+    this.updatedAt = const Value.absent(),
+  }) : sex = Value(sex),
+       age = Value(age),
+       heightCm = Value(heightCm),
+       weightKg = Value(weightKg),
+       activity = Value(activity),
+       goal = Value(goal);
+  static Insertable<NutritionTargetsRow> custom({
+    Expression<int>? studentId,
+    Expression<int>? sex,
+    Expression<int>? age,
+    Expression<double>? heightCm,
+    Expression<double>? weightKg,
+    Expression<int>? activity,
+    Expression<int>? goal,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (studentId != null) 'student_id': studentId,
+      if (sex != null) 'sex': sex,
+      if (age != null) 'age': age,
+      if (heightCm != null) 'height_cm': heightCm,
+      if (weightKg != null) 'weight_kg': weightKg,
+      if (activity != null) 'activity': activity,
+      if (goal != null) 'goal': goal,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  NutritionTargetsCompanion copyWith({
+    Value<int>? studentId,
+    Value<int>? sex,
+    Value<int>? age,
+    Value<double>? heightCm,
+    Value<double>? weightKg,
+    Value<int>? activity,
+    Value<int>? goal,
+    Value<DateTime>? updatedAt,
+  }) {
+    return NutritionTargetsCompanion(
+      studentId: studentId ?? this.studentId,
+      sex: sex ?? this.sex,
+      age: age ?? this.age,
+      heightCm: heightCm ?? this.heightCm,
+      weightKg: weightKg ?? this.weightKg,
+      activity: activity ?? this.activity,
+      goal: goal ?? this.goal,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (studentId.present) {
+      map['student_id'] = Variable<int>(studentId.value);
+    }
+    if (sex.present) {
+      map['sex'] = Variable<int>(sex.value);
+    }
+    if (age.present) {
+      map['age'] = Variable<int>(age.value);
+    }
+    if (heightCm.present) {
+      map['height_cm'] = Variable<double>(heightCm.value);
+    }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
+    if (activity.present) {
+      map['activity'] = Variable<int>(activity.value);
+    }
+    if (goal.present) {
+      map['goal'] = Variable<int>(goal.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NutritionTargetsCompanion(')
+          ..write('studentId: $studentId, ')
+          ..write('sex: $sex, ')
+          ..write('age: $age, ')
+          ..write('heightCm: $heightCm, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('activity: $activity, ')
+          ..write('goal: $goal, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2561,6 +3066,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SetLogsTable setLogs = $SetLogsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $FoodItemsTable foodItems = $FoodItemsTable(this);
+  late final $NutritionTargetsTable nutritionTargets = $NutritionTargetsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2574,7 +3082,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     setLogs,
     appSettings,
     foodItems,
+    nutritionTargets,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'users',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('nutrition_targets', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$UsersTableCreateCompanionBuilder =
@@ -2645,6 +3164,26 @@ final class $$UsersTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _workoutSessionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$NutritionTargetsTable, List<NutritionTargetsRow>>
+  _nutritionTargetsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.nutritionTargets,
+    aliasName: $_aliasNameGenerator(db.users.id, db.nutritionTargets.studentId),
+  );
+
+  $$NutritionTargetsTableProcessedTableManager get nutritionTargetsRefs {
+    final manager = $$NutritionTargetsTableTableManager(
+      $_db,
+      $_db.nutritionTargets,
+    ).filter((f) => f.studentId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _nutritionTargetsRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -2742,6 +3281,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
           }) => $$WorkoutSessionsTableFilterComposer(
             $db: $db,
             $table: $db.workoutSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> nutritionTargetsRefs(
+    Expression<bool> Function($$NutritionTargetsTableFilterComposer f) f,
+  ) {
+    final $$NutritionTargetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.nutritionTargets,
+      getReferencedColumn: (t) => t.studentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NutritionTargetsTableFilterComposer(
+            $db: $db,
+            $table: $db.nutritionTargets,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2869,6 +3433,31 @@ class $$UsersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> nutritionTargetsRefs<T extends Object>(
+    Expression<T> Function($$NutritionTargetsTableAnnotationComposer a) f,
+  ) {
+    final $$NutritionTargetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.nutritionTargets,
+      getReferencedColumn: (t) => t.studentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NutritionTargetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.nutritionTargets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -2888,6 +3477,7 @@ class $$UsersTableTableManager
             bool workoutPlansRefs,
             bool sessionsRefs,
             bool workoutSessionsRefs,
+            bool nutritionTargetsRefs,
           })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
@@ -2924,6 +3514,7 @@ class $$UsersTableTableManager
                 workoutPlansRefs = false,
                 sessionsRefs = false,
                 workoutSessionsRefs = false,
+                nutritionTargetsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -2931,6 +3522,7 @@ class $$UsersTableTableManager
                     if (workoutPlansRefs) db.workoutPlans,
                     if (sessionsRefs) db.sessions,
                     if (workoutSessionsRefs) db.workoutSessions,
+                    if (nutritionTargetsRefs) db.nutritionTargets,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -2994,6 +3586,27 @@ class $$UsersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (nutritionTargetsRefs)
+                        await $_getPrefetchedData<
+                          User,
+                          $UsersTable,
+                          NutritionTargetsRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._nutritionTargetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).nutritionTargetsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.studentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3018,6 +3631,7 @@ typedef $$UsersTableProcessedTableManager =
         bool workoutPlansRefs,
         bool sessionsRefs,
         bool workoutSessionsRefs,
+        bool nutritionTargetsRefs,
       })
     >;
 typedef $$WorkoutPlansTableCreateCompanionBuilder =
@@ -5456,6 +6070,388 @@ typedef $$FoodItemsTableProcessedTableManager =
       FoodRow,
       PrefetchHooks Function()
     >;
+typedef $$NutritionTargetsTableCreateCompanionBuilder =
+    NutritionTargetsCompanion Function({
+      Value<int> studentId,
+      required int sex,
+      required int age,
+      required double heightCm,
+      required double weightKg,
+      required int activity,
+      required int goal,
+      Value<DateTime> updatedAt,
+    });
+typedef $$NutritionTargetsTableUpdateCompanionBuilder =
+    NutritionTargetsCompanion Function({
+      Value<int> studentId,
+      Value<int> sex,
+      Value<int> age,
+      Value<double> heightCm,
+      Value<double> weightKg,
+      Value<int> activity,
+      Value<int> goal,
+      Value<DateTime> updatedAt,
+    });
+
+final class $$NutritionTargetsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $NutritionTargetsTable,
+          NutritionTargetsRow
+        > {
+  $$NutritionTargetsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $UsersTable _studentIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.nutritionTargets.studentId, db.users.id),
+  );
+
+  $$UsersTableProcessedTableManager get studentId {
+    final $_column = $_itemColumn<int>('student_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_studentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$NutritionTargetsTableFilterComposer
+    extends Composer<_$AppDatabase, $NutritionTargetsTable> {
+  $$NutritionTargetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get sex => $composableBuilder(
+    column: $table.sex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get age => $composableBuilder(
+    column: $table.age,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get heightCm => $composableBuilder(
+    column: $table.heightCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get activity => $composableBuilder(
+    column: $table.activity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get goal => $composableBuilder(
+    column: $table.goal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get studentId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.studentId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$NutritionTargetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $NutritionTargetsTable> {
+  $$NutritionTargetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get sex => $composableBuilder(
+    column: $table.sex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get age => $composableBuilder(
+    column: $table.age,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get heightCm => $composableBuilder(
+    column: $table.heightCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get activity => $composableBuilder(
+    column: $table.activity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get goal => $composableBuilder(
+    column: $table.goal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get studentId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.studentId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$NutritionTargetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NutritionTargetsTable> {
+  $$NutritionTargetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get sex =>
+      $composableBuilder(column: $table.sex, builder: (column) => column);
+
+  GeneratedColumn<int> get age =>
+      $composableBuilder(column: $table.age, builder: (column) => column);
+
+  GeneratedColumn<double> get heightCm =>
+      $composableBuilder(column: $table.heightCm, builder: (column) => column);
+
+  GeneratedColumn<double> get weightKg =>
+      $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<int> get activity =>
+      $composableBuilder(column: $table.activity, builder: (column) => column);
+
+  GeneratedColumn<int> get goal =>
+      $composableBuilder(column: $table.goal, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get studentId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.studentId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$NutritionTargetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $NutritionTargetsTable,
+          NutritionTargetsRow,
+          $$NutritionTargetsTableFilterComposer,
+          $$NutritionTargetsTableOrderingComposer,
+          $$NutritionTargetsTableAnnotationComposer,
+          $$NutritionTargetsTableCreateCompanionBuilder,
+          $$NutritionTargetsTableUpdateCompanionBuilder,
+          (NutritionTargetsRow, $$NutritionTargetsTableReferences),
+          NutritionTargetsRow,
+          PrefetchHooks Function({bool studentId})
+        > {
+  $$NutritionTargetsTableTableManager(
+    _$AppDatabase db,
+    $NutritionTargetsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NutritionTargetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NutritionTargetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NutritionTargetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> studentId = const Value.absent(),
+                Value<int> sex = const Value.absent(),
+                Value<int> age = const Value.absent(),
+                Value<double> heightCm = const Value.absent(),
+                Value<double> weightKg = const Value.absent(),
+                Value<int> activity = const Value.absent(),
+                Value<int> goal = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => NutritionTargetsCompanion(
+                studentId: studentId,
+                sex: sex,
+                age: age,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                activity: activity,
+                goal: goal,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> studentId = const Value.absent(),
+                required int sex,
+                required int age,
+                required double heightCm,
+                required double weightKg,
+                required int activity,
+                required int goal,
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => NutritionTargetsCompanion.insert(
+                studentId: studentId,
+                sex: sex,
+                age: age,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                activity: activity,
+                goal: goal,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$NutritionTargetsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({studentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (studentId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.studentId,
+                                referencedTable:
+                                    $$NutritionTargetsTableReferences
+                                        ._studentIdTable(db),
+                                referencedColumn:
+                                    $$NutritionTargetsTableReferences
+                                        ._studentIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$NutritionTargetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $NutritionTargetsTable,
+      NutritionTargetsRow,
+      $$NutritionTargetsTableFilterComposer,
+      $$NutritionTargetsTableOrderingComposer,
+      $$NutritionTargetsTableAnnotationComposer,
+      $$NutritionTargetsTableCreateCompanionBuilder,
+      $$NutritionTargetsTableUpdateCompanionBuilder,
+      (NutritionTargetsRow, $$NutritionTargetsTableReferences),
+      NutritionTargetsRow,
+      PrefetchHooks Function({bool studentId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5476,4 +6472,6 @@ class $AppDatabaseManager {
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$FoodItemsTableTableManager get foodItems =>
       $$FoodItemsTableTableManager(_db, _db.foodItems);
+  $$NutritionTargetsTableTableManager get nutritionTargets =>
+      $$NutritionTargetsTableTableManager(_db, _db.nutritionTargets);
 }
