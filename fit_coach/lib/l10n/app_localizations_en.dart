@@ -134,6 +134,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noHistoryYet => 'No workouts recorded yet';
 
   @override
+  String get weeklyTrendChart => 'Weekly trend';
+
+  @override
+  String get movementVolumeChart => 'Volume by movement';
+
+  @override
+  String get setsAxisLabel => 'sets';
+
+  @override
   String weekOf(String date) {
     return 'Week of $date';
   }

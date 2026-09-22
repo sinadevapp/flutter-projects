@@ -134,6 +134,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get noHistoryYet => 'هنوز تمرینی ثبت نشده';
 
   @override
+  String get weeklyTrendChart => 'نمودار روند هفتگی';
+
+  @override
+  String get movementVolumeChart => 'نمودار حجم حرکات';
+
+  @override
+  String get setsAxisLabel => 'ست';
+
+  @override
   String weekOf(String date) {
     return 'هفته $date';
   }

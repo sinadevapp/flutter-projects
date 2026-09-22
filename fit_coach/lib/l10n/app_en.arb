@@ -76,6 +76,9 @@
   "weeklyTrend": "Weekly trend",
   "volumeByMovement": "Volume by movement",
   "noHistoryYet": "No workouts recorded yet",
+  "weeklyTrendChart": "Weekly trend",
+  "movementVolumeChart": "Volume by movement",
+  "setsAxisLabel": "sets",
   "weekOf": "Week of {date}",
   "@weekOf": {
     "placeholders": {

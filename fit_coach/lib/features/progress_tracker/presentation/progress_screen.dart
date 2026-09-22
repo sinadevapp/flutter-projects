@@ -2,6 +2,7 @@ import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/progress_tracker/application/progress_providers.dart';
 import 'package:fit_coach/features/progress_tracker/domain/workout_stats.dart';
+import 'package:fit_coach/features/progress_tracker/presentation/progress_charts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,6 +56,12 @@ class ProgressScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   children: [
                     _summary(context, stats),
+                    const SizedBox(height: 24),
+                    _sectionTitle(context, l10n.weeklyTrendChart),
+                    WeeklyVolumeChart(points: stats.weeklyVolumeSeries(locale)),
+                    const SizedBox(height: 24),
+                    _sectionTitle(context, l10n.movementVolumeChart),
+                    MovementVolumeChart(points: stats.movementVolumeSeries()),
                     const SizedBox(height: 24),
                     _sectionTitle(context, l10n.weeklyTrend),
                     for (final week in stats.weeklyVolume(locale))

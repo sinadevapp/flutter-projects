@@ -80,13 +80,24 @@ void main() {
     expect(find.text('پیشرفت من'), findsOneWidget);
     expect(find.text('۱'), findsWidgets); // one completed workout, Persian digit
     // The week label uses the Persian calendar; ask the calendar library what
-    // this week's Jalali year is, rather than hard-coding one.
+    // this week's Jalali year is, rather than hard-coding one. The charts sit
+    // above the list, so scroll to where the week rows actually are.
     final jalaliYear = fa(Jalali.fromDateTime(DateTime.now()).year);
-    expect(find.textContaining(jalaliYear), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining(jalaliYear),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining(jalaliYear), findsWidgets);
 
     await pumpProgress(const Locale('en'));
     expect(find.text('My progress'), findsOneWidget);
-    expect(find.textContaining('${DateTime.now().year}/'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('${DateTime.now().year}/'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining('${DateTime.now().year}/'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();

@@ -13,6 +13,29 @@ class WeekVolume {
   final int sets;
 }
 
+/// One point on a chart.
+///
+/// [label] is what the chart draws on its axis; [weekStart] is set instead for
+/// series measured in time, so the axis can format it through the locale
+/// helpers rather than a chart widget guessing at a calendar.
+class ChartPoint {
+  const ChartPoint._({
+    required this.value,
+    this.label,
+    this.weekStart,
+  });
+
+  ChartPoint.forWeek({required DateTime weekStart, required num value})
+      : this._(value: value.toDouble(), weekStart: weekStart);
+
+  ChartPoint.forLabel({required String label, required num value})
+      : this._(value: value.toDouble(), label: label);
+
+  final double value;
+  final String? label;
+  final DateTime? weekStart;
+}
+
 /// Aggregates one student's training history.
 ///
 /// Pure domain logic over rows the database already holds: no widgets, no
@@ -76,4 +99,25 @@ class WorkoutStats {
       ..sort((a, b) => b.weekStart.compareTo(a.weekStart));
     return weeks;
   }
+
+  /// Sets per week, **oldest first** — the order a trend is read in.
+  ///
+  /// [weeklyVolume] returns newest first, which is right for a list but
+  /// backwards for a chart. Reversing in the widget would be logic in
+  /// `build()`, so the chart's own order is derived here instead.
+  List<ChartPoint> weeklyVolumeSeries(Locale locale) => weeklyVolume(locale)
+      .reversed
+      .map((week) => ChartPoint.forWeek(
+            weekStart: week.weekStart,
+            value: week.sets,
+          ))
+      .toList();
+
+  /// Total reps per movement, busiest first — the order a bar chart reads in.
+  List<ChartPoint> movementVolumeSeries() => volumeByMovement()
+      .map((entry) => ChartPoint.forLabel(
+            label: entry.key,
+            value: entry.value,
+          ))
+      .toList();
 }

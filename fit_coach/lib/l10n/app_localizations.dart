@@ -332,6 +332,24 @@ abstract class AppLocalizations {
   /// **'No workouts recorded yet'**
   String get noHistoryYet;
 
+  /// No description provided for @weeklyTrendChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly trend'**
+  String get weeklyTrendChart;
+
+  /// No description provided for @movementVolumeChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume by movement'**
+  String get movementVolumeChart;
+
+  /// No description provided for @setsAxisLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'sets'**
+  String get setsAxisLabel;
+
   /// No description provided for @weekOf.
   ///
   /// In en, this message translates to:
