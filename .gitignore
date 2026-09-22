@@ -33,3 +33,7 @@ Thumbs.db
 # Note: local.properties contains cmake.dir path needed for build
 # We'll add a template instead
 android/local.properties
+# Local AI-agent context / handover notes — never published
+CLAUDE.md
+CLAUDE.local.md
+.claude/
