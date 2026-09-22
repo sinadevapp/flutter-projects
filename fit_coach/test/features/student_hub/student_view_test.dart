@@ -111,4 +111,28 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();
   });
+
+  testWidgets('a student reaches their nutrition from their plans screen',
+      (tester) async {
+    final db = await pumpApp(tester);
+    final ali = await db.insertUser(
+      UsersCompanion.insert(name: 'علی', role: UserRole.student),
+    );
+
+    await signIn(tester, 'شاگرد');
+    await tester.tap(find.text('علی'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('تغذیه'));
+    await tester.pumpAndSettle();
+
+    // Before the coach sets anything up the student sees a prompt, not an
+    // empty screen — and no way to set it themselves.
+    expect(find.text('هنوز برنامه غذایی برایت تنظیم نشده'), findsOneWidget);
+    expect(find.text('ثبت پروفایل'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
+    expect(ali, isNotNull);
+  });
 }

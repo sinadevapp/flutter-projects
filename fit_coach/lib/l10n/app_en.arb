@@ -171,6 +171,7 @@
       }
     }
   },
+  "noStudentNutritionYet": "No meal plan has been set for you yet",
   "proteinPlanTitle": "Cheapest ways to get protein",
   "proteinPlanEmpty": "Enter food prices to work out the cheapest options",
   "planOption": "{grams} g of {name}",

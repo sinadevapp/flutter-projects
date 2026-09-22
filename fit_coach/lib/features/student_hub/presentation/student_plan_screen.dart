@@ -2,6 +2,7 @@ import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/features/nutrition_budget/presentation/student_nutrition_screen.dart';
 import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
@@ -24,6 +25,15 @@ class StudentPlanScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(context.l10n.myPlans),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.restaurant),
+            tooltip: context.l10n.nutrition,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => StudentNutritionScreen(studentId: studentId),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.insights),
             tooltip: context.l10n.myProgress,

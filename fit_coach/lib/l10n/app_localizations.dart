@@ -608,6 +608,12 @@ abstract class AppLocalizations {
   /// **'{value} g'**
   String gramUnit(String value);
 
+  /// No description provided for @noStudentNutritionYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No meal plan has been set for you yet'**
+  String get noStudentNutritionYet;
+
   /// No description provided for @proteinPlanTitle.
   ///
   /// In en, this message translates to:

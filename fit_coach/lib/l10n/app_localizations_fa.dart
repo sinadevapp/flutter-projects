@@ -287,6 +287,9 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String get noStudentNutritionYet => 'هنوز برنامه غذایی برایت تنظیم نشده';
+
+  @override
   String get proteinPlanTitle => 'ارزان‌ترین راه پروتئین';
 
   @override

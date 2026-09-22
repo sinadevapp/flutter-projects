@@ -85,6 +85,7 @@
   "dailyFat": "چربی روزانه",
   "kcalUnit": "{value} کالری",
   "gramUnit": "{value} گرم",
+  "noStudentNutritionYet": "هنوز برنامه غذایی برایت تنظیم نشده",
   "proteinPlanTitle": "ارزان‌ترین راه پروتئین",
   "proteinPlanEmpty": "برای محاسبه، قیمت مواد غذایی را وارد کنید",
   "planOption": "{grams} گرم {name}",

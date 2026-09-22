@@ -1,12 +1,11 @@
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
-import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/nutrition_budget/application/food_providers.dart';
 import 'package:fit_coach/features/nutrition_budget/application/target_providers.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/food_cost.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/nutrition_target.dart';
-import 'package:fit_coach/features/nutrition_budget/domain/protein_plan.dart';
+import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_widgets.dart';
 import 'package:fit_coach/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,108 +72,22 @@ class _TargetsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final locale = Localizations.localeOf(context);
-    final foods = ref.watch(rankedFoodsProvider).value ?? const [];
-
-    String digits(num value) => localizeNumber(locale, value.round());
+    final foods = ref.watch(rankedFoodsProvider).value ?? const <FoodItem>[];
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _TargetTile(label: l10n.bmr, value: l10n.kcalUnit(digits(targets.bmr))),
-        _TargetTile(label: l10n.tdee, value: l10n.kcalUnit(digits(targets.tdee))),
-        _TargetTile(
-          label: l10n.dailyCalories,
-          value: l10n.kcalUnit(digits(targets.calories)),
-        ),
-        const Divider(),
-        _TargetTile(
-          label: l10n.dailyProtein,
-          value: l10n.gramUnit(digits(targets.proteinG)),
-        ),
-        _TargetTile(
-          label: l10n.dailyCarbs,
-          value: l10n.gramUnit(digits(targets.carbsG)),
-        ),
-        _TargetTile(
-          label: l10n.dailyFat,
-          value: l10n.gramUnit(digits(targets.fatG)),
-        ),
+        TargetsSection(targets: targets),
         const SizedBox(height: 24),
-        Text(
-          l10n.proteinPlanTitle,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        _ProteinPlan(targetG: targets.proteinG, foods: foods),
+        ProteinPlanSection(targetG: targets.proteinG, foods: foods),
         const SizedBox(height: 24),
         OutlinedButton(
           onPressed: () => _openProfileSheet(context, student),
-          child: Text(l10n.editProfile),
+          child: Text(context.l10n.editProfile),
         ),
       ],
     );
   }
-}
-
-class _ProteinPlan extends StatelessWidget {
-  const _ProteinPlan({required this.targetG, required this.foods});
-
-  final double targetG;
-  final List<FoodItem> foods;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final locale = Localizations.localeOf(context);
-
-    final options = proteinPlan(targetG: targetG, foods: foods);
-
-    // No priced food means no plan: a costing feature that quietly shows
-    // nothing would look broken rather than ask for the missing input.
-    if (options.isEmpty) {
-      return Text(l10n.proteinPlanEmpty);
-    }
-
-    return Column(
-      children: [
-        for (final option in options)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              l10n.planOption(
-                localizeNumber(locale, option.grams.round()),
-                option.food.name,
-              ),
-            ),
-            subtitle: Text(
-              l10n.planKcal(localizeNumber(locale, option.kcal.round())),
-            ),
-            trailing: Text(
-              l10n.planCost(localizeNumber(locale, option.cost.round())),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _TargetTile extends StatelessWidget {
-  const _TargetTile({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(label),
-        trailing: Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      );
 }
 
 /// Opens the profile form as a modal sheet.
