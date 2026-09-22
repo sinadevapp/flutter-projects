@@ -76,6 +76,45 @@
   "weeklyTrend": "Weekly trend",
   "volumeByMovement": "Volume by movement",
   "noHistoryYet": "No workouts recorded yet",
+  "resting": "Rest",
+  "restDone": "Rest over",
+  "skipRest": "Skip",
+  "pauseRest": "Pause",
+  "resumeRest": "Resume",
+  "restSeconds": "{seconds} s",
+  "@restSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "workoutSummary": "Workout summary",
+  "summaryDuration": "Duration",
+  "summarySets": "Sets",
+  "summaryReps": "Reps",
+  "summaryComplete": "Workout complete",
+  "summaryPartial": "Workout cut short",
+  "durationMinutes": "{minutes} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} h {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "restTimeLabel": "Rest time (seconds)",
   "weeklyTrendChart": "Weekly trend",
   "movementVolumeChart": "Volume by movement",
   "setsAxisLabel": "sets",

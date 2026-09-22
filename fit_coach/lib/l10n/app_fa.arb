@@ -39,6 +39,45 @@
   "weeklyTrend": "روند هفتگی",
   "volumeByMovement": "حجم به تفکیک حرکت",
   "noHistoryYet": "هنوز تمرینی ثبت نشده",
+  "resting": "استراحت",
+  "restDone": "استراحت تمام شد",
+  "skipRest": "رد کردن",
+  "pauseRest": "توقف",
+  "resumeRest": "ادامه",
+  "restSeconds": "{seconds} ثانیه",
+  "@restSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "workoutSummary": "خلاصه تمرین",
+  "summaryDuration": "مدت",
+  "summarySets": "ست‌ها",
+  "summaryReps": "تکرارها",
+  "summaryComplete": "تمرین کامل شد",
+  "summaryPartial": "تمرین ناتمام",
+  "durationMinutes": "{minutes} دقیقه",
+  "durationHoursMinutes": "{hours} ساعت و {minutes} دقیقه",
+  "restTimeLabel": "زمان استراحت (ثانیه)",
   "weeklyTrendChart": "نمودار روند هفتگی",
   "movementVolumeChart": "نمودار حجم حرکات",
   "setsAxisLabel": "ست",

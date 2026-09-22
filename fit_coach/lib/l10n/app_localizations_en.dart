@@ -134,6 +134,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noHistoryYet => 'No workouts recorded yet';
 
   @override
+  String get resting => 'Rest';
+
+  @override
+  String get restDone => 'Rest over';
+
+  @override
+  String get skipRest => 'Skip';
+
+  @override
+  String get pauseRest => 'Pause';
+
+  @override
+  String get resumeRest => 'Resume';
+
+  @override
+  String restSeconds(String seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get workoutSummary => 'Workout summary';
+
+  @override
+  String get summaryDuration => 'Duration';
+
+  @override
+  String get summarySets => 'Sets';
+
+  @override
+  String get summaryReps => 'Reps';
+
+  @override
+  String get summaryComplete => 'Workout complete';
+
+  @override
+  String get summaryPartial => 'Workout cut short';
+
+  @override
+  String durationMinutes(String minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String durationHoursMinutes(String hours, String minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String get restTimeLabel => 'Rest time (seconds)';
+
+  @override
   String get weeklyTrendChart => 'Weekly trend';
 
   @override

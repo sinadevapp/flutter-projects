@@ -17,6 +17,20 @@ final activeWorkoutProvider =
       .watchSingleOrNull();
 });
 
+/// One workout session by id.
+///
+/// The active workout screen is handed an id, but the end-of-workout summary
+/// needs the session's real `startedAt` to time it honestly — deriving the
+/// start from the first logged set would understate a workout where the
+/// student logged the first set minutes after starting.
+final workoutSessionProvider =
+    StreamProvider.autoDispose.family<WorkoutSession?, int>((ref, sessionId) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.workoutSessions)
+        ..where((s) => s.id.equals(sessionId)))
+      .watchSingleOrNull();
+});
+
 /// Sets logged so far in one workout, oldest first.
 final setLogsProvider =
     StreamProvider.autoDispose.family<List<SetLog>, int>((ref, sessionId) {

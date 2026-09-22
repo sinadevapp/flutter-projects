@@ -134,6 +134,57 @@ class AppLocalizationsFa extends AppLocalizations {
   String get noHistoryYet => 'هنوز تمرینی ثبت نشده';
 
   @override
+  String get resting => 'استراحت';
+
+  @override
+  String get restDone => 'استراحت تمام شد';
+
+  @override
+  String get skipRest => 'رد کردن';
+
+  @override
+  String get pauseRest => 'توقف';
+
+  @override
+  String get resumeRest => 'ادامه';
+
+  @override
+  String restSeconds(String seconds) {
+    return '$seconds ثانیه';
+  }
+
+  @override
+  String get workoutSummary => 'خلاصه تمرین';
+
+  @override
+  String get summaryDuration => 'مدت';
+
+  @override
+  String get summarySets => 'ست‌ها';
+
+  @override
+  String get summaryReps => 'تکرارها';
+
+  @override
+  String get summaryComplete => 'تمرین کامل شد';
+
+  @override
+  String get summaryPartial => 'تمرین ناتمام';
+
+  @override
+  String durationMinutes(String minutes) {
+    return '$minutes دقیقه';
+  }
+
+  @override
+  String durationHoursMinutes(String hours, String minutes) {
+    return '$hours ساعت و $minutes دقیقه';
+  }
+
+  @override
+  String get restTimeLabel => 'زمان استراحت (ثانیه)';
+
+  @override
   String get weeklyTrendChart => 'نمودار روند هفتگی';
 
   @override

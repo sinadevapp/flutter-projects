@@ -332,6 +332,96 @@ abstract class AppLocalizations {
   /// **'No workouts recorded yet'**
   String get noHistoryYet;
 
+  /// No description provided for @resting.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get resting;
+
+  /// No description provided for @restDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest over'**
+  String get restDone;
+
+  /// No description provided for @skipRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skipRest;
+
+  /// No description provided for @pauseRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseRest;
+
+  /// No description provided for @resumeRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resumeRest;
+
+  /// No description provided for @restSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} s'**
+  String restSeconds(String seconds);
+
+  /// No description provided for @workoutSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout summary'**
+  String get workoutSummary;
+
+  /// No description provided for @summaryDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get summaryDuration;
+
+  /// No description provided for @summarySets.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets'**
+  String get summarySets;
+
+  /// No description provided for @summaryReps.
+  ///
+  /// In en, this message translates to:
+  /// **'Reps'**
+  String get summaryReps;
+
+  /// No description provided for @summaryComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout complete'**
+  String get summaryComplete;
+
+  /// No description provided for @summaryPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout cut short'**
+  String get summaryPartial;
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutes(String minutes);
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String durationHoursMinutes(String hours, String minutes);
+
+  /// No description provided for @restTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest time (seconds)'**
+  String get restTimeLabel;
+
   /// No description provided for @weeklyTrendChart.
   ///
   /// In en, this message translates to:
