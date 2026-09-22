@@ -82,6 +82,35 @@ class AppSettings extends Table {
   TextColumn get locale => text().nullable()();
 }
 
+/// A food the coach budgets around.
+///
+/// Prices are *user data*, not constants: they move with the Iranian market,
+/// so the coach edits them and every ranking follows. [updatedAt] records when
+/// a price was last touched, so a stale price is visible rather than silent.
+///
+/// The generated row class is [FoodRow], not `FoodItem`: the feature's pure
+/// domain type already owns that name.
+@DataClassName('FoodRow')
+class FoodItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+
+  /// Macros per 100 g, the unit on every Iranian nutrition label. These are
+  /// facts about the food and are seeded; they do not change with the market.
+  RealColumn get proteinPer100g => real()();
+  RealColumn get kcalPer100g => real()();
+
+  /// Toman per kilogram, or **null until the coach enters it**.
+  ///
+  /// Prices are the coach's own market reading, so the app ships none of its
+  /// own: a guessed price is worse than a blank one, because a blank one asks
+  /// to be filled in.
+  IntColumn get pricePerKg => integer().nullable()();
+
+  /// When the price was last entered. Meaningless while [pricePerKg] is null.
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 @DriftDatabase(
   tables: [
     Users,
@@ -91,6 +120,7 @@ class AppSettings extends Table {
     WorkoutSessions,
     SetLogs,
     AppSettings,
+    FoodItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -101,7 +131,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -129,11 +159,85 @@ class AppDatabase extends _$AppDatabase {
           if (from < 6) {
             await m.createTable(appSettings);
           }
+          if (from < 7) {
+            await m.createTable(foodItems);
+            await _seedFoods();
+          }
+        },
+        // A *fresh* install never runs onUpgrade, so the seed has to happen
+        // here as well as in the `from < 7` branch. Both paths run exactly
+        // once per database, so the coach can still delete every food and
+        // have it stay deleted.
+        onCreate: (m) async {
+          await m.createAll();
+          await _seedFoods();
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
+
+  /// Starting set of Iranian staples, with macros but **no prices**.
+  ///
+  /// Only what a nutrition label states for free: protein and energy per
+  /// 100 g. Prices stay blank on purpose — a price invented by the app is
+  /// worse than no price, because it looks like a fact the coach can trust.
+  /// Blank prices ask to be filled in, and the coach is the one who knows
+  /// what things cost in their own market.
+  Future<void> _seedFoods() => batch((b) {
+        b.insertAll(foodItems, [
+          FoodItemsCompanion.insert(
+            name: 'سینه مرغ',
+            proteinPer100g: 31,
+            kcalPer100g: 165,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'تخم مرغ',
+            proteinPer100g: 13,
+            kcalPer100g: 155,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'عدس',
+            proteinPer100g: 25,
+            kcalPer100g: 350,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'نخود',
+            proteinPer100g: 19,
+            kcalPer100g: 364,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'لوبیا قرمز',
+            proteinPer100g: 24,
+            kcalPer100g: 333,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'ماست',
+            proteinPer100g: 3.5,
+            kcalPer100g: 59,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'پنیر',
+            proteinPer100g: 14,
+            kcalPer100g: 260,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'شیر',
+            proteinPer100g: 3.4,
+            kcalPer100g: 61,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'برنج',
+            proteinPer100g: 7,
+            kcalPer100g: 360,
+          ),
+          FoodItemsCompanion.insert(
+            name: 'پروتئین وی',
+            proteinPer100g: 80,
+            kcalPer100g: 400,
+          ),
+        ]);
+      });
 
   Future<int> insertUser(UsersCompanion entry) => into(users).insert(entry);
 
@@ -253,6 +357,35 @@ class AppDatabase extends _$AppDatabase {
           AppSettingsCompanion.insert(locale: Value(code)),
         );
       });
+
+  Future<int> insertFood(FoodItemsCompanion entry) =>
+      into(foodItems).insert(entry);
+
+  Future<FoodRow?> getFood(int id) =>
+      (select(foodItems)..where((f) => f.id.equals(id))).getSingleOrNull();
+
+  /// Every food, in a stable order.
+  ///
+  /// Deliberately *not* sorted by cost here: ranking is domain logic
+  /// ([rankByProteinCost], unit-tested on its own), and writing it twice would
+  /// let the two copies drift apart.
+  Future<List<FoodRow>> getAllFoods() =>
+      (select(foodItems)..orderBy([(f) => OrderingTerm.asc(f.id)])).get();
+
+  /// Sets — or clears — a food's price. [updatedAt] moves with it.
+  ///
+  /// Passing null blanks the price rather than zeroing it: the coach may not
+  /// know today's price, and 0 would read as "free".
+  Future<void> updateFoodPrice(int id, int? pricePerKg) =>
+      (update(foodItems)..where((f) => f.id.equals(id))).write(
+        FoodItemsCompanion(
+          pricePerKg: Value(pricePerKg),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+  /// Removes every food. The seed is not re-applied, so an empty list sticks.
+  Future<void> deleteAllFoods() => delete(foodItems).go();
 }
 
 QueryExecutor _openConnection() {

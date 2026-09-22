@@ -99,5 +99,26 @@
         "type": "String"
       }
     }
-  }
+  },
+  "nutrition": "Nutrition",
+  "foodPrices": "Food prices",
+  "foodPricesHint": "Enter a price per kilo to work out what the protein costs",
+  "noPriceYet": "No price entered",
+  "pricePerKg": "Price per kilo (toman)",
+  "costPerGramProtein": "Cost per gram of protein",
+  "proteinPer100g": "Protein per 100 g",
+  "kcalPer100g": "Energy per 100 g",
+  "cheapestProteinFirst": "Ordered by cheapest protein",
+  "noFoodsYet": "No foods yet",
+  "enterPriceFor": "Price of {name}",
+  "@enterPriceFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "priceSaved": "Price saved",
+  "cancel": "Cancel",
+  "invalidPrice": "Enter a valid price"
 }

@@ -147,4 +147,49 @@ class AppLocalizationsFa extends AppLocalizations {
   String weekStart(String day) {
     return 'شروع هفته: $day';
   }
+
+  @override
+  String get nutrition => 'تغذیه';
+
+  @override
+  String get foodPrices => 'قیمت مواد غذایی';
+
+  @override
+  String get foodPricesHint =>
+      'قیمت هر کیلو را وارد کنید تا هزینه پروتئین محاسبه شود';
+
+  @override
+  String get noPriceYet => 'قیمت وارد نشده';
+
+  @override
+  String get pricePerKg => 'قیمت هر کیلو (تومان)';
+
+  @override
+  String get costPerGramProtein => 'هزینه هر گرم پروتئین';
+
+  @override
+  String get proteinPer100g => 'پروتئین در ۱۰۰ گرم';
+
+  @override
+  String get kcalPer100g => 'کالری در ۱۰۰ گرم';
+
+  @override
+  String get cheapestProteinFirst => 'ترتیب: ارزان‌ترین پروتئین';
+
+  @override
+  String get noFoodsYet => 'هنوز غذایی ثبت نشده';
+
+  @override
+  String enterPriceFor(String name) {
+    return 'قیمت $name';
+  }
+
+  @override
+  String get priceSaved => 'قیمت ذخیره شد';
+
+  @override
+  String get cancel => 'انصراف';
+
+  @override
+  String get invalidPrice => 'قیمت را درست وارد کنید';
 }

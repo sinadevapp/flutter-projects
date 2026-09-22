@@ -41,5 +41,26 @@
   "noHistoryYet": "هنوز تمرینی ثبت نشده",
   "weekOf": "هفته {date}",
   "setsCount": "{count} ست",
-  "weekStart": "شروع هفته: {day}"
+  "weekStart": "شروع هفته: {day}",
+  "nutrition": "تغذیه",
+  "foodPrices": "قیمت مواد غذایی",
+  "foodPricesHint": "قیمت هر کیلو را وارد کنید تا هزینه پروتئین محاسبه شود",
+  "noPriceYet": "قیمت وارد نشده",
+  "pricePerKg": "قیمت هر کیلو (تومان)",
+  "costPerGramProtein": "هزینه هر گرم پروتئین",
+  "proteinPer100g": "پروتئین در ۱۰۰ گرم",
+  "kcalPer100g": "کالری در ۱۰۰ گرم",
+  "cheapestProteinFirst": "ترتیب: ارزان‌ترین پروتئین",
+  "noFoodsYet": "هنوز غذایی ثبت نشده",
+  "enterPriceFor": "قیمت {name}",
+  "priceSaved": "قیمت ذخیره شد",
+  "cancel": "انصراف",
+  "invalidPrice": "قیمت را درست وارد کنید",
+  "@enterPriceFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

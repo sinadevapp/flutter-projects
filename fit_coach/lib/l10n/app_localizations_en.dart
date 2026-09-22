@@ -147,4 +147,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String weekStart(String day) {
     return 'Week starts: $day';
   }
+
+  @override
+  String get nutrition => 'Nutrition';
+
+  @override
+  String get foodPrices => 'Food prices';
+
+  @override
+  String get foodPricesHint =>
+      'Enter a price per kilo to work out what the protein costs';
+
+  @override
+  String get noPriceYet => 'No price entered';
+
+  @override
+  String get pricePerKg => 'Price per kilo (toman)';
+
+  @override
+  String get costPerGramProtein => 'Cost per gram of protein';
+
+  @override
+  String get proteinPer100g => 'Protein per 100 g';
+
+  @override
+  String get kcalPer100g => 'Energy per 100 g';
+
+  @override
+  String get cheapestProteinFirst => 'Ordered by cheapest protein';
+
+  @override
+  String get noFoodsYet => 'No foods yet';
+
+  @override
+  String enterPriceFor(String name) {
+    return 'Price of $name';
+  }
+
+  @override
+  String get priceSaved => 'Price saved';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get invalidPrice => 'Enter a valid price';
 }

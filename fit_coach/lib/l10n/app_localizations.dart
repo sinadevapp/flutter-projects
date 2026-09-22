@@ -349,6 +349,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Week starts: {day}'**
   String weekStart(String day);
+
+  /// No description provided for @nutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get nutrition;
+
+  /// No description provided for @foodPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Food prices'**
+  String get foodPrices;
+
+  /// No description provided for @foodPricesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a price per kilo to work out what the protein costs'**
+  String get foodPricesHint;
+
+  /// No description provided for @noPriceYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No price entered'**
+  String get noPriceYet;
+
+  /// No description provided for @pricePerKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Price per kilo (toman)'**
+  String get pricePerKg;
+
+  /// No description provided for @costPerGramProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost per gram of protein'**
+  String get costPerGramProtein;
+
+  /// No description provided for @proteinPer100g.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein per 100 g'**
+  String get proteinPer100g;
+
+  /// No description provided for @kcalPer100g.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy per 100 g'**
+  String get kcalPer100g;
+
+  /// No description provided for @cheapestProteinFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordered by cheapest protein'**
+  String get cheapestProteinFirst;
+
+  /// No description provided for @noFoodsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No foods yet'**
+  String get noFoodsYet;
+
+  /// No description provided for @enterPriceFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Price of {name}'**
+  String enterPriceFor(String name);
+
+  /// No description provided for @priceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Price saved'**
+  String get priceSaved;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @invalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price'**
+  String get invalidPrice;
 }
 
 class _AppLocalizationsDelegate

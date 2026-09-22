@@ -2121,6 +2121,433 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   }
 }
 
+class $FoodItemsTable extends FoodItems
+    with TableInfo<$FoodItemsTable, FoodRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FoodItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _proteinPer100gMeta = const VerificationMeta(
+    'proteinPer100g',
+  );
+  @override
+  late final GeneratedColumn<double> proteinPer100g = GeneratedColumn<double>(
+    'protein_per100g',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kcalPer100gMeta = const VerificationMeta(
+    'kcalPer100g',
+  );
+  @override
+  late final GeneratedColumn<double> kcalPer100g = GeneratedColumn<double>(
+    'kcal_per100g',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pricePerKgMeta = const VerificationMeta(
+    'pricePerKg',
+  );
+  @override
+  late final GeneratedColumn<int> pricePerKg = GeneratedColumn<int>(
+    'price_per_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    proteinPer100g,
+    kcalPer100g,
+    pricePerKg,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'food_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FoodRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('protein_per100g')) {
+      context.handle(
+        _proteinPer100gMeta,
+        proteinPer100g.isAcceptableOrUnknown(
+          data['protein_per100g']!,
+          _proteinPer100gMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_proteinPer100gMeta);
+    }
+    if (data.containsKey('kcal_per100g')) {
+      context.handle(
+        _kcalPer100gMeta,
+        kcalPer100g.isAcceptableOrUnknown(
+          data['kcal_per100g']!,
+          _kcalPer100gMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_kcalPer100gMeta);
+    }
+    if (data.containsKey('price_per_kg')) {
+      context.handle(
+        _pricePerKgMeta,
+        pricePerKg.isAcceptableOrUnknown(
+          data['price_per_kg']!,
+          _pricePerKgMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FoodRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FoodRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      proteinPer100g: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}protein_per100g'],
+      )!,
+      kcalPer100g: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}kcal_per100g'],
+      )!,
+      pricePerKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}price_per_kg'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FoodItemsTable createAlias(String alias) {
+    return $FoodItemsTable(attachedDatabase, alias);
+  }
+}
+
+class FoodRow extends DataClass implements Insertable<FoodRow> {
+  final int id;
+  final String name;
+
+  /// Macros per 100 g, the unit on every Iranian nutrition label. These are
+  /// facts about the food and are seeded; they do not change with the market.
+  final double proteinPer100g;
+  final double kcalPer100g;
+
+  /// Toman per kilogram, or **null until the coach enters it**.
+  ///
+  /// Prices are the coach's own market reading, so the app ships none of its
+  /// own: a guessed price is worse than a blank one, because a blank one asks
+  /// to be filled in.
+  final int? pricePerKg;
+
+  /// When the price was last entered. Meaningless while [pricePerKg] is null.
+  final DateTime updatedAt;
+  const FoodRow({
+    required this.id,
+    required this.name,
+    required this.proteinPer100g,
+    required this.kcalPer100g,
+    this.pricePerKg,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['protein_per100g'] = Variable<double>(proteinPer100g);
+    map['kcal_per100g'] = Variable<double>(kcalPer100g);
+    if (!nullToAbsent || pricePerKg != null) {
+      map['price_per_kg'] = Variable<int>(pricePerKg);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  FoodItemsCompanion toCompanion(bool nullToAbsent) {
+    return FoodItemsCompanion(
+      id: Value(id),
+      name: Value(name),
+      proteinPer100g: Value(proteinPer100g),
+      kcalPer100g: Value(kcalPer100g),
+      pricePerKg: pricePerKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pricePerKg),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory FoodRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FoodRow(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      proteinPer100g: serializer.fromJson<double>(json['proteinPer100g']),
+      kcalPer100g: serializer.fromJson<double>(json['kcalPer100g']),
+      pricePerKg: serializer.fromJson<int?>(json['pricePerKg']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'proteinPer100g': serializer.toJson<double>(proteinPer100g),
+      'kcalPer100g': serializer.toJson<double>(kcalPer100g),
+      'pricePerKg': serializer.toJson<int?>(pricePerKg),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  FoodRow copyWith({
+    int? id,
+    String? name,
+    double? proteinPer100g,
+    double? kcalPer100g,
+    Value<int?> pricePerKg = const Value.absent(),
+    DateTime? updatedAt,
+  }) => FoodRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    proteinPer100g: proteinPer100g ?? this.proteinPer100g,
+    kcalPer100g: kcalPer100g ?? this.kcalPer100g,
+    pricePerKg: pricePerKg.present ? pricePerKg.value : this.pricePerKg,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  FoodRow copyWithCompanion(FoodItemsCompanion data) {
+    return FoodRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      proteinPer100g: data.proteinPer100g.present
+          ? data.proteinPer100g.value
+          : this.proteinPer100g,
+      kcalPer100g: data.kcalPer100g.present
+          ? data.kcalPer100g.value
+          : this.kcalPer100g,
+      pricePerKg: data.pricePerKg.present
+          ? data.pricePerKg.value
+          : this.pricePerKg,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FoodRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('proteinPer100g: $proteinPer100g, ')
+          ..write('kcalPer100g: $kcalPer100g, ')
+          ..write('pricePerKg: $pricePerKg, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, proteinPer100g, kcalPer100g, pricePerKg, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FoodRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.proteinPer100g == this.proteinPer100g &&
+          other.kcalPer100g == this.kcalPer100g &&
+          other.pricePerKg == this.pricePerKg &&
+          other.updatedAt == this.updatedAt);
+}
+
+class FoodItemsCompanion extends UpdateCompanion<FoodRow> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<double> proteinPer100g;
+  final Value<double> kcalPer100g;
+  final Value<int?> pricePerKg;
+  final Value<DateTime> updatedAt;
+  const FoodItemsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.proteinPer100g = const Value.absent(),
+    this.kcalPer100g = const Value.absent(),
+    this.pricePerKg = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  FoodItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required double proteinPer100g,
+    required double kcalPer100g,
+    this.pricePerKg = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name),
+       proteinPer100g = Value(proteinPer100g),
+       kcalPer100g = Value(kcalPer100g);
+  static Insertable<FoodRow> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<double>? proteinPer100g,
+    Expression<double>? kcalPer100g,
+    Expression<int>? pricePerKg,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (proteinPer100g != null) 'protein_per100g': proteinPer100g,
+      if (kcalPer100g != null) 'kcal_per100g': kcalPer100g,
+      if (pricePerKg != null) 'price_per_kg': pricePerKg,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  FoodItemsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<double>? proteinPer100g,
+    Value<double>? kcalPer100g,
+    Value<int?>? pricePerKg,
+    Value<DateTime>? updatedAt,
+  }) {
+    return FoodItemsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      proteinPer100g: proteinPer100g ?? this.proteinPer100g,
+      kcalPer100g: kcalPer100g ?? this.kcalPer100g,
+      pricePerKg: pricePerKg ?? this.pricePerKg,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (proteinPer100g.present) {
+      map['protein_per100g'] = Variable<double>(proteinPer100g.value);
+    }
+    if (kcalPer100g.present) {
+      map['kcal_per100g'] = Variable<double>(kcalPer100g.value);
+    }
+    if (pricePerKg.present) {
+      map['price_per_kg'] = Variable<int>(pricePerKg.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FoodItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('proteinPer100g: $proteinPer100g, ')
+          ..write('kcalPer100g: $kcalPer100g, ')
+          ..write('pricePerKg: $pricePerKg, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2133,6 +2560,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $SetLogsTable setLogs = $SetLogsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final $FoodItemsTable foodItems = $FoodItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2145,6 +2573,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     workoutSessions,
     setLogs,
     appSettings,
+    foodItems,
   ];
 }
 
@@ -4814,6 +5243,219 @@ typedef $$AppSettingsTableProcessedTableManager =
       AppSetting,
       PrefetchHooks Function()
     >;
+typedef $$FoodItemsTableCreateCompanionBuilder =
+    FoodItemsCompanion Function({
+      Value<int> id,
+      required String name,
+      required double proteinPer100g,
+      required double kcalPer100g,
+      Value<int?> pricePerKg,
+      Value<DateTime> updatedAt,
+    });
+typedef $$FoodItemsTableUpdateCompanionBuilder =
+    FoodItemsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<double> proteinPer100g,
+      Value<double> kcalPer100g,
+      Value<int?> pricePerKg,
+      Value<DateTime> updatedAt,
+    });
+
+class $$FoodItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $FoodItemsTable> {
+  $$FoodItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get proteinPer100g => $composableBuilder(
+    column: $table.proteinPer100g,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get kcalPer100g => $composableBuilder(
+    column: $table.kcalPer100g,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pricePerKg => $composableBuilder(
+    column: $table.pricePerKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FoodItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $FoodItemsTable> {
+  $$FoodItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get proteinPer100g => $composableBuilder(
+    column: $table.proteinPer100g,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get kcalPer100g => $composableBuilder(
+    column: $table.kcalPer100g,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pricePerKg => $composableBuilder(
+    column: $table.pricePerKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FoodItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FoodItemsTable> {
+  $$FoodItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<double> get proteinPer100g => $composableBuilder(
+    column: $table.proteinPer100g,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get kcalPer100g => $composableBuilder(
+    column: $table.kcalPer100g,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get pricePerKg => $composableBuilder(
+    column: $table.pricePerKg,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$FoodItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FoodItemsTable,
+          FoodRow,
+          $$FoodItemsTableFilterComposer,
+          $$FoodItemsTableOrderingComposer,
+          $$FoodItemsTableAnnotationComposer,
+          $$FoodItemsTableCreateCompanionBuilder,
+          $$FoodItemsTableUpdateCompanionBuilder,
+          (FoodRow, BaseReferences<_$AppDatabase, $FoodItemsTable, FoodRow>),
+          FoodRow,
+          PrefetchHooks Function()
+        > {
+  $$FoodItemsTableTableManager(_$AppDatabase db, $FoodItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FoodItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FoodItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FoodItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<double> proteinPer100g = const Value.absent(),
+                Value<double> kcalPer100g = const Value.absent(),
+                Value<int?> pricePerKg = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => FoodItemsCompanion(
+                id: id,
+                name: name,
+                proteinPer100g: proteinPer100g,
+                kcalPer100g: kcalPer100g,
+                pricePerKg: pricePerKg,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required double proteinPer100g,
+                required double kcalPer100g,
+                Value<int?> pricePerKg = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => FoodItemsCompanion.insert(
+                id: id,
+                name: name,
+                proteinPer100g: proteinPer100g,
+                kcalPer100g: kcalPer100g,
+                pricePerKg: pricePerKg,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FoodItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FoodItemsTable,
+      FoodRow,
+      $$FoodItemsTableFilterComposer,
+      $$FoodItemsTableOrderingComposer,
+      $$FoodItemsTableAnnotationComposer,
+      $$FoodItemsTableCreateCompanionBuilder,
+      $$FoodItemsTableUpdateCompanionBuilder,
+      (FoodRow, BaseReferences<_$AppDatabase, $FoodItemsTable, FoodRow>),
+      FoodRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4832,4 +5474,6 @@ class $AppDatabaseManager {
       $$SetLogsTableTableManager(_db, _db.setLogs);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$FoodItemsTableTableManager get foodItems =>
+      $$FoodItemsTableTableManager(_db, _db.foodItems);
 }
