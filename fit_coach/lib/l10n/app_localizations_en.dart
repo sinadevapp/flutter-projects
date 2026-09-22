@@ -192,4 +192,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidPrice => 'Enter a valid price';
+
+  @override
+  String studentNutrition(String name) {
+    return 'Nutrition for $name';
+  }
+
+  @override
+  String get noProfileYet => 'No nutrition profile yet';
+
+  @override
+  String get setProfile => 'Set profile';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get sexLabel => 'Sex';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get ageLabel => 'Age';
+
+  @override
+  String get heightLabel => 'Height (cm)';
+
+  @override
+  String get weightLabel => 'Weight (kg)';
+
+  @override
+  String get activityLabel => 'Activity level';
+
+  @override
+  String get activitySedentary => 'Sedentary';
+
+  @override
+  String get activityLight => 'Light';
+
+  @override
+  String get activityModerate => 'Moderate';
+
+  @override
+  String get activityActive => 'Active';
+
+  @override
+  String get activityVeryActive => 'Very active';
+
+  @override
+  String get goalLabel => 'Goal';
+
+  @override
+  String get goalLose => 'Lose weight';
+
+  @override
+  String get goalMaintain => 'Maintain weight';
+
+  @override
+  String get goalGain => 'Gain weight';
+
+  @override
+  String get invalidNumber => 'Enter a valid number';
+
+  @override
+  String get bmr => 'Basal metabolic rate';
+
+  @override
+  String get tdee => 'Daily energy use';
+
+  @override
+  String get dailyCalories => 'Daily calories';
+
+  @override
+  String get dailyProtein => 'Daily protein';
+
+  @override
+  String get dailyCarbs => 'Daily carbs';
+
+  @override
+  String get dailyFat => 'Daily fat';
+
+  @override
+  String kcalUnit(String value) {
+    return '$value kcal';
+  }
+
+  @override
+  String gramUnit(String value) {
+    return '$value g';
+  }
+
+  @override
+  String get proteinPlanTitle => 'Cheapest ways to get protein';
+
+  @override
+  String get proteinPlanEmpty =>
+      'Enter food prices to work out the cheapest options';
+
+  @override
+  String planOption(String grams, String name) {
+    return '$grams g of $name';
+  }
+
+  @override
+  String planCost(String cost) {
+    return '$cost toman';
+  }
+
+  @override
+  String planKcal(String value) {
+    return '$value kcal';
+  }
+
+  @override
+  String tomanUnit(String value) {
+    return '$value toman';
+  }
 }

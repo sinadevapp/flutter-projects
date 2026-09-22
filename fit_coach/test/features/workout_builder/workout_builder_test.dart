@@ -93,4 +93,23 @@ void main() {
 
     await unmount(tester);
   });
+
+  testWidgets('the coach reaches a student\'s nutrition from their page',
+      (tester) async {
+    await pumpCoachHub(tester);
+
+    await tester.tap(find.text('علی'));
+    await tester.pumpAndSettle();
+
+    // The entry point lives on the student's own page, beside their plans: a
+    // coach working with one student should not have to leave it to set their
+    // nutrition up.
+    await tester.tap(find.byTooltip('تغذیه'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('تغذیه علی'), findsOneWidget);
+    expect(find.text('هنوز پروفایل تغذیه ثبت نشده'), findsOneWidget);
+
+    await unmount(tester);
+  });
 }

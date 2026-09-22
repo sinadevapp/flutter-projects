@@ -433,6 +433,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid price'**
   String get invalidPrice;
+
+  /// No description provided for @studentNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition for {name}'**
+  String studentNutrition(String name);
+
+  /// No description provided for @noProfileYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No nutrition profile yet'**
+  String get noProfileYet;
+
+  /// No description provided for @setProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Set profile'**
+  String get setProfile;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @sexLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sex'**
+  String get sexLabel;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
+  /// No description provided for @ageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get ageLabel;
+
+  /// No description provided for @heightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get heightLabel;
+
+  /// No description provided for @weightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get weightLabel;
+
+  /// No description provided for @activityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity level'**
+  String get activityLabel;
+
+  /// No description provided for @activitySedentary.
+  ///
+  /// In en, this message translates to:
+  /// **'Sedentary'**
+  String get activitySedentary;
+
+  /// No description provided for @activityLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get activityLight;
+
+  /// No description provided for @activityModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get activityModerate;
+
+  /// No description provided for @activityActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activityActive;
+
+  /// No description provided for @activityVeryActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Very active'**
+  String get activityVeryActive;
+
+  /// No description provided for @goalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get goalLabel;
+
+  /// No description provided for @goalLose.
+  ///
+  /// In en, this message translates to:
+  /// **'Lose weight'**
+  String get goalLose;
+
+  /// No description provided for @goalMaintain.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintain weight'**
+  String get goalMaintain;
+
+  /// No description provided for @goalGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain weight'**
+  String get goalGain;
+
+  /// No description provided for @invalidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get invalidNumber;
+
+  /// No description provided for @bmr.
+  ///
+  /// In en, this message translates to:
+  /// **'Basal metabolic rate'**
+  String get bmr;
+
+  /// No description provided for @tdee.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily energy use'**
+  String get tdee;
+
+  /// No description provided for @dailyCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily calories'**
+  String get dailyCalories;
+
+  /// No description provided for @dailyProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily protein'**
+  String get dailyProtein;
+
+  /// No description provided for @dailyCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily carbs'**
+  String get dailyCarbs;
+
+  /// No description provided for @dailyFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily fat'**
+  String get dailyFat;
+
+  /// No description provided for @kcalUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kcal'**
+  String kcalUnit(String value);
+
+  /// No description provided for @gramUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} g'**
+  String gramUnit(String value);
+
+  /// No description provided for @proteinPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheapest ways to get protein'**
+  String get proteinPlanTitle;
+
+  /// No description provided for @proteinPlanEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter food prices to work out the cheapest options'**
+  String get proteinPlanEmpty;
+
+  /// No description provided for @planOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g of {name}'**
+  String planOption(String grams, String name);
+
+  /// No description provided for @planCost.
+  ///
+  /// In en, this message translates to:
+  /// **'{cost} toman'**
+  String planCost(String cost);
+
+  /// No description provided for @planKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kcal'**
+  String planKcal(String value);
+
+  /// No description provided for @tomanUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} toman'**
+  String tomanUnit(String value);
 }
 
 class _AppLocalizationsDelegate

@@ -192,4 +192,123 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get invalidPrice => 'قیمت را درست وارد کنید';
+
+  @override
+  String studentNutrition(String name) {
+    return 'تغذیه $name';
+  }
+
+  @override
+  String get noProfileYet => 'هنوز پروفایل تغذیه ثبت نشده';
+
+  @override
+  String get setProfile => 'ثبت پروفایل';
+
+  @override
+  String get editProfile => 'ویرایش پروفایل';
+
+  @override
+  String get sexLabel => 'جنسیت';
+
+  @override
+  String get male => 'مرد';
+
+  @override
+  String get female => 'زن';
+
+  @override
+  String get ageLabel => 'سن';
+
+  @override
+  String get heightLabel => 'قد (سانتی‌متر)';
+
+  @override
+  String get weightLabel => 'وزن (کیلوگرم)';
+
+  @override
+  String get activityLabel => 'سطح فعالیت';
+
+  @override
+  String get activitySedentary => 'بی‌تحرک';
+
+  @override
+  String get activityLight => 'کم';
+
+  @override
+  String get activityModerate => 'متوسط';
+
+  @override
+  String get activityActive => 'زیاد';
+
+  @override
+  String get activityVeryActive => 'خیلی زیاد';
+
+  @override
+  String get goalLabel => 'هدف';
+
+  @override
+  String get goalLose => 'کاهش وزن';
+
+  @override
+  String get goalMaintain => 'حفظ وزن';
+
+  @override
+  String get goalGain => 'افزایش وزن';
+
+  @override
+  String get invalidNumber => 'عدد را درست وارد کنید';
+
+  @override
+  String get bmr => 'سوخت‌وساز پایه';
+
+  @override
+  String get tdee => 'سوخت روزانه';
+
+  @override
+  String get dailyCalories => 'کالری روزانه';
+
+  @override
+  String get dailyProtein => 'پروتئین روزانه';
+
+  @override
+  String get dailyCarbs => 'کربوهیدرات روزانه';
+
+  @override
+  String get dailyFat => 'چربی روزانه';
+
+  @override
+  String kcalUnit(String value) {
+    return '$value کالری';
+  }
+
+  @override
+  String gramUnit(String value) {
+    return '$value گرم';
+  }
+
+  @override
+  String get proteinPlanTitle => 'ارزان‌ترین راه پروتئین';
+
+  @override
+  String get proteinPlanEmpty => 'برای محاسبه، قیمت مواد غذایی را وارد کنید';
+
+  @override
+  String planOption(String grams, String name) {
+    return '$grams گرم $name';
+  }
+
+  @override
+  String planCost(String cost) {
+    return '$cost تومان';
+  }
+
+  @override
+  String planKcal(String value) {
+    return '$value کالری';
+  }
+
+  @override
+  String tomanUnit(String value) {
+    return '$value تومان';
+  }
 }

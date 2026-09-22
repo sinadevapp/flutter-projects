@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
+import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_screen.dart';
 import 'package:fit_coach/features/workout_builder/presentation/add_plan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +28,20 @@ class StudentDetailScreen extends ConsumerWidget {
     final plans = ref.watch(studentPlansProvider(student.id));
 
     return Scaffold(
-      appBar: AppBar(title: Text(student.name)),
+      appBar: AppBar(
+        title: Text(student.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.restaurant),
+            tooltip: context.l10n.nutrition,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => NutritionScreen(student: student),
+              ),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'برنامه جدید',
         onPressed: () => Navigator.of(context).push(

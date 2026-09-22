@@ -120,5 +120,92 @@
   },
   "priceSaved": "Price saved",
   "cancel": "Cancel",
-  "invalidPrice": "Enter a valid price"
+  "invalidPrice": "Enter a valid price",
+  "studentNutrition": "Nutrition for {name}",
+  "@studentNutrition": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noProfileYet": "No nutrition profile yet",
+  "setProfile": "Set profile",
+  "editProfile": "Edit profile",
+  "sexLabel": "Sex",
+  "male": "Male",
+  "female": "Female",
+  "ageLabel": "Age",
+  "heightLabel": "Height (cm)",
+  "weightLabel": "Weight (kg)",
+  "activityLabel": "Activity level",
+  "activitySedentary": "Sedentary",
+  "activityLight": "Light",
+  "activityModerate": "Moderate",
+  "activityActive": "Active",
+  "activityVeryActive": "Very active",
+  "goalLabel": "Goal",
+  "goalLose": "Lose weight",
+  "goalMaintain": "Maintain weight",
+  "goalGain": "Gain weight",
+  "invalidNumber": "Enter a valid number",
+  "bmr": "Basal metabolic rate",
+  "tdee": "Daily energy use",
+  "dailyCalories": "Daily calories",
+  "dailyProtein": "Daily protein",
+  "dailyCarbs": "Daily carbs",
+  "dailyFat": "Daily fat",
+  "kcalUnit": "{value} kcal",
+  "@kcalUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "gramUnit": "{value} g",
+  "@gramUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "proteinPlanTitle": "Cheapest ways to get protein",
+  "proteinPlanEmpty": "Enter food prices to work out the cheapest options",
+  "planOption": "{grams} g of {name}",
+  "@planOption": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "planCost": "{cost} toman",
+  "@planCost": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "planKcal": "{value} kcal",
+  "@planKcal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tomanUnit": "{value} toman",
+  "@tomanUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

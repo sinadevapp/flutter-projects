@@ -56,6 +56,93 @@
   "priceSaved": "قیمت ذخیره شد",
   "cancel": "انصراف",
   "invalidPrice": "قیمت را درست وارد کنید",
+  "studentNutrition": "تغذیه {name}",
+  "noProfileYet": "هنوز پروفایل تغذیه ثبت نشده",
+  "setProfile": "ثبت پروفایل",
+  "editProfile": "ویرایش پروفایل",
+  "sexLabel": "جنسیت",
+  "male": "مرد",
+  "female": "زن",
+  "ageLabel": "سن",
+  "heightLabel": "قد (سانتی‌متر)",
+  "weightLabel": "وزن (کیلوگرم)",
+  "activityLabel": "سطح فعالیت",
+  "activitySedentary": "بی‌تحرک",
+  "activityLight": "کم",
+  "activityModerate": "متوسط",
+  "activityActive": "زیاد",
+  "activityVeryActive": "خیلی زیاد",
+  "goalLabel": "هدف",
+  "goalLose": "کاهش وزن",
+  "goalMaintain": "حفظ وزن",
+  "goalGain": "افزایش وزن",
+  "invalidNumber": "عدد را درست وارد کنید",
+  "bmr": "سوخت‌وساز پایه",
+  "tdee": "سوخت روزانه",
+  "dailyCalories": "کالری روزانه",
+  "dailyProtein": "پروتئین روزانه",
+  "dailyCarbs": "کربوهیدرات روزانه",
+  "dailyFat": "چربی روزانه",
+  "kcalUnit": "{value} کالری",
+  "gramUnit": "{value} گرم",
+  "proteinPlanTitle": "ارزان‌ترین راه پروتئین",
+  "proteinPlanEmpty": "برای محاسبه، قیمت مواد غذایی را وارد کنید",
+  "planOption": "{grams} گرم {name}",
+  "planCost": "{cost} تومان",
+  "planKcal": "{value} کالری",
+  "tomanUnit": "{value} تومان",
+  "@studentNutrition": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@kcalUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@gramUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@planOption": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@planCost": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "@planKcal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@tomanUnit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "@enterPriceFor": {
     "placeholders": {
       "name": {
