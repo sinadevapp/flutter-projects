@@ -315,5 +315,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tabAll": "All",
+  "tabPrivate": "Private",
+  "tabPublic": "Group",
+  "visibilityLabel": "Student type",
+  "privateStudent": "Private student",
+  "publicStudent": "Group student",
+  "addPhoto": "Add photo",
+  "changePhoto": "Change photo",
+  "removePhoto": "Remove photo",
+  "editStudent": "Edit student",
+  "studentUpdated": "Student details updated",
+  "noPrivateStudents": "No private students yet",
+  "noPublicStudents": "No group students yet",
+  "emptyTabHint": "These students are under another tab"
 }

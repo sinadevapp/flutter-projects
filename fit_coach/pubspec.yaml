@@ -46,6 +46,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   fl_chart: 0.71.0
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

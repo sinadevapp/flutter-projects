@@ -8,6 +8,16 @@ part 'app_database.g.dart';
 /// Role of a user inside the coaching platform.
 enum UserRole { coach, student }
 
+/// Private vs public student.
+///
+/// This is a **business grouping** the coach picks when registering someone —
+/// one-to-one work versus group work — not a permission. Phase 1 shares
+/// nothing at all, so today it only drives which tab a student appears under.
+///
+/// It still lives as a first-class column rather than a note in the UI
+/// because a sync layer will want to ask exactly this question later.
+enum StudentVisibility { private, public }
+
 /// Users table: coaches and students of the platform.
 ///
 /// Phase 1 is local-only; a sync layer can map this to a backend later.
@@ -15,6 +25,23 @@ class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 100)();
   IntColumn get role => intEnum<UserRole>()();
+
+  /// The coach's chosen photo, already compressed by the picker.
+  ///
+  /// Stored as **bytes, not a path**: a path means nothing on web, breaks
+  /// when the sandbox moves, and needs deleting along with the student. A row
+  /// that carries its own photo has none of those problems. Null is the normal
+  /// case — the UI falls back to a default icon.
+  BlobColumn get photo => blob().nullable()();
+
+  /// [StudentVisibility], stored as its enum index. The SQL default is the raw
+  /// index `0` (private) because drift's `withDefault` takes an `Expression`
+  /// of the *column's* type — which for `intEnum` is still `int`.
+  ///
+  /// Defaults to private so a student registered in a hurry still lands under
+  /// a tab that exists.
+  IntColumn get visibility =>
+      intEnum<StudentVisibility>().withDefault(const Constant(0))();
 }
 
 /// A training plan a coach builds for one student.
@@ -165,7 +192,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -199,6 +226,23 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 8) {
             await m.createTable(nutritionTargets);
+          }
+          // Both columns go on `users`, and **no earlier branch creates that
+          // table** — `onUpgrade` only ever runs on a database that already
+          // has it, since every table comes from `onCreate`.
+          //
+          // This is why the guard is `from < 9` and *not* the `from == 8` the
+          // migration note in CLAUDE.md prescribes for column additions. That
+          // narrower guard is only correct when an earlier branch's
+          // `createTable` already emits the column (the `sessions.student_id`
+          // case). Using `from == 8` here would skip the ALTER for anyone
+          // upgrading from 6 or 7 and leave the app without the columns.
+          if (from < 9) {
+            await customStatement('ALTER TABLE users ADD COLUMN photo BLOB');
+            await customStatement(
+              'ALTER TABLE users ADD COLUMN visibility '
+              'INTEGER NOT NULL DEFAULT 0',
+            );
           }
         },
         // A *fresh* install never runs onUpgrade, so the seed has to happen
@@ -279,6 +323,27 @@ class AppDatabase extends _$AppDatabase {
   Future<int> insertUser(UsersCompanion entry) => into(users).insert(entry);
 
   Future<List<User>> getAllUsers() => select(users).get();
+
+  Future<User> getUser(int id) =>
+      (select(users)..where((u) => u.id.equals(id))).getSingle();
+
+  /// Stores the coach's chosen photo, or blanks it when [photo] is null.
+  ///
+  /// Null means "no photo yet", which the UI renders as the default icon —
+  /// deliberately distinct from an empty photo that would decode to garbage.
+  Future<void> updateStudentPhoto(int id, Uint8List? photo) =>
+      (update(users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(photo: Value(photo)));
+
+  /// Moves a student between the private and public tabs.
+  Future<void> updateStudentVisibility(int id, StudentVisibility visibility) =>
+      (update(users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(visibility: Value(visibility)));
+
+  /// Corrects a student's name. The column carries its own length check.
+  Future<void> updateStudentName(int id, String name) =>
+      (update(users)..where((u) => u.id.equals(id)))
+          .write(UsersCompanion(name: Value(name)));
 
   /// Resets the local identity: drops every user *and* everything that hangs
   /// off them (plans, exercises) — deleting users first would trip the

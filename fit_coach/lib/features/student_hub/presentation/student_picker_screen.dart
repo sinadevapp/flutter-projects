@@ -2,6 +2,7 @@ import 'package:fit_coach/core/database/students_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/widgets/states.dart';
+import 'package:fit_coach/core/widgets/student_avatar.dart';
 import 'package:fit_coach/features/auth/application/active_session_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,19 +39,9 @@ class StudentPickerScreen extends ConsumerWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (context, i) => Card(
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      child: Text(
-                        list[i].name.characters.first,
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    // Shared with the coach's list, so a student recognises
+                    // their own row from the other side.
+                    leading: StudentAvatar(student: list[i]),
                     title: Text(
                       list[i].name,
                       style: Theme.of(context).textTheme.titleMedium,

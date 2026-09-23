@@ -4,6 +4,7 @@ import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/students_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/features/coach_hub/presentation/edit_student_screen.dart';
 import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_screen.dart';
 import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
 import 'package:fit_coach/features/workout_builder/presentation/add_plan_screen.dart';
@@ -29,12 +30,30 @@ class StudentDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Re-read from the live roster rather than trusting the row this screen
+    // was opened with: renaming a student elsewhere must not leave a stale
+    // title here.
+    final student = ref.watch(studentsProvider).value?.firstWhere(
+              (u) => u.id == this.student.id,
+              orElse: () => this.student,
+            ) ??
+        this.student;
+
     final plans = ref.watch(studentPlansProvider(student.id));
 
     return Scaffold(
       appBar: AppBar(
         title: Text(student.name),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: context.l10n.editStudent,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => EditStudentScreen(student: student),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.insights),
             tooltip: context.l10n.progress,

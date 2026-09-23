@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:drift/drift.dart' show Value;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
@@ -9,60 +8,59 @@ import 'package:fit_coach/core/utils/pick_photo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Form screen for the coach to add a new student.
-class AddStudentScreen extends ConsumerStatefulWidget {
-  const AddStudentScreen({super.key});
+/// Corrects a student's name, photo and kind after registration.
+///
+/// Without this, picking the wrong kind at registration is permanent — and a
+/// feature the coach can only ever set once is a feature they will avoid.
+class EditStudentScreen extends ConsumerStatefulWidget {
+  const EditStudentScreen({super.key, required this.student});
+
+  final User student;
 
   @override
-  ConsumerState<AddStudentScreen> createState() => _AddStudentScreenState();
+  ConsumerState<EditStudentScreen> createState() => _EditStudentScreenState();
 }
 
-class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
-  final _nameController = TextEditingController();
+class _EditStudentScreenState extends ConsumerState<EditStudentScreen> {
+  late final TextEditingController _name =
+      TextEditingController(text: widget.student.name);
+  late Uint8List? _photo = widget.student.photo;
+  late StudentVisibility _visibility = widget.student.visibility;
   String? _error;
-
-  /// Optional, and explicitly allowed to be absent.
-  Uint8List? _photo;
-
-  /// Private unless the coach says otherwise — the quieter default, and the
-  /// one that keeps an existing student under the tab they were in before.
-  StudentVisibility _visibility = StudentVisibility.private;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _name.dispose();
     super.dispose();
   }
 
   Future<void> _pickPhoto() async {
-    // Cancelling the picker returns null and must leave the choice alone:
-    // dismissing it is not the same as "no photo".
+    // Cancelling leaves the current photo alone rather than clearing it.
     final picked = await pickStudentPhoto();
     if (picked == null) return;
     if (mounted) setState(() => _photo = picked);
   }
 
+  Future<void> _removePhoto() async {
+    if (mounted) setState(() => _photo = null);
+  }
+
   Future<void> _save() async {
-    final name = _nameController.text.trim();
+    final name = _name.text.trim();
     if (name.isEmpty) {
       setState(() => _error = context.l10n.nameRequired);
       return;
     }
 
-    await ref.read(appDatabaseProvider).insertUser(
-          UsersCompanion.insert(
-            name: name,
-            role: UserRole.student,
-            photo: Value(_photo),
-            visibility: Value(_visibility),
-          ),
-        );
-    setState(() => _error = null);
+    final db = ref.read(appDatabaseProvider);
+    await db.updateStudentName(widget.student.id, name);
+    await db.updateStudentPhoto(widget.student.id, _photo);
+    await db.updateStudentVisibility(widget.student.id, _visibility);
 
-    // Return to the list: the coach added the student in order to *see* them
-    // there, and leaving them on a cleared form makes them navigate back for
-    // something they already asked for.
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l10n.studentUpdated)));
+    Navigator.of(context).pop();
   }
 
   @override
@@ -72,42 +70,47 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
     final hasPhoto = _photo != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addStudent)),
+      appBar: AppBar(title: Text(l10n.editStudent)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.pagePadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(
-              child: Stack(
-                // Directional on purpose: the button belongs on the *leading*
-                // edge, so it lands bottom-right in Persian and bottom-left in
-                // English.
-                alignment: AlignmentDirectional.bottomStart,
+              child: Column(
                 children: [
                   CircleAvatar(
                     radius: 48,
                     backgroundColor: scheme.surfaceContainerHighest,
-                    // No photo is a valid state, not a broken one — the icon
-                    // says "not set" rather than showing an empty circle.
-                    backgroundImage:
-                        hasPhoto ? MemoryImage(_photo!) : null,
+                    backgroundImage: hasPhoto ? MemoryImage(_photo!) : null,
                     child: hasPhoto
                         ? null
                         : Icon(Icons.person, size: 48, color: scheme.outline),
                   ),
-                  IconButton.filledTonal(
-                    tooltip: hasPhoto ? l10n.changePhoto : l10n.addPhoto,
-                    onPressed: _pickPhoto,
-                    icon: const Icon(Icons.camera_alt_outlined),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton.icon(
+                        onPressed: _pickPhoto,
+                        icon: const Icon(Icons.camera_alt_outlined),
+                        label: Text(
+                            hasPhoto ? l10n.changePhoto : l10n.addPhoto),
+                      ),
+                      if (hasPhoto)
+                        TextButton.icon(
+                          onPressed: _removePhoto,
+                          icon: const Icon(Icons.close),
+                          label: Text(l10n.removePhoto),
+                        ),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             TextField(
-              controller: _nameController,
-              autofocus: true,
+              controller: _name,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
                 labelText: l10n.studentNameLabel,

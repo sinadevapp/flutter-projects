@@ -257,5 +257,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tabAll": "همه",
+  "tabPrivate": "خصوصی",
+  "tabPublic": "عمومی",
+  "visibilityLabel": "نوع شاگرد",
+  "privateStudent": "شاگرد خصوصی",
+  "publicStudent": "شاگرد گروهی",
+  "addPhoto": "افزودن عکس",
+  "changePhoto": "تغییر عکس",
+  "removePhoto": "حذف عکس",
+  "editStudent": "ویرایش شاگرد",
+  "studentUpdated": "اطلاعات شاگرد به‌روز شد",
+  "noPrivateStudents": "شاگرد خصوصی‌ای ثبت نشده",
+  "noPublicStudents": "شاگرد گروهی‌ای ثبت نشده",
+  "emptyTabHint": "شاگردان این دسته در تب دیگری هستند"
 }

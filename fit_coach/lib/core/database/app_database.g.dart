@@ -43,8 +43,27 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         type: DriftSqlType.int,
         requiredDuringInsert: true,
       ).withConverter<UserRole>($UsersTable.$converterrole);
+  static const VerificationMeta _photoMeta = const VerificationMeta('photo');
   @override
-  List<GeneratedColumn> get $columns => [id, name, role];
+  late final GeneratedColumn<Uint8List> photo = GeneratedColumn<Uint8List>(
+    'photo',
+    aliasedName,
+    true,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<StudentVisibility, int>
+  visibility = GeneratedColumn<int>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  ).withConverter<StudentVisibility>($UsersTable.$convertervisibility);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, role, photo, visibility];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -67,6 +86,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('photo')) {
+      context.handle(
+        _photoMeta,
+        photo.isAcceptableOrUnknown(data['photo']!, _photoMeta),
+      );
     }
     return context;
   }
@@ -91,6 +116,16 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           data['${effectivePrefix}role'],
         )!,
       ),
+      photo: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}photo'],
+      ),
+      visibility: $UsersTable.$convertervisibility.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}visibility'],
+        )!,
+      ),
     );
   }
 
@@ -101,13 +136,37 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
 
   static JsonTypeConverter2<UserRole, int, int> $converterrole =
       const EnumIndexConverter<UserRole>(UserRole.values);
+  static JsonTypeConverter2<StudentVisibility, int, int> $convertervisibility =
+      const EnumIndexConverter<StudentVisibility>(StudentVisibility.values);
 }
 
 class User extends DataClass implements Insertable<User> {
   final int id;
   final String name;
   final UserRole role;
-  const User({required this.id, required this.name, required this.role});
+
+  /// The coach's chosen photo, already compressed by the picker.
+  ///
+  /// Stored as **bytes, not a path**: a path means nothing on web, breaks
+  /// when the sandbox moves, and needs deleting along with the student. A row
+  /// that carries its own photo has none of those problems. Null is the normal
+  /// case — the UI falls back to a default icon.
+  final Uint8List? photo;
+
+  /// [StudentVisibility], stored as its enum index. The SQL default is the raw
+  /// index `0` (private) because drift's `withDefault` takes an `Expression`
+  /// of the *column's* type — which for `intEnum` is still `int`.
+  ///
+  /// Defaults to private so a student registered in a hurry still lands under
+  /// a tab that exists.
+  final StudentVisibility visibility;
+  const User({
+    required this.id,
+    required this.name,
+    required this.role,
+    this.photo,
+    required this.visibility,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -116,11 +175,27 @@ class User extends DataClass implements Insertable<User> {
     {
       map['role'] = Variable<int>($UsersTable.$converterrole.toSql(role));
     }
+    if (!nullToAbsent || photo != null) {
+      map['photo'] = Variable<Uint8List>(photo);
+    }
+    {
+      map['visibility'] = Variable<int>(
+        $UsersTable.$convertervisibility.toSql(visibility),
+      );
+    }
     return map;
   }
 
   UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(id: Value(id), name: Value(name), role: Value(role));
+    return UsersCompanion(
+      id: Value(id),
+      name: Value(name),
+      role: Value(role),
+      photo: photo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photo),
+      visibility: Value(visibility),
+    );
   }
 
   factory User.fromJson(
@@ -134,6 +209,10 @@ class User extends DataClass implements Insertable<User> {
       role: $UsersTable.$converterrole.fromJson(
         serializer.fromJson<int>(json['role']),
       ),
+      photo: serializer.fromJson<Uint8List?>(json['photo']),
+      visibility: $UsersTable.$convertervisibility.fromJson(
+        serializer.fromJson<int>(json['visibility']),
+      ),
     );
   }
   @override
@@ -143,16 +222,35 @@ class User extends DataClass implements Insertable<User> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'role': serializer.toJson<int>($UsersTable.$converterrole.toJson(role)),
+      'photo': serializer.toJson<Uint8List?>(photo),
+      'visibility': serializer.toJson<int>(
+        $UsersTable.$convertervisibility.toJson(visibility),
+      ),
     };
   }
 
-  User copyWith({int? id, String? name, UserRole? role}) =>
-      User(id: id ?? this.id, name: name ?? this.name, role: role ?? this.role);
+  User copyWith({
+    int? id,
+    String? name,
+    UserRole? role,
+    Value<Uint8List?> photo = const Value.absent(),
+    StudentVisibility? visibility,
+  }) => User(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    role: role ?? this.role,
+    photo: photo.present ? photo.value : this.photo,
+    visibility: visibility ?? this.visibility,
+  );
   User copyWithCompanion(UsersCompanion data) {
     return User(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       role: data.role.present ? data.role.value : this.role,
+      photo: data.photo.present ? data.photo.value : this.photo,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
     );
   }
 
@@ -161,46 +259,61 @@ class User extends DataClass implements Insertable<User> {
     return (StringBuffer('User(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('role: $role')
+          ..write('role: $role, ')
+          ..write('photo: $photo, ')
+          ..write('visibility: $visibility')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, role);
+  int get hashCode =>
+      Object.hash(id, name, role, $driftBlobEquality.hash(photo), visibility);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is User &&
           other.id == this.id &&
           other.name == this.name &&
-          other.role == this.role);
+          other.role == this.role &&
+          $driftBlobEquality.equals(other.photo, this.photo) &&
+          other.visibility == this.visibility);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<int> id;
   final Value<String> name;
   final Value<UserRole> role;
+  final Value<Uint8List?> photo;
+  final Value<StudentVisibility> visibility;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.role = const Value.absent(),
+    this.photo = const Value.absent(),
+    this.visibility = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required UserRole role,
+    this.photo = const Value.absent(),
+    this.visibility = const Value.absent(),
   }) : name = Value(name),
        role = Value(role);
   static Insertable<User> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<int>? role,
+    Expression<Uint8List>? photo,
+    Expression<int>? visibility,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (role != null) 'role': role,
+      if (photo != null) 'photo': photo,
+      if (visibility != null) 'visibility': visibility,
     });
   }
 
@@ -208,11 +321,15 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<int>? id,
     Value<String>? name,
     Value<UserRole>? role,
+    Value<Uint8List?>? photo,
+    Value<StudentVisibility>? visibility,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       role: role ?? this.role,
+      photo: photo ?? this.photo,
+      visibility: visibility ?? this.visibility,
     );
   }
 
@@ -228,6 +345,14 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (role.present) {
       map['role'] = Variable<int>($UsersTable.$converterrole.toSql(role.value));
     }
+    if (photo.present) {
+      map['photo'] = Variable<Uint8List>(photo.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<int>(
+        $UsersTable.$convertervisibility.toSql(visibility.value),
+      );
+    }
     return map;
   }
 
@@ -236,7 +361,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     return (StringBuffer('UsersCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('role: $role')
+          ..write('role: $role, ')
+          ..write('photo: $photo, ')
+          ..write('visibility: $visibility')
           ..write(')'))
         .toString();
   }
@@ -3101,12 +3228,16 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required UserRole role,
+      Value<Uint8List?> photo,
+      Value<StudentVisibility> visibility,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<UserRole> role,
+      Value<Uint8List?> photo,
+      Value<StudentVisibility> visibility,
     });
 
 final class $$UsersTableReferences
@@ -3214,6 +3345,17 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
         column: $table.role,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  ColumnFilters<Uint8List> get photo => $composableBuilder(
+    column: $table.photo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<StudentVisibility, StudentVisibility, int>
+  get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   Expression<bool> workoutPlansRefs(
     Expression<bool> Function($$WorkoutPlansTableFilterComposer f) f,
@@ -3339,6 +3481,16 @@ class $$UsersTableOrderingComposer
     column: $table.role,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<Uint8List> get photo => $composableBuilder(
+    column: $table.photo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -3358,6 +3510,15 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<UserRole, int> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get photo =>
+      $composableBuilder(column: $table.photo, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<StudentVisibility, int> get visibility =>
+      $composableBuilder(
+        column: $table.visibility,
+        builder: (column) => column,
+      );
 
   Expression<T> workoutPlansRefs<T extends Object>(
     Expression<T> Function($$WorkoutPlansTableAnnotationComposer a) f,
@@ -3496,13 +3657,29 @@ class $$UsersTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<UserRole> role = const Value.absent(),
-              }) => UsersCompanion(id: id, name: name, role: role),
+                Value<Uint8List?> photo = const Value.absent(),
+                Value<StudentVisibility> visibility = const Value.absent(),
+              }) => UsersCompanion(
+                id: id,
+                name: name,
+                role: role,
+                photo: photo,
+                visibility: visibility,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 required UserRole role,
-              }) => UsersCompanion.insert(id: id, name: name, role: role),
+                Value<Uint8List?> photo = const Value.absent(),
+                Value<StudentVisibility> visibility = const Value.absent(),
+              }) => UsersCompanion.insert(
+                id: id,
+                name: name,
+                role: role,
+                photo: photo,
+                visibility: visibility,
+              ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) =>

@@ -937,6 +937,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value} toman'**
   String tomanUnit(String value);
+
+  /// No description provided for @tabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tabAll;
+
+  /// No description provided for @tabPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get tabPrivate;
+
+  /// No description provided for @tabPublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get tabPublic;
+
+  /// No description provided for @visibilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student type'**
+  String get visibilityLabel;
+
+  /// No description provided for @privateStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Private student'**
+  String get privateStudent;
+
+  /// No description provided for @publicStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Group student'**
+  String get publicStudent;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhoto;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePhoto;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhoto;
+
+  /// No description provided for @editStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit student'**
+  String get editStudent;
+
+  /// No description provided for @studentUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Student details updated'**
+  String get studentUpdated;
+
+  /// No description provided for @noPrivateStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'No private students yet'**
+  String get noPrivateStudents;
+
+  /// No description provided for @noPublicStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'No group students yet'**
+  String get noPublicStudents;
+
+  /// No description provided for @emptyTabHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These students are under another tab'**
+  String get emptyTabHint;
 }
 
 class _AppLocalizationsDelegate

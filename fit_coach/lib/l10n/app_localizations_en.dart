@@ -478,4 +478,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String tomanUnit(String value) {
     return '$value toman';
   }
+
+  @override
+  String get tabAll => 'All';
+
+  @override
+  String get tabPrivate => 'Private';
+
+  @override
+  String get tabPublic => 'Group';
+
+  @override
+  String get visibilityLabel => 'Student type';
+
+  @override
+  String get privateStudent => 'Private student';
+
+  @override
+  String get publicStudent => 'Group student';
+
+  @override
+  String get addPhoto => 'Add photo';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get editStudent => 'Edit student';
+
+  @override
+  String get studentUpdated => 'Student details updated';
+
+  @override
+  String get noPrivateStudents => 'No private students yet';
+
+  @override
+  String get noPublicStudents => 'No group students yet';
+
+  @override
+  String get emptyTabHint => 'These students are under another tab';
 }

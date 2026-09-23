@@ -477,4 +477,46 @@ class AppLocalizationsFa extends AppLocalizations {
   String tomanUnit(String value) {
     return '$value تومان';
   }
+
+  @override
+  String get tabAll => 'همه';
+
+  @override
+  String get tabPrivate => 'خصوصی';
+
+  @override
+  String get tabPublic => 'عمومی';
+
+  @override
+  String get visibilityLabel => 'نوع شاگرد';
+
+  @override
+  String get privateStudent => 'شاگرد خصوصی';
+
+  @override
+  String get publicStudent => 'شاگرد گروهی';
+
+  @override
+  String get addPhoto => 'افزودن عکس';
+
+  @override
+  String get changePhoto => 'تغییر عکس';
+
+  @override
+  String get removePhoto => 'حذف عکس';
+
+  @override
+  String get editStudent => 'ویرایش شاگرد';
+
+  @override
+  String get studentUpdated => 'اطلاعات شاگرد به‌روز شد';
+
+  @override
+  String get noPrivateStudents => 'شاگرد خصوصی‌ای ثبت نشده';
+
+  @override
+  String get noPublicStudents => 'شاگرد گروهی‌ای ثبت نشده';
+
+  @override
+  String get emptyTabHint => 'شاگردان این دسته در تب دیگری هستند';
 }
