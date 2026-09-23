@@ -1,5 +1,6 @@
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
+import 'package:fit_coach/core/utils/money_format.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/food_cost.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/nutrition_target.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/protein_plan.dart';
@@ -113,8 +114,17 @@ class ProteinPlanSection extends StatelessWidget {
               subtitle: Text(
                 l10n.planKcal(localizeNumber(locale, option.kcal.round())),
               ),
+              // Money goes through the money formatter, not the plain number
+              // one: these are millions of toman, and "۲۵۰۰۰۰۰" is unreadable
+              // at a glance.
               trailing: Text(
-                l10n.planCost(localizeNumber(locale, option.cost.round())),
+                formatToman(
+                  locale,
+                  l10n.toman,
+                  l10n.scaleThousand,
+                  l10n.scaleMillion,
+                  option.cost,
+                ),
               ),
             ),
       ],

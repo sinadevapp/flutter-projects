@@ -30,14 +30,16 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    // 2. Add a student.
+    // 2. Add a student. The form returns to the list on its own — the coach
+    // added the student in order to see them there, so having to navigate back
+    // would be asking for something they already asked for.
     await tester.tap(find.byTooltip('افزودن شاگرد'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'علی');
     await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsNothing,
+        reason: 'the add-student form closes itself after saving');
     expect(find.text('علی'), findsOneWidget);
 
     // 3. Build a plan for that student.

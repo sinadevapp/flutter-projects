@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/workout_active/domain/rest_timer.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +73,7 @@ class _RestTimerViewState extends State<RestTimerView> {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(AppTheme.pagePadding),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -84,19 +85,30 @@ class _RestTimerViewState extends State<RestTimerView> {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 96,
-              width: 96,
+              height: 120,
+              width: 120,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  CircularProgressIndicator(
-                    // The ring fills as the rest elapses.
-                    value: _timer.progress,
-                    strokeWidth: 6,
+                  SizedBox.expand(
+                    child: CircularProgressIndicator(
+                      // The ring fills as the rest elapses. Orange is the
+                      // design system's *live* accent, and this is the one
+                      // place it belongs: something is actively running.
+                      value: _timer.progress,
+                      strokeWidth: 8,
+                      color: AppTheme.live,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
+                    ),
                   ),
                   Text(
+                    // Big: this is read from across a gym, not held close.
                     localizeNumber(locale, _timer.secondsRemaining),
-                    style: theme.textTheme.headlineSmall,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ],
               ),

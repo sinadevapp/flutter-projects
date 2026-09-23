@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('مربی'), findsOneWidget);
-    expect(find.text('هنوز شاگردی اضافه نشده'), findsOneWidget);
+    expect(find.text('هنوز شاگردی ثبت نشده'), findsOneWidget);
 
     // Unmount while still inside fake-async so riverpod's provider disposal
     // (which cancels drift stream timers) runs in a controlled zone.
@@ -59,7 +59,7 @@ void main() {
 
     expect(find.text('Ali'), findsOneWidget);
     expect(find.text('Reza'), findsOneWidget);
-    expect(find.text('هنوز شاگردی اضافه نشده'), findsNothing);
+    expect(find.text('هنوز شاگردی ثبت نشده'), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle(); // fire zero-duration timers from stream disposal

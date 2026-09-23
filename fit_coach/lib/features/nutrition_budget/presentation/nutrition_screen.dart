@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
@@ -30,7 +31,7 @@ class NutritionScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(context.l10n.studentNutrition(student.name))),
       body: profile.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (row) => row == null
             ? _EmptyState(student: student)
             : _TargetsView(student: student, targets: targets!),

@@ -146,11 +146,29 @@ abstract class AppLocalizations {
   /// **'Student added'**
   String get studentAdded;
 
-  /// No description provided for @noStudentsYet.
+  /// No description provided for @noStudentsHint.
   ///
   /// In en, this message translates to:
-  /// **'No students added yet'**
-  String get noStudentsYet;
+  /// **'Add your first student to start building them a plan.'**
+  String get noStudentsHint;
+
+  /// No description provided for @askCoachToAddYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your coach to add your name.'**
+  String get askCoachToAddYou;
+
+  /// No description provided for @noPlansHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not built a plan for this student yet.'**
+  String get noPlansHint;
+
+  /// No description provided for @noPlansHintStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Once your coach writes a plan, it appears here.'**
+  String get noPlansHintStudent;
 
   /// No description provided for @noStudentsRegistered.
   ///
@@ -337,6 +355,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rename plan'**
   String get renamePlan;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get somethingWentWrong;
+
+  /// No description provided for @tryAgainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again. If it keeps happening, close and reopen the app.'**
+  String get tryAgainHint;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retry;
+
+  /// No description provided for @toman.
+  ///
+  /// In en, this message translates to:
+  /// **'toman'**
+  String get toman;
+
+  /// No description provided for @scaleThousand.
+  ///
+  /// In en, this message translates to:
+  /// **'k'**
+  String get scaleThousand;
+
+  /// No description provided for @scaleMillion.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get scaleMillion;
+
+  /// No description provided for @thousandToman.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}k toman'**
+  String thousandToman(String value);
+
+  /// No description provided for @millionToman.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}M toman'**
+  String millionToman(String value);
+
+  /// No description provided for @renameConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get renameConfirm;
 
   /// No description provided for @deletePlan.
   ///

@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
@@ -26,7 +27,7 @@ class FoodPricesScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.foodPrices)),
       body: foods.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (rows) => rows.isEmpty
             ? Center(child: Text(l10n.noFoodsYet))
             : Column(
@@ -65,9 +66,22 @@ class _FoodRowTile extends ConsumerWidget {
     final food = foodToItem(row);
     final cost = food.costPerGramProtein;
 
+    final theme = Theme.of(context);
+
     return ListTile(
-      leading: CircleAvatar(child: Text(localizeNumber(locale, rank))),
-      title: Text(food.name),
+      leading: CircleAvatar(
+        backgroundColor: theme.colorScheme.primaryContainer,
+        // The rank is only meaningful once something is priced: before that
+        // the list is not a ranking, it is just the order foods were added in.
+        child: Text(
+          localizeNumber(locale, rank),
+          style: TextStyle(
+            color: theme.colorScheme.onPrimaryContainer,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      title: Text(food.name, style: theme.textTheme.titleMedium),
       subtitle: Text(
         '${l10n.proteinPer100g}: ${localizeNumber(locale, food.proteinPer100g.round())}'
         ' • ${l10n.kcalPer100g}: ${localizeNumber(locale, food.kcalPer100g.round())}',
@@ -81,14 +95,27 @@ class _FoodRowTile extends ConsumerWidget {
             // not been to the market yet.
             Text(
               l10n.noPriceYet,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             )
           else
-            Text(localizeNumber(locale, cost.round())),
+            // Cost per gram of protein is a small figure — never millions —
+            // so it is shown in full rather than abbreviated, with the unit
+            // spelled out so the number is not bare.
+            Text(
+              l10n.tomanUnit(localizeNumber(locale, cost.round())),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           if (cost != null)
             Text(
               l10n.costPerGramProtein,
-              style: Theme.of(context).textTheme.labelSmall,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
         ],
       ),

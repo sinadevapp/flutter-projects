@@ -33,7 +33,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get studentAdded => 'شاگرد اضافه شد';
 
   @override
-  String get noStudentsYet => 'هنوز شاگردی اضافه نشده';
+  String get noStudentsHint =>
+      'اولین شاگردت را اضافه کن تا بتوانی برایش برنامه بسازی.';
+
+  @override
+  String get askCoachToAddYou => 'از مربی‌ات بخواه نامت را اضافه کند.';
+
+  @override
+  String get noPlansHint => 'برای این شاگرد هنوز برنامه‌ای نساخته‌ای.';
+
+  @override
+  String get noPlansHintStudent =>
+      'وقتی مربی برایت برنامه ساخت، اینجا نمایش داده می‌شود.';
 
   @override
   String get noStudentsRegistered => 'هنوز شاگردی ثبت نشده';
@@ -135,6 +146,38 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get renamePlan => 'تغییر نام برنامه';
+
+  @override
+  String get somethingWentWrong => 'مشکلی پیش آمد';
+
+  @override
+  String get tryAgainHint =>
+      'دوباره تلاش کن. اگر ادامه داشت، برنامه را ببند و باز کن.';
+
+  @override
+  String get retry => 'تلاش دوباره';
+
+  @override
+  String get toman => 'تومان';
+
+  @override
+  String get scaleThousand => 'هزار';
+
+  @override
+  String get scaleMillion => 'میلیون';
+
+  @override
+  String thousandToman(String value) {
+    return '$value هزار تومان';
+  }
+
+  @override
+  String millionToman(String value) {
+    return '$value میلیون تومان';
+  }
+
+  @override
+  String get renameConfirm => 'ذخیره';
 
   @override
   String get deletePlan => 'حذف برنامه';

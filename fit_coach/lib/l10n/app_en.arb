@@ -8,7 +8,10 @@
   "nameRequired": "Enter a name",
   "save": "Save",
   "studentAdded": "Student added",
-  "noStudentsYet": "No students added yet",
+  "noStudentsHint": "Add your first student to start building them a plan.",
+  "askCoachToAddYou": "Ask your coach to add your name.",
+  "noPlansHint": "You have not built a plan for this student yet.",
+  "noPlansHintStudent": "Once your coach writes a plan, it appears here.",
   "noStudentsRegistered": "No students registered yet",
   "switchRole": "Switch role",
   "myPlans": "My plans",
@@ -77,6 +80,29 @@
   "volumeByMovement": "Volume by movement",
   "noHistoryYet": "No workouts recorded yet",
   "renamePlan": "Rename plan",
+  "somethingWentWrong": "Something went wrong",
+  "tryAgainHint": "Try again. If it keeps happening, close and reopen the app.",
+  "retry": "Try again",
+  "toman": "toman",
+  "scaleThousand": "k",
+  "scaleMillion": "M",
+  "thousandToman": "{value}k toman",
+  "@thousandToman": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "millionToman": "{value}M toman",
+  "@millionToman": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "renameConfirm": "Save",
   "deletePlan": "Delete plan",
   "deletePlanConfirm": "Delete \"{title}\" and every workout logged against it?",
   "@deletePlanConfirm": {

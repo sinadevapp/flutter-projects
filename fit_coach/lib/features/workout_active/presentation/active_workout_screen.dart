@@ -1,7 +1,9 @@
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
 import 'package:fit_coach/features/workout_active/domain/workout_progress.dart';
@@ -70,10 +72,10 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       appBar: AppBar(title: Text(widget.plan.title)),
       body: exercises.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (list) => logs.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (e, _) => const ErrorState(),
           data: (logs) => _body(list, logs, session.value),
         ),
       ),
@@ -125,19 +127,43 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             onFinished: () => setState(() => _resting = false),
           ),
         Expanded(
-          child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.pagePadding),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // The movement name dominates: this screen is glanced at from
+                // arm's length, between sets.
                 Text(
                   current.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   l10n.setOf(
                     localizeNumber(locale, progress.currentSetNumber),
                     localizeNumber(locale, current.sets),
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 24),
+                // A bare bar would not say how far along the workout is, so
+                // the fraction is always shown as text beside it. RTL makes it
+                // fill from the right without any extra work.
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radius),
+                  child: LinearProgressIndicator(
+                    value: progress.totalSets == 0
+                        ? 0
+                        : progress.completedSets / progress.totalSets,
+                    minHeight: 8,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -146,12 +172,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     localizeNumber(locale, progress.completedSets),
                     localizeNumber(locale, progress.totalSets),
                   ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-                const SizedBox(height: 24),
-                FilledButton(
+                const SizedBox(height: 32),
+                FilledButton.icon(
                   onPressed: () =>
                       _logSet(current.id, progress.currentSetNumber),
-                  child: Text(l10n.completeSet),
+                  icon: const Icon(Icons.check),
+                  label: Text(l10n.completeSet),
                 ),
               ],
             ),

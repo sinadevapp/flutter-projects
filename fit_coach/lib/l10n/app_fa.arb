@@ -8,8 +8,11 @@
   "nameRequired": "نام را وارد کنید",
   "save": "ذخیره",
   "studentAdded": "شاگرد اضافه شد",
-  "noStudentsYet": "هنوز شاگردی اضافه نشده",
   "noStudentsRegistered": "هنوز شاگردی ثبت نشده",
+  "noStudentsHint": "اولین شاگردت را اضافه کن تا بتوانی برایش برنامه بسازی.",
+  "askCoachToAddYou": "از مربی‌ات بخواه نامت را اضافه کند.",
+  "noPlansHintStudent": "وقتی مربی برایت برنامه ساخت، اینجا نمایش داده می‌شود.",
+  "noPlansHint": "برای این شاگرد هنوز برنامه‌ای نساخته‌ای.",
   "switchRole": "تغییر نقش",
   "myPlans": "برنامه‌های من",
   "plansForStudent": "برنامه‌های {name}",
@@ -40,6 +43,15 @@
   "volumeByMovement": "حجم به تفکیک حرکت",
   "noHistoryYet": "هنوز تمرینی ثبت نشده",
   "renamePlan": "تغییر نام برنامه",
+  "somethingWentWrong": "مشکلی پیش آمد",
+  "tryAgainHint": "دوباره تلاش کن. اگر ادامه داشت، برنامه را ببند و باز کن.",
+  "retry": "تلاش دوباره",
+  "toman": "تومان",
+  "thousandToman": "{value} هزار تومان",
+  "millionToman": "{value} میلیون تومان",
+  "scaleThousand": "هزار",
+  "scaleMillion": "میلیون",
+  "renameConfirm": "ذخیره",
   "deletePlan": "حذف برنامه",
   "deletePlanConfirm": "برنامه «{title}» و تمام تمرین‌های ثبت‌شده آن حذف می‌شود. مطمئنی؟",
   "planDeleted": "برنامه حذف شد",
@@ -214,6 +226,20 @@
   "@enterPriceFor": {
     "placeholders": {
       "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@thousandToman": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@millionToman": {
+    "placeholders": {
+      "value": {
         "type": "String"
       }
     }

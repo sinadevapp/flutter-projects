@@ -2,6 +2,8 @@ import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/core/theme/app_theme.dart';
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/features/nutrition_budget/presentation/student_nutrition_screen.dart';
 import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
@@ -48,18 +50,31 @@ class StudentPlanScreen extends ConsumerWidget {
       ),
       body: plans.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (list) => list.isEmpty
-            ? const Center(child: Text('هنوز برنامه‌ای برایت ساخته نشده'))
-            : ListView.builder(
+            // Nothing the student can do from here — the plan is the coach's
+            // to write — so this explains rather than offering an action.
+            ? EmptyState(
+                icon: Icons.fitness_center,
+                message: context.l10n.noPlansForMe,
+                hint: context.l10n.noPlansHintStudent,
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.all(AppTheme.pagePadding),
                 itemCount: list.length,
-                itemBuilder: (context, i) => ListTile(
-                  leading: const Icon(Icons.fitness_center),
-                  title: Text(list[i].title),
-                  trailing: const Icon(Icons.chevron_left),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => PlanDetailScreen(plan: list[i]),
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, i) => Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.fitness_center),
+                    title: Text(
+                      list[i].title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PlanDetailScreen(plan: list[i]),
+                      ),
                     ),
                   ),
                 ),
@@ -85,7 +100,7 @@ class PlanDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(plan.title)),
       body: exercises.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (list) => list.isEmpty
             ? Center(child: Text(context.l10n.planHasNoMovements))
             : ListView(

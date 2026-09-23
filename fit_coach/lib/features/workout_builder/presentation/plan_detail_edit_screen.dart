@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
@@ -40,7 +41,7 @@ class PlanDetailEditScreen extends ConsumerWidget {
       ),
       body: exercises.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (list) => list.isEmpty
             ? Center(child: Text(l10n.planHasNoMovements))
             : ListView(

@@ -33,7 +33,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentAdded => 'Student added';
 
   @override
-  String get noStudentsYet => 'No students added yet';
+  String get noStudentsHint =>
+      'Add your first student to start building them a plan.';
+
+  @override
+  String get askCoachToAddYou => 'Ask your coach to add your name.';
+
+  @override
+  String get noPlansHint => 'You have not built a plan for this student yet.';
+
+  @override
+  String get noPlansHintStudent =>
+      'Once your coach writes a plan, it appears here.';
 
   @override
   String get noStudentsRegistered => 'No students registered yet';
@@ -135,6 +146,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get renamePlan => 'Rename plan';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get tryAgainHint =>
+      'Try again. If it keeps happening, close and reopen the app.';
+
+  @override
+  String get retry => 'Try again';
+
+  @override
+  String get toman => 'toman';
+
+  @override
+  String get scaleThousand => 'k';
+
+  @override
+  String get scaleMillion => 'M';
+
+  @override
+  String thousandToman(String value) {
+    return '${value}k toman';
+  }
+
+  @override
+  String millionToman(String value) {
+    return '${value}M toman';
+  }
+
+  @override
+  String get renameConfirm => 'Save';
 
   @override
   String get deletePlan => 'Delete plan';

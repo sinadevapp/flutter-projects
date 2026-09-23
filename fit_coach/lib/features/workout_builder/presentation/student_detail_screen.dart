@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
@@ -66,7 +67,7 @@ class StudentDetailScreen extends ConsumerWidget {
       ),
       body: plans.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => const ErrorState(),
         data: (list) => list.isEmpty
             ? Center(child: Text(context.l10n.noPlansForStudent))
             : ListView.builder(

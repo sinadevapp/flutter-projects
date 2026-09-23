@@ -1,5 +1,6 @@
 import 'package:fit_coach/app/router.dart';
 import 'package:fit_coach/core/settings/locale_provider.dart';
+import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -25,10 +26,7 @@ class FitCoachApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.teal,
-      ),
+      theme: AppTheme.light,
       routerConfig: buildAppRouter(),
     );
   }

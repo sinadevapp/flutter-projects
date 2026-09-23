@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/features/auth/application/active_session_provider.dart';
 import 'package:fit_coach/features/auth/presentation/role_picker_screen.dart';
@@ -37,7 +38,7 @@ class _HomeGate extends ConsumerWidget {
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
+      error: (e, _) => const Scaffold(body: ErrorState()),
       data: (session) {
         if (session == null) return const RolePickerScreen();
         if (session.role == UserRole.coach) return const CoachHubScreen();
