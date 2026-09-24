@@ -12,7 +12,9 @@ import 'package:fit_coach/features/coach_hub/presentation/edit_student_screen.da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../helpers/fake_gallery.dart';
 import '../../helpers/localized_app.dart';
 
 /// A real 1×1 PNG.
@@ -466,6 +468,58 @@ void main() {
       expect(find.byType(EditStudentScreen), findsNothing);
       expect(find.text('رضا'), findsOneWidget);
       expect(find.text('علی'), findsNothing);
+
+      await unmount(tester);
+    });
+  });
+
+  group('choosing a photo', () {
+    setUp(() => installGallery(FakeGallery(XFile.fromData(bytes()))));
+    tearDown(restoreGallery);
+
+    bool avatarHasPhoto(WidgetTester tester) => tester
+        .widgetList<CircleAvatar>(find.byType(CircleAvatar))
+        .any((a) => a.backgroundImage is MemoryImage);
+
+    testWidgets('stores what the gallery returned', (tester) async {
+      await pump(tester, const AddStudentScreen());
+      expect(find.byIcon(Icons.person), findsOneWidget);
+
+      await tester.tap(find.byTooltip('افزودن عکس'));
+      await tester.pumpAndSettle();
+
+      // The placeholder is gone: the bytes came back and were rendered.
+      expect(avatarHasPhoto(tester), isTrue);
+      expect(find.byIcon(Icons.person), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'سینا');
+      await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
+      await tester.pumpAndSettle();
+
+      // End to end: gallery → helper → form state → database row.
+      expect((await db.getAllUsers()).single.photo, bytes());
+
+      await unmount(tester);
+    });
+
+    testWidgets('cancelling keeps the student photo-less', (tester) async {
+      // The gallery refuses: this is what the coach sees when they back out.
+      installGallery(FakeGallery());
+      await pump(tester, const AddStudentScreen());
+
+      await tester.tap(find.byTooltip('افزودن عکس'));
+      await tester.pumpAndSettle();
+
+      // Backing out is not "no photo" — it is "unchanged", so the icon stays
+      // and nothing was written.
+      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(avatarHasPhoto(tester), isFalse);
+
+      await tester.enterText(find.byType(TextField), 'سینا');
+      await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
+      await tester.pumpAndSettle();
+
+      expect((await db.getAllUsers()).single.photo, isNull);
 
       await unmount(tester);
     });
