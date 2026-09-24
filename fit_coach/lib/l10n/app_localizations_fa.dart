@@ -509,6 +509,17 @@ class AppLocalizationsFa extends AppLocalizations {
   String get editStudent => 'ویرایش شاگرد';
 
   @override
+  String get deleteStudent => 'حذف شاگرد';
+
+  @override
+  String deleteStudentConfirm(String name) {
+    return 'همه برنامه‌ها، تمرین‌ها و اطلاعات $name برای همیشه حذف می‌شود. مطمئنی؟';
+  }
+
+  @override
+  String get studentDeleted => 'شاگرد حذف شد';
+
+  @override
   String get studentUpdated => 'اطلاعات شاگرد به‌روز شد';
 
   @override

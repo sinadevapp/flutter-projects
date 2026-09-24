@@ -63,6 +63,49 @@ class _EditStudentScreenState extends ConsumerState<EditStudentScreen> {
     Navigator.of(context).pop();
   }
 
+  Future<void> _remove() async {
+    final scheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.deleteStudent),
+        // Names them: the coach came here from a list that may hold several
+        // people, and an unlabelled confirmation is a wrong press waiting to
+        // happen.
+        content: Text(
+          context.l10n.deleteStudentConfirm(widget.student.name),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.error,
+              foregroundColor: scheme.onError,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    // Take them off the roster entirely: plans, movements, sessions, logs,
+    // nutrition profile, sign-in row and photo all go with them.
+    await ref.read(appDatabaseProvider).deleteStudent(widget.student.id);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l10n.studentDeleted)));
+
+    // This screen and the student's detail page both describe someone who no
+    // longer exists, so leave both — popping once would land on a dead record.
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -143,6 +186,20 @@ class _EditStudentScreenState extends ConsumerState<EditStudentScreen> {
             ),
             const SizedBox(height: 32),
             FilledButton(onPressed: _save, child: Text(l10n.save)),
+            const SizedBox(height: 16),
+            // Destructive and separate from Save: pressing the wrong one here
+            // either loses the edits or loses the student.
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+              onPressed: _remove,
+              icon: const Icon(Icons.delete_outline),
+              label: Text(l10n.deleteStudent),
+            ),
           ],
         ),
       ),

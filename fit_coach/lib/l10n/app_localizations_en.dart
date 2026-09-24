@@ -510,6 +510,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editStudent => 'Edit student';
 
   @override
+  String get deleteStudent => 'Delete student';
+
+  @override
+  String deleteStudentConfirm(String name) {
+    return 'Every plan, workout and detail for $name will be deleted permanently. Continue?';
+  }
+
+  @override
+  String get studentDeleted => 'Student deleted';
+
+  @override
   String get studentUpdated => 'Student details updated';
 
   @override

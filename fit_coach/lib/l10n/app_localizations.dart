@@ -998,6 +998,24 @@ abstract class AppLocalizations {
   /// **'Edit student'**
   String get editStudent;
 
+  /// No description provided for @deleteStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete student'**
+  String get deleteStudent;
+
+  /// Names the student, so a wrong press is harder to make
+  ///
+  /// In en, this message translates to:
+  /// **'Every plan, workout and detail for {name} will be deleted permanently. Continue?'**
+  String deleteStudentConfirm(String name);
+
+  /// No description provided for @studentDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Student deleted'**
+  String get studentDeleted;
+
   /// No description provided for @studentUpdated.
   ///
   /// In en, this message translates to:

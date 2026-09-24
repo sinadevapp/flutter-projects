@@ -446,6 +446,66 @@ class AppDatabase extends _$AppDatabase {
     await delete(users).go();
   });
 
+  /// Removes one student and everything they produced.
+  ///
+  /// Leaf-first inside one transaction, exactly like [deleteAllUsers] — but
+  /// scoped, so the coach's other students survive. Deleting the user row
+  /// first would trip `workout_plans.studentId` (code 787).
+  ///
+  /// Their sign-in row goes too: the device may be signed in *as* this
+  /// student, and leaving it behind would point the session at a row that no
+  /// longer exists.
+  Future<void> deleteStudent(int id) => transaction(() async {
+        // Resolve the ids first: these tables are about to change, and a
+        // subquery re-read as it goes would be aiming at a moving target.
+        final sessionIds = [
+          for (final s in await (select(workoutSessions)
+                ..where((s) => s.studentId.equals(id)))
+              .get())
+            s.id,
+        ];
+        final planIds = [
+          for (final p in await (select(workoutPlans)
+                ..where((p) => p.studentId.equals(id)))
+              .get())
+            p.id,
+        ];
+        final exerciseIds = [
+          for (final e in await (select(exercises)
+                ..where((e) => e.planId.isIn(planIds)))
+              .get())
+            e.id,
+        ];
+
+        // Set logs hang off two things: the session that recorded them and the
+        // movement they were for. Clear both paths — a log left behind would
+        // break whichever of the two is deleted first.
+        if (sessionIds.isNotEmpty) {
+          await (delete(setLogs)..where((l) => l.sessionId.isIn(sessionIds)))
+              .go();
+        }
+        if (exerciseIds.isNotEmpty) {
+          await (delete(setLogs)..where((l) => l.exerciseId.isIn(exerciseIds)))
+              .go();
+        }
+        if (sessionIds.isNotEmpty) {
+          await (delete(workoutSessions)..where((s) => s.id.isIn(sessionIds)))
+              .go();
+        }
+        if (exerciseIds.isNotEmpty) {
+          await (delete(exercises)..where((e) => e.id.isIn(exerciseIds)))
+              .go();
+        }
+        if (planIds.isNotEmpty) {
+          await (delete(workoutPlans)..where((p) => p.id.isIn(planIds))).go();
+        }
+
+        await (delete(nutritionTargets)..where((t) => t.studentId.equals(id)))
+            .go();
+        await (delete(sessions)..where((s) => s.studentId.equals(id))).go();
+        await (delete(users)..where((u) => u.id.equals(id))).go();
+      });
+
   Future<int> insertWorkoutPlan(WorkoutPlansCompanion entry) =>
       into(workoutPlans).insert(entry);
 

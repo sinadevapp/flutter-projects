@@ -326,6 +326,17 @@
   "changePhoto": "Change photo",
   "removePhoto": "Remove photo",
   "editStudent": "Edit student",
+  "deleteStudent": "Delete student",
+  "deleteStudentConfirm": "Every plan, workout and detail for {name} will be deleted permanently. Continue?",
+  "@deleteStudentConfirm": {
+    "description": "Names the student, so a wrong press is harder to make",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "studentDeleted": "Student deleted",
   "studentUpdated": "Student details updated",
   "noPrivateStudents": "No private students yet",
   "noPublicStudents": "No group students yet",

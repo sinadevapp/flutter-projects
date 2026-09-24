@@ -389,4 +389,85 @@ void main() {
       await unmount(tester);
     });
   });
+
+  group('deleting a student', () {
+    /// Brings [finder] into view, and therefore into the tree.
+    ///
+    /// The edit form scrolls, so its delete button sits below the fold and
+    /// does not exist until scrolled to — the same scroll the coach does.
+    Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+      await tester.scrollUntilVisible(
+        finder,
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(finder);
+      await tester.pumpAndSettle();
+    }
+
+    /// Walks to the edit screen exactly as the coach would.
+    Future<void> openEdit(WidgetTester tester, String name) async {
+      await pump(tester, const CoachHubScreen());
+      await tester.tap(find.text(name));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('ویرایش شاگرد'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('ویرایش شاگرد'));
+      await tester.pumpAndSettle();
+      // Reached, or everything below fails with a confusing "No element"
+      // from a scroll that has nothing to scroll.
+      expect(find.byType(EditStudentScreen), findsOneWidget);
+    }
+
+    testWidgets('cancelling the confirmation keeps the student', (tester) async {
+      await db.insertUser(
+        UsersCompanion.insert(name: 'علی', role: UserRole.student),
+      );
+      await openEdit(tester, 'علی');
+
+      final remove = find.text('حذف شاگرد');
+      await scrollTo(tester, remove);
+      await tester.tap(remove);
+      await tester.pumpAndSettle();
+
+      // The confirmation names them, so nobody deletes the wrong record.
+      expect(find.textContaining('علی'), findsWidgets);
+
+      await tester.tap(find.text('انصراف'));
+      await tester.pumpAndSettle();
+
+      expect((await db.getAllUsers()).map((u) => u.name).toList(), ['علی']);
+      expect(find.byType(EditStudentScreen), findsOneWidget);
+
+      await unmount(tester);
+    });
+
+    testWidgets('confirming removes them and returns to the roster', (
+      tester,
+    ) async {
+      await db.insertUser(
+        UsersCompanion.insert(name: 'علی', role: UserRole.student),
+      );
+      await db.insertUser(
+        UsersCompanion.insert(name: 'رضا', role: UserRole.student),
+      );
+      await openEdit(tester, 'علی');
+
+      final remove = find.text('حذف شاگرد');
+      await scrollTo(tester, remove);
+      await tester.tap(remove);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'حذف'));
+      await tester.pumpAndSettle();
+
+      expect((await db.getAllUsers()).map((u) => u.name).toList(), ['رضا']);
+      // Not the edit screen, and not the deleted student's page either: the
+      // coach is back at the roster, and it already reflects the removal.
+      expect(find.byType(EditStudentScreen), findsNothing);
+      expect(find.text('رضا'), findsOneWidget);
+      expect(find.text('علی'), findsNothing);
+
+      await unmount(tester);
+    });
+  });
 }
