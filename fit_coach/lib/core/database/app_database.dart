@@ -67,6 +67,38 @@ class WorkoutPlans extends Table {
   IntColumn get durationWeeks => integer().nullable()();
 }
 
+/// One day of a plan, as the coach sees it: a name and whether it is rest.
+///
+/// Exercises keep their own `weekNumber` / `dayNumber`, so this table is the
+/// *only* thing schema 11 adds — nothing existing changes shape.
+///
+/// It exists because of the one day that has no movements in it: a rest day.
+/// Deriving days from their movements cannot describe an empty day, because
+/// an empty day has nothing to describe it with. Days with no row yet are
+/// days the coach has not reached.
+///
+/// The unique index is not decoration — it is what makes the upsert below
+/// conflict instead of appending a second row for the same slot.
+@DataClassName('PlanDay')
+@TableIndex(
+  name: 'plan_days_slot',
+  unique: true,
+  columns: {#planId, #weekNumber, #dayNumber},
+)
+class PlanDays extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get planId => integer().references(WorkoutPlans, #id)();
+  IntColumn get weekNumber => integer()();
+  IntColumn get dayNumber => integer()();
+
+  /// The coach's own name for the day — «بالاتنه», «پا دست». Null = unnamed,
+  /// which is the normal state for a day written out of order.
+  TextColumn get title => text().nullable()();
+
+  /// A planned rest day: exists, named or not, with nothing to perform.
+  BoolColumn get isRestDay => boolean().withDefault(const Constant(false))();
+}
+
 /// One movement inside a training plan (e.g. squat, 4 sets of 10).
 /// One movement, and the slot of the program it belongs to.
 ///
@@ -222,6 +254,7 @@ class NutritionTargets extends Table {
     AppSettings,
     FoodItems,
     NutritionTargets,
+    PlanDays,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -231,7 +264,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase({QueryExecutor? executor}) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -326,6 +359,20 @@ class AppDatabase extends _$AppDatabase {
             'INTEGER NOT NULL DEFAULT 1',
           );
         }
+      }
+      // `plan_days` is created by no earlier branch, so unlike the guarded
+      // ALTERs above a plain `from < 11` is correct: nothing can already have
+      // emitted this table.
+      //
+      // Deliberately *after* `from < 10` — the backfill reads
+      // `exercises.week_number`, which that branch is what adds.
+      if (from < 11) {
+        await m.createTable(planDays);
+        await customStatement(
+          'INSERT INTO plan_days (plan_id, week_number, day_number) '
+          'SELECT DISTINCT plan_id, week_number, day_number '
+          'FROM exercises',
+        );
       }
     },
     // A *fresh* install never runs onUpgrade, so the seed has to happen
@@ -440,6 +487,7 @@ class AppDatabase extends _$AppDatabase {
     await delete(setLogs).go();
     await delete(workoutSessions).go();
     await delete(exercises).go();
+    await delete(planDays).go();
     await delete(workoutPlans).go();
     await delete(nutritionTargets).go();
     await delete(sessions).go();
@@ -497,6 +545,7 @@ class AppDatabase extends _$AppDatabase {
               .go();
         }
         if (planIds.isNotEmpty) {
+          await (delete(planDays)..where((d) => d.planId.isIn(planIds))).go();
           await (delete(workoutPlans)..where((p) => p.id.isIn(planIds))).go();
         }
 
@@ -509,14 +558,109 @@ class AppDatabase extends _$AppDatabase {
   Future<int> insertWorkoutPlan(WorkoutPlansCompanion entry) =>
       into(workoutPlans).insert(entry);
 
-  Future<int> insertExercise(ExercisesCompanion entry) =>
-      into(exercises).insert(entry);
+  /// Writes a movement and records the day it belongs to.
+  ///
+  /// Both in one transaction: a movement without its day row would be a day
+  /// the coach cannot name, and a day row without its movement would be a day
+  /// that does not exist. Reading the row back rather than taking the slot
+  /// from the companion means absent columns resolve to their real defaults.
+  Future<int> insertExercise(ExercisesCompanion entry) => transaction(() async {
+        final id = await into(exercises).insert(entry);
+        final movement = await (select(
+          exercises,
+        )..where((e) => e.id.equals(id))).getSingle();
+        await _ensureDay(
+          movement.planId,
+          week: movement.weekNumber,
+          day: movement.dayNumber,
+        );
+        return id;
+      });
 
   Future<List<WorkoutPlan>> getPlansForStudent(int studentId) =>
       (select(workoutPlans)
             ..where((p) => p.studentId.equals(studentId))
             ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))
           .get();
+
+  /// Every day of a plan the coach has authored, in program order.
+  ///
+  /// Includes rest days, which have no movements and so cannot be reached
+  /// through `exercises`. A day with no row has not been reached yet.
+  Future<List<PlanDay>> getDays(int planId) =>
+      (select(planDays)
+            ..where((d) => d.planId.equals(planId))
+            ..orderBy([
+              (d) => OrderingTerm.asc(d.weekNumber),
+              (d) => OrderingTerm.asc(d.dayNumber),
+            ]))
+          .get();
+
+  /// Creates the day row if it is not there yet.
+  ///
+  /// Upsert rather than insert: naming a day that has been running for weeks
+  /// must not append a duplicate slot. The unique index is what makes this
+  /// conflict instead.
+  Future<void> _ensureDay(
+    int planId, {
+    required int week,
+    required int day,
+  }) =>
+      into(planDays).insert(
+        PlanDaysCompanion.insert(
+          planId: planId,
+          weekNumber: week,
+          dayNumber: day,
+        ),
+        // Not `insertOnConflictUpdate`: that resolves conflicts on the primary
+        // key, so the unique (plan, week, day) index still fired and threw.
+        // `insertOrIgnore` honours the index instead, and leaving an existing
+        // row untouched is exactly what we want — a title or a rest flag set
+        // weeks ago must survive the next movement being added.
+        mode: InsertMode.insertOrIgnore,
+      );
+
+  /// Matches one day slot. Takes the table because drift's `where` hands back
+  /// a callback over its own alias — a pre-built expression would resolve the
+  /// columns against a table that is not in scope.
+  static Expression<bool> _slot(
+    $PlanDaysTable d,
+    int planId,
+    int week,
+    int day,
+  ) =>
+      d.planId.equals(planId) &
+      d.weekNumber.equals(week) &
+      d.dayNumber.equals(day);
+
+  /// Names a day, creating the row if this is its first movement.
+  Future<void> setDayTitle(
+    int planId, {
+    required int week,
+    required int day,
+    String? title,
+  }) async {
+    await _ensureDay(planId, week: week, day: day);
+    await (update(planDays)
+          ..where((d) => _slot(d, planId, week, day)))
+        .write(PlanDaysCompanion(title: Value(title)));
+  }
+
+  /// Marks a day as rest — or un-marks it, keeping the name either way.
+  ///
+  /// A rest day has no movements, so this is also the only way one comes into
+  /// existence.
+  Future<void> setDayRest(
+    int planId, {
+    required int week,
+    required int day,
+    required bool isRest,
+  }) async {
+    await _ensureDay(planId, week: week, day: day);
+    await (update(planDays)
+          ..where((d) => _slot(d, planId, week, day)))
+        .write(PlanDaysCompanion(isRestDay: Value(isRest)));
+  }
 
   /// Every movement of a plan, in program order: week, then day, then its
   /// place within that day.
@@ -610,6 +754,9 @@ class AppDatabase extends _$AppDatabase {
       )..where((l) => l.exerciseId.equals(movement.id))).go();
     }
     await (delete(exercises)..where((e) => e.planId.equals(planId))).go();
+    // Days reference the plan, so they go before it — leaf-first, same rule
+    // as everything else in this transaction.
+    await (delete(planDays)..where((d) => d.planId.equals(planId))).go();
     await (delete(workoutPlans)..where((p) => p.id.equals(planId))).go();
   });
 
@@ -648,6 +795,24 @@ class AppDatabase extends _$AppDatabase {
             ),
           );
         }
+        // After the movements, so their auto-created rows are updated rather
+        // than duplicated — and so rest days, which have no movement to create
+        // them, come along too. Titles and rest flags are what make a copy
+        // readable; without this a copy arrives unnamed and fully training.
+        for (final day in await getDays(planId)) {
+          await _ensureDay(
+            copyId,
+            week: day.weekNumber,
+            day: day.dayNumber,
+          );
+          await (update(planDays)
+                ..where((d) => _slot(d, copyId, day.weekNumber, day.dayNumber)))
+              .write(PlanDaysCompanion(
+            title: Value(day.title),
+            isRestDay: Value(day.isRestDay),
+          ));
+        }
+
         return copyId;
       });
 

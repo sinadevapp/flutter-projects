@@ -45,8 +45,35 @@ class _ExerciseDraft {
 }
 
 /// One training day: movements in the order they will be performed.
+///
+/// Carries a name and a rest flag as well, because both belong to the *day*
+/// rather than to its movements — a rest day's movements are none.
 class _DayDraft {
-  final exercises = <_ExerciseDraft>[_ExerciseDraft()];
+  _DayDraft({
+    this.title,
+    this.isRest = false,
+    List<_ExerciseDraft>? exercises,
+  }) : exercises = exercises ?? [_ExerciseDraft()];
+
+  /// The coach's own name for the day; null until they give it one, in which
+  /// case the screen falls back to `l10n.dayLabel(n)`.
+  String? title;
+
+  /// Planned rest: nothing to perform, and nothing to ask the coach for.
+  bool isRest;
+
+  final List<_ExerciseDraft> exercises;
+
+  /// A new day with the same name, rest flag and movements.
+  ///
+  /// Copying all three is what makes "add week" a real copy: a coach who
+  /// labelled week 1's days should not label week 2 again, and a rest day
+  /// should still be a rest day in week 3.
+  _DayDraft copy() => _DayDraft(
+        title: title,
+        isRest: isRest,
+        exercises: [for (final e in exercises) e.copy()],
+      );
 
   void dispose() {
     for (final e in exercises) {
@@ -108,16 +135,12 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   /// per week — so it is the button that matters more than an empty week.
   void _addWeekCopiedFromPrevious() {
     if (_weeks.isEmpty) return;
-    final source = _weeks.last;
     final clone = _WeekDraft();
     clone.days.clear();
-    for (final day in source.days) {
-      final dayClone = _DayDraft();
-      dayClone.exercises.clear();
-      for (final movement in day.exercises) {
-        dayClone.exercises.add(movement.copy());
-      }
-      clone.days.add(dayClone);
+    // `copy()` brings the name, the rest flag and the movements — a week the
+    // coach already laid out, not an empty shell with the right shape.
+    for (final day in _weeks.last.days) {
+      clone.days.add(day.copy());
     }
     setState(() => _weeks.add(clone));
   }
@@ -125,6 +148,66 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   void _addDay(int weekIndex) {
     setState(() => _weeks[weekIndex].days.add(_DayDraft()));
   }
+
+  Future<void> _renameDay(int weekIndex, int dayIndex) async {
+    final day = _weeks[weekIndex].days[dayIndex];
+    // The dialog owns its controller: disposing one from here runs while the
+    // dialog is still animating out, and the field then reads a disposed
+    // controller.
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => _DayNameDialog(initial: day.title),
+    );
+    if (name == null || !mounted) return;
+
+    setState(() => day.title = name.trim().isEmpty ? null : name.trim());
+  }
+
+  void _toggleRest(int weekIndex, int dayIndex) {
+    setState(() {
+      final day = _weeks[weekIndex].days[dayIndex];
+      day.isRest = !day.isRest;
+      // Rest means nothing to perform, so asking for movements alongside it
+      // would be contradictory. The rows are hidden rather than discarded, so
+      // un-toggling brings back what was written.
+    });
+  }
+
+  /// A day's heading: its name, tappable to change, and a rest switch.
+  Widget _dayHeader(
+    AppLocalizations l10n,
+    ThemeData theme, {
+    required String title,
+    required bool isRest,
+    required VoidCallback onRename,
+    required VoidCallback onToggleRest,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: onRename,
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: onToggleRest,
+              icon: Icon(
+                isRest ? Icons.nightlight_round : Icons.nights_stay_outlined,
+                size: 18,
+              ),
+              label: Text(l10n.restDay),
+            ),
+          ],
+        ),
+      );
 
   Future<void> _save() async {
     final l10n = context.l10n;
@@ -176,6 +259,29 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               position: Value(position++),
             ),
           );
+        }
+
+        // Persist the day itself, but only if the coach made it something:
+        // named it, marked rest, or gave it work. An untouched day is not in
+        // the program at all — which is how it behaved before days had rows,
+        // and inventing an empty one would clutter the student's view.
+        if (day.title != null || day.isRest || position > 0) {
+          if (day.title != null) {
+            await db.setDayTitle(
+              planId,
+              week: w + 1,
+              day: d + 1,
+              title: day.title,
+            );
+          }
+          if (day.isRest) {
+            await db.setDayRest(
+              planId,
+              week: w + 1,
+              day: d + 1,
+              isRest: true,
+            );
+          }
         }
       }
     }
@@ -241,24 +347,39 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               ],
             ),
             for (var d = 0; d < _weeks[w].days.length; d++) ...[
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  l10n.dayLabel(localizeNumber(locale, d + 1)),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+              _dayHeader(
+                l10n,
+                theme,
+                title: _weeks[w].days[d].title ??
+                    l10n.dayLabel(localizeNumber(locale, d + 1)),
+                isRest: _weeks[w].days[d].isRest,
+                onRename: () => _renameDay(w, d),
+                onToggleRest: () => _toggleRest(w, d),
+              ),
+              if (_weeks[w].days[d].isRest)
+                // A rest day has nothing to perform. Showing movement rows
+                // under it would ask the coach to write a day they just said
+                // was off.
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 4),
+                  child: Text(
+                    l10n.restDayHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
+                )
+              else ...[
+                for (final movement in _weeks[w].days[d].exercises)
+                  _exerciseRow(movement),
+                OutlinedButton.icon(
+                  onPressed: () => setState(
+                    () => _weeks[w].days[d].exercises.add(_ExerciseDraft()),
+                  ),
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.addMovement),
                 ),
-              ),
-              for (final movement in _weeks[w].days[d].exercises)
-                _exerciseRow(movement),
-              OutlinedButton.icon(
-                onPressed: () => setState(
-                  () => _weeks[w].days[d].exercises.add(_ExerciseDraft()),
-                ),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.addMovement),
-              ),
+              ],
             ],
             const SizedBox(height: 16),
           ],
@@ -377,6 +498,54 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Asks for a day's name.
+///
+/// Its own [State] so the [TextEditingController] is disposed with the dialog
+/// — disposing from the caller races the closing animation.
+class _DayNameDialog extends StatefulWidget {
+  const _DayNameDialog({this.initial});
+
+  final String? initial;
+
+  @override
+  State<_DayNameDialog> createState() => _DayNameDialogState();
+}
+
+class _DayNameDialogState extends State<_DayNameDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.of(context).pop(_controller.text);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return AlertDialog(
+      title: Text(l10n.dayNameLabel),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(labelText: l10n.dayNameHint),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(onPressed: _submit, child: Text(l10n.save)),
+      ],
     );
   }
 }

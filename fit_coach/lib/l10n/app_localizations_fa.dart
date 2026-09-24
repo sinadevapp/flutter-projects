@@ -520,6 +520,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get studentDeleted => 'شاگرد حذف شد';
 
   @override
+  String get restDay => 'استراحت';
+
+  @override
+  String get restDayHint => 'این روز استراحت است — حرکتی برای اجرا ندارد';
+
+  @override
+  String get dayNameLabel => 'نام روز';
+
+  @override
+  String get dayNameHint => 'مثل «بالاتنه» یا «پا دست» (اختیاری)';
+
+  @override
   String get studentUpdated => 'اطلاعات شاگرد به‌روز شد';
 
   @override

@@ -44,25 +44,36 @@ class PlanDetailEditScreen extends ConsumerWidget {
       body: exercises.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => const ErrorState(),
-        data: (list) => list.isEmpty
-            ? Center(child: Text(l10n.planHasNoMovements))
-            : _grouped(context, ref, list),
+        data: (list) => ref.watch(planDaysProvider(plan.id)).when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => const ErrorState(),
+              data: (days) => days.isEmpty && list.isEmpty
+                  ? Center(child: Text(l10n.planHasNoMovements))
+                  : _grouped(context, ref, days, list),
+            ),
       ),
       floatingActionButton: list(context, ref, exercises.value ?? const []),
     );
   }
 
-  /// Movements grouped under their week and day, each showing its category.
+  /// Days grouped under their week, each showing its category-tagged work.
   ///
-  /// Grouped the same way the student's view reads them, so the coach edits
-  /// in the order the program actually runs.
-  Widget _grouped(BuildContext context, WidgetRef ref, List<Exercise> list) {
+  /// Reads `planDays` rather than deriving the days from the movements, so a
+  /// rest day shows up here too — which is the only way the coach can see the
+  /// one day they planned as off.
+  Widget _grouped(
+    BuildContext context,
+    WidgetRef ref,
+    List<PlanDay> days,
+    List<Exercise> list,
+  ) {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context);
     final items = <Widget>[];
     int? lastWeek;
 
-    for (final (week, day) in daysOf(list)) {
+    for (final day in days) {
+      final week = day.weekNumber;
       if (lastWeek != week) {
         lastWeek = week;
         items.add(
@@ -81,14 +92,30 @@ class PlanDetailEditScreen extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
           child: Text(
-            l10n.dayLabel(localizeNumber(locale, day)),
+            day.title ?? l10n.dayLabel(localizeNumber(locale, day.dayNumber)),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: day.isRestDay
+                  ? Theme.of(context).colorScheme.tertiary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
       );
-      for (final exercise in exercisesForDay(list, week, day)) {
+      if (day.isRestDay) {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              l10n.restDayHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+      for (final exercise in exercisesForDay(list, week, day.dayNumber)) {
         items.add(
           ListTile(
             title: Text(exercise.name),

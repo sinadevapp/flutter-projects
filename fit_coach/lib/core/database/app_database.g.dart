@@ -3509,6 +3509,413 @@ class NutritionTargetsCompanion extends UpdateCompanion<NutritionTargetsRow> {
   }
 }
 
+class $PlanDaysTable extends PlanDays with TableInfo<$PlanDaysTable, PlanDay> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanDaysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
+  @override
+  late final GeneratedColumn<int> planId = GeneratedColumn<int>(
+    'plan_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES workout_plans (id)',
+    ),
+  );
+  static const VerificationMeta _weekNumberMeta = const VerificationMeta(
+    'weekNumber',
+  );
+  @override
+  late final GeneratedColumn<int> weekNumber = GeneratedColumn<int>(
+    'week_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayNumberMeta = const VerificationMeta(
+    'dayNumber',
+  );
+  @override
+  late final GeneratedColumn<int> dayNumber = GeneratedColumn<int>(
+    'day_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isRestDayMeta = const VerificationMeta(
+    'isRestDay',
+  );
+  @override
+  late final GeneratedColumn<bool> isRestDay = GeneratedColumn<bool>(
+    'is_rest_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_rest_day" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    planId,
+    weekNumber,
+    dayNumber,
+    title,
+    isRestDay,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'plan_days';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlanDay> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('plan_id')) {
+      context.handle(
+        _planIdMeta,
+        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_planIdMeta);
+    }
+    if (data.containsKey('week_number')) {
+      context.handle(
+        _weekNumberMeta,
+        weekNumber.isAcceptableOrUnknown(data['week_number']!, _weekNumberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_weekNumberMeta);
+    }
+    if (data.containsKey('day_number')) {
+      context.handle(
+        _dayNumberMeta,
+        dayNumber.isAcceptableOrUnknown(data['day_number']!, _dayNumberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayNumberMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('is_rest_day')) {
+      context.handle(
+        _isRestDayMeta,
+        isRestDay.isAcceptableOrUnknown(data['is_rest_day']!, _isRestDayMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlanDay map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanDay(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      planId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}plan_id'],
+      )!,
+      weekNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}week_number'],
+      )!,
+      dayNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}day_number'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      isRestDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_rest_day'],
+      )!,
+    );
+  }
+
+  @override
+  $PlanDaysTable createAlias(String alias) {
+    return $PlanDaysTable(attachedDatabase, alias);
+  }
+}
+
+class PlanDay extends DataClass implements Insertable<PlanDay> {
+  final int id;
+  final int planId;
+  final int weekNumber;
+  final int dayNumber;
+
+  /// The coach's own name for the day — «بالاتنه», «پا دست». Null = unnamed,
+  /// which is the normal state for a day written out of order.
+  final String? title;
+
+  /// A planned rest day: exists, named or not, with nothing to perform.
+  final bool isRestDay;
+  const PlanDay({
+    required this.id,
+    required this.planId,
+    required this.weekNumber,
+    required this.dayNumber,
+    this.title,
+    required this.isRestDay,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['plan_id'] = Variable<int>(planId);
+    map['week_number'] = Variable<int>(weekNumber);
+    map['day_number'] = Variable<int>(dayNumber);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['is_rest_day'] = Variable<bool>(isRestDay);
+    return map;
+  }
+
+  PlanDaysCompanion toCompanion(bool nullToAbsent) {
+    return PlanDaysCompanion(
+      id: Value(id),
+      planId: Value(planId),
+      weekNumber: Value(weekNumber),
+      dayNumber: Value(dayNumber),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      isRestDay: Value(isRestDay),
+    );
+  }
+
+  factory PlanDay.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanDay(
+      id: serializer.fromJson<int>(json['id']),
+      planId: serializer.fromJson<int>(json['planId']),
+      weekNumber: serializer.fromJson<int>(json['weekNumber']),
+      dayNumber: serializer.fromJson<int>(json['dayNumber']),
+      title: serializer.fromJson<String?>(json['title']),
+      isRestDay: serializer.fromJson<bool>(json['isRestDay']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'planId': serializer.toJson<int>(planId),
+      'weekNumber': serializer.toJson<int>(weekNumber),
+      'dayNumber': serializer.toJson<int>(dayNumber),
+      'title': serializer.toJson<String?>(title),
+      'isRestDay': serializer.toJson<bool>(isRestDay),
+    };
+  }
+
+  PlanDay copyWith({
+    int? id,
+    int? planId,
+    int? weekNumber,
+    int? dayNumber,
+    Value<String?> title = const Value.absent(),
+    bool? isRestDay,
+  }) => PlanDay(
+    id: id ?? this.id,
+    planId: planId ?? this.planId,
+    weekNumber: weekNumber ?? this.weekNumber,
+    dayNumber: dayNumber ?? this.dayNumber,
+    title: title.present ? title.value : this.title,
+    isRestDay: isRestDay ?? this.isRestDay,
+  );
+  PlanDay copyWithCompanion(PlanDaysCompanion data) {
+    return PlanDay(
+      id: data.id.present ? data.id.value : this.id,
+      planId: data.planId.present ? data.planId.value : this.planId,
+      weekNumber: data.weekNumber.present
+          ? data.weekNumber.value
+          : this.weekNumber,
+      dayNumber: data.dayNumber.present ? data.dayNumber.value : this.dayNumber,
+      title: data.title.present ? data.title.value : this.title,
+      isRestDay: data.isRestDay.present ? data.isRestDay.value : this.isRestDay,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanDay(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('weekNumber: $weekNumber, ')
+          ..write('dayNumber: $dayNumber, ')
+          ..write('title: $title, ')
+          ..write('isRestDay: $isRestDay')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, planId, weekNumber, dayNumber, title, isRestDay);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanDay &&
+          other.id == this.id &&
+          other.planId == this.planId &&
+          other.weekNumber == this.weekNumber &&
+          other.dayNumber == this.dayNumber &&
+          other.title == this.title &&
+          other.isRestDay == this.isRestDay);
+}
+
+class PlanDaysCompanion extends UpdateCompanion<PlanDay> {
+  final Value<int> id;
+  final Value<int> planId;
+  final Value<int> weekNumber;
+  final Value<int> dayNumber;
+  final Value<String?> title;
+  final Value<bool> isRestDay;
+  const PlanDaysCompanion({
+    this.id = const Value.absent(),
+    this.planId = const Value.absent(),
+    this.weekNumber = const Value.absent(),
+    this.dayNumber = const Value.absent(),
+    this.title = const Value.absent(),
+    this.isRestDay = const Value.absent(),
+  });
+  PlanDaysCompanion.insert({
+    this.id = const Value.absent(),
+    required int planId,
+    required int weekNumber,
+    required int dayNumber,
+    this.title = const Value.absent(),
+    this.isRestDay = const Value.absent(),
+  }) : planId = Value(planId),
+       weekNumber = Value(weekNumber),
+       dayNumber = Value(dayNumber);
+  static Insertable<PlanDay> custom({
+    Expression<int>? id,
+    Expression<int>? planId,
+    Expression<int>? weekNumber,
+    Expression<int>? dayNumber,
+    Expression<String>? title,
+    Expression<bool>? isRestDay,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (planId != null) 'plan_id': planId,
+      if (weekNumber != null) 'week_number': weekNumber,
+      if (dayNumber != null) 'day_number': dayNumber,
+      if (title != null) 'title': title,
+      if (isRestDay != null) 'is_rest_day': isRestDay,
+    });
+  }
+
+  PlanDaysCompanion copyWith({
+    Value<int>? id,
+    Value<int>? planId,
+    Value<int>? weekNumber,
+    Value<int>? dayNumber,
+    Value<String?>? title,
+    Value<bool>? isRestDay,
+  }) {
+    return PlanDaysCompanion(
+      id: id ?? this.id,
+      planId: planId ?? this.planId,
+      weekNumber: weekNumber ?? this.weekNumber,
+      dayNumber: dayNumber ?? this.dayNumber,
+      title: title ?? this.title,
+      isRestDay: isRestDay ?? this.isRestDay,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (planId.present) {
+      map['plan_id'] = Variable<int>(planId.value);
+    }
+    if (weekNumber.present) {
+      map['week_number'] = Variable<int>(weekNumber.value);
+    }
+    if (dayNumber.present) {
+      map['day_number'] = Variable<int>(dayNumber.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (isRestDay.present) {
+      map['is_rest_day'] = Variable<bool>(isRestDay.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanDaysCompanion(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('weekNumber: $weekNumber, ')
+          ..write('dayNumber: $dayNumber, ')
+          ..write('title: $title, ')
+          ..write('isRestDay: $isRestDay')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3525,6 +3932,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $NutritionTargetsTable nutritionTargets = $NutritionTargetsTable(
     this,
   );
+  late final $PlanDaysTable planDays = $PlanDaysTable(this);
+  late final Index planDaysSlot = Index(
+    'plan_days_slot',
+    'CREATE UNIQUE INDEX plan_days_slot ON plan_days (plan_id, week_number, day_number)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3539,6 +3951,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     appSettings,
     foodItems,
     nutritionTargets,
+    planDays,
+    planDaysSlot,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4219,6 +4633,25 @@ final class $$WorkoutPlansTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PlanDaysTable, List<PlanDay>> _planDaysRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.planDays,
+    aliasName: $_aliasNameGenerator(db.workoutPlans.id, db.planDays.planId),
+  );
+
+  $$PlanDaysTableProcessedTableManager get planDaysRefs {
+    final manager = $$PlanDaysTableTableManager(
+      $_db,
+      $_db.planDays,
+    ).filter((f) => f.planId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_planDaysRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$WorkoutPlansTableFilterComposer
@@ -4314,6 +4747,31 @@ class $$WorkoutPlansTableFilterComposer
           }) => $$WorkoutSessionsTableFilterComposer(
             $db: $db,
             $table: $db.workoutSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> planDaysRefs(
+    Expression<bool> Function($$PlanDaysTableFilterComposer f) f,
+  ) {
+    final $$PlanDaysTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.planDays,
+      getReferencedColumn: (t) => t.planId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanDaysTableFilterComposer(
+            $db: $db,
+            $table: $db.planDays,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4472,6 +4930,31 @@ class $$WorkoutPlansTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> planDaysRefs<T extends Object>(
+    Expression<T> Function($$PlanDaysTableAnnotationComposer a) f,
+  ) {
+    final $$PlanDaysTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.planDays,
+      getReferencedColumn: (t) => t.planId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanDaysTableAnnotationComposer(
+            $db: $db,
+            $table: $db.planDays,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$WorkoutPlansTableTableManager
@@ -4491,6 +4974,7 @@ class $$WorkoutPlansTableTableManager
             bool studentId,
             bool exercisesRefs,
             bool workoutSessionsRefs,
+            bool planDaysRefs,
           })
         > {
   $$WorkoutPlansTableTableManager(_$AppDatabase db, $WorkoutPlansTable table)
@@ -4545,12 +5029,14 @@ class $$WorkoutPlansTableTableManager
                 studentId = false,
                 exercisesRefs = false,
                 workoutSessionsRefs = false,
+                planDaysRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (exercisesRefs) db.exercises,
                     if (workoutSessionsRefs) db.workoutSessions,
+                    if (planDaysRefs) db.planDays,
                   ],
                   addJoins:
                       <
@@ -4630,6 +5116,27 @@ class $$WorkoutPlansTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (planDaysRefs)
+                        await $_getPrefetchedData<
+                          WorkoutPlan,
+                          $WorkoutPlansTable,
+                          PlanDay
+                        >(
+                          currentTable: table,
+                          referencedTable: $$WorkoutPlansTableReferences
+                              ._planDaysRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$WorkoutPlansTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).planDaysRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.planId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -4654,6 +5161,7 @@ typedef $$WorkoutPlansTableProcessedTableManager =
         bool studentId,
         bool exercisesRefs,
         bool workoutSessionsRefs,
+        bool planDaysRefs,
       })
     >;
 typedef $$ExercisesTableCreateCompanionBuilder =
@@ -7079,6 +7587,340 @@ typedef $$NutritionTargetsTableProcessedTableManager =
       NutritionTargetsRow,
       PrefetchHooks Function({bool studentId})
     >;
+typedef $$PlanDaysTableCreateCompanionBuilder =
+    PlanDaysCompanion Function({
+      Value<int> id,
+      required int planId,
+      required int weekNumber,
+      required int dayNumber,
+      Value<String?> title,
+      Value<bool> isRestDay,
+    });
+typedef $$PlanDaysTableUpdateCompanionBuilder =
+    PlanDaysCompanion Function({
+      Value<int> id,
+      Value<int> planId,
+      Value<int> weekNumber,
+      Value<int> dayNumber,
+      Value<String?> title,
+      Value<bool> isRestDay,
+    });
+
+final class $$PlanDaysTableReferences
+    extends BaseReferences<_$AppDatabase, $PlanDaysTable, PlanDay> {
+  $$PlanDaysTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $WorkoutPlansTable _planIdTable(_$AppDatabase db) =>
+      db.workoutPlans.createAlias(
+        $_aliasNameGenerator(db.planDays.planId, db.workoutPlans.id),
+      );
+
+  $$WorkoutPlansTableProcessedTableManager get planId {
+    final $_column = $_itemColumn<int>('plan_id')!;
+
+    final manager = $$WorkoutPlansTableTableManager(
+      $_db,
+      $_db.workoutPlans,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_planIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PlanDaysTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanDaysTable> {
+  $$PlanDaysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dayNumber => $composableBuilder(
+    column: $table.dayNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRestDay => $composableBuilder(
+    column: $table.isRestDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$WorkoutPlansTableFilterComposer get planId {
+    final $$WorkoutPlansTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.workoutPlans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkoutPlansTableFilterComposer(
+            $db: $db,
+            $table: $db.workoutPlans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanDaysTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanDaysTable> {
+  $$PlanDaysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dayNumber => $composableBuilder(
+    column: $table.dayNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isRestDay => $composableBuilder(
+    column: $table.isRestDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$WorkoutPlansTableOrderingComposer get planId {
+    final $$WorkoutPlansTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.workoutPlans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkoutPlansTableOrderingComposer(
+            $db: $db,
+            $table: $db.workoutPlans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanDaysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanDaysTable> {
+  $$PlanDaysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get dayNumber =>
+      $composableBuilder(column: $table.dayNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<bool> get isRestDay =>
+      $composableBuilder(column: $table.isRestDay, builder: (column) => column);
+
+  $$WorkoutPlansTableAnnotationComposer get planId {
+    final $$WorkoutPlansTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.planId,
+      referencedTable: $db.workoutPlans,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkoutPlansTableAnnotationComposer(
+            $db: $db,
+            $table: $db.workoutPlans,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanDaysTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlanDaysTable,
+          PlanDay,
+          $$PlanDaysTableFilterComposer,
+          $$PlanDaysTableOrderingComposer,
+          $$PlanDaysTableAnnotationComposer,
+          $$PlanDaysTableCreateCompanionBuilder,
+          $$PlanDaysTableUpdateCompanionBuilder,
+          (PlanDay, $$PlanDaysTableReferences),
+          PlanDay,
+          PrefetchHooks Function({bool planId})
+        > {
+  $$PlanDaysTableTableManager(_$AppDatabase db, $PlanDaysTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlanDaysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlanDaysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlanDaysTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> planId = const Value.absent(),
+                Value<int> weekNumber = const Value.absent(),
+                Value<int> dayNumber = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<bool> isRestDay = const Value.absent(),
+              }) => PlanDaysCompanion(
+                id: id,
+                planId: planId,
+                weekNumber: weekNumber,
+                dayNumber: dayNumber,
+                title: title,
+                isRestDay: isRestDay,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int planId,
+                required int weekNumber,
+                required int dayNumber,
+                Value<String?> title = const Value.absent(),
+                Value<bool> isRestDay = const Value.absent(),
+              }) => PlanDaysCompanion.insert(
+                id: id,
+                planId: planId,
+                weekNumber: weekNumber,
+                dayNumber: dayNumber,
+                title: title,
+                isRestDay: isRestDay,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PlanDaysTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({planId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (planId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.planId,
+                                referencedTable: $$PlanDaysTableReferences
+                                    ._planIdTable(db),
+                                referencedColumn: $$PlanDaysTableReferences
+                                    ._planIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlanDaysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlanDaysTable,
+      PlanDay,
+      $$PlanDaysTableFilterComposer,
+      $$PlanDaysTableOrderingComposer,
+      $$PlanDaysTableAnnotationComposer,
+      $$PlanDaysTableCreateCompanionBuilder,
+      $$PlanDaysTableUpdateCompanionBuilder,
+      (PlanDay, $$PlanDaysTableReferences),
+      PlanDay,
+      PrefetchHooks Function({bool planId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7101,4 +7943,6 @@ class $AppDatabaseManager {
       $$FoodItemsTableTableManager(_db, _db.foodItems);
   $$NutritionTargetsTableTableManager get nutritionTargets =>
       $$NutritionTargetsTableTableManager(_db, _db.nutritionTargets);
+  $$PlanDaysTableTableManager get planDays =>
+      $$PlanDaysTableTableManager(_db, _db.planDays);
 }

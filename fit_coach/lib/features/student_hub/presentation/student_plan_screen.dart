@@ -115,51 +115,68 @@ class PlanDetailScreen extends ConsumerWidget {
           // offer to start — say nothing rather than offering twice.
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, __) => const ErrorState(),
-          data: (session) {
-            if (list.isEmpty) {
-              return Center(child: Text(context.l10n.planHasNoMovements));
-            }
+          data: (session) => ref.watch(planDaysProvider(plan.id)).when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => const ErrorState(),
+            data: (slots) {
+              if (list.isEmpty && slots.isEmpty) {
+                return Center(child: Text(context.l10n.planHasNoMovements));
+              }
 
-            final locale = Localizations.localeOf(context);
-            final days = <Widget>[];
-            int? lastWeek;
+              final locale = Localizations.localeOf(context);
+              final cards = <Widget>[];
+              int? lastWeek;
 
-            for (final (week, day) in daysOf(list)) {
-              // The week is printed once, where it starts — repeating it on
-              // every day would bury the day itself.
-              if (lastWeek != week) {
-                lastWeek = week;
-                days.add(
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
-                    child: Text(
-                      context.l10n.weekLabel(localizeNumber(locale, week)),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+              // From `plan_days`, not from the movements: a rest day has no
+              // movements, and the day the student should *not* train is
+              // exactly the one they need to see.
+              for (final slot in slots) {
+                // The week is printed once, where it starts — repeating it on
+                // every day would bury the day itself.
+                if (lastWeek != slot.weekNumber) {
+                  lastWeek = slot.weekNumber;
+                  cards.add(
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+                      child: Text(
+                        context.l10n
+                            .weekLabel(localizeNumber(locale, slot.weekNumber)),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                     ),
+                  );
+                }
+                cards.add(
+                  _DayCard(
+                    day: slot.dayNumber,
+                    title: slot.title,
+                    isRestDay: slot.isRestDay,
+                    movements: exercisesForDay(
+                      list,
+                      slot.weekNumber,
+                      slot.dayNumber,
+                    ),
+                    isTheOpenSession:
+                        session != null &&
+                        session.weekNumber == slot.weekNumber &&
+                        session.dayNumber == slot.dayNumber,
+                    anotherSessionOpen: session != null,
+                    onStart: () =>
+                        _start(context, ref, slot.weekNumber, slot.dayNumber),
                   ),
                 );
               }
-              days.add(
-                _DayCard(
-                  day: day,
-                  movements: exercisesForDay(list, week, day),
-                  isTheOpenSession:
-                      session != null &&
-                      session.weekNumber == week &&
-                      session.dayNumber == day,
-                  anotherSessionOpen: session != null,
-                  onStart: () => _start(context, ref, week, day),
-                ),
-              );
-            }
 
-            return ListView(
-              padding: const EdgeInsets.all(AppTheme.pagePadding),
-              children: days,
-            );
-          },
+              return ListView(
+                padding: const EdgeInsets.all(AppTheme.pagePadding),
+                children: cards,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -198,6 +215,8 @@ class PlanDetailScreen extends ConsumerWidget {
 class _DayCard extends StatelessWidget {
   const _DayCard({
     required this.day,
+    required this.title,
+    required this.isRestDay,
     required this.movements,
     required this.isTheOpenSession,
     required this.anotherSessionOpen,
@@ -205,6 +224,13 @@ class _DayCard extends StatelessWidget {
   });
 
   final int day;
+
+  /// The coach's name for the day, null until they gave it one.
+  final String? title;
+
+  /// Planned rest: nothing to perform, so nothing to offer to start.
+  final bool isRestDay;
+
   final List<Exercise> movements;
 
   /// This day *is* the one running right now.
@@ -231,11 +257,21 @@ class _DayCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  l10n.dayLabel(localizeNumber(locale, day)),
+                  title ?? l10n.dayLabel(localizeNumber(locale, day)),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: isRestDay ? theme.colorScheme.tertiary : null,
                   ),
                 ),
+                if (isRestDay) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.restDay,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.tertiary,
+                    ),
+                  ),
+                ],
                 if (isTheOpenSession) ...[
                   const SizedBox(width: 8),
                   // The one place a running workout is flagged, so the
@@ -262,7 +298,19 @@ class _DayCard extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 4),
-            if (isTheOpenSession)
+            if (isRestDay)
+              // Nothing to offer: a rest day has no movements and no session
+              // to start. Saying what it is beats an empty card.
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  l10n.restDayHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              )
+            else if (isTheOpenSession)
               FilledButton.icon(
                 onPressed: onStart,
                 icon: const Icon(Icons.play_arrow),

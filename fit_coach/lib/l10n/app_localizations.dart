@@ -1016,6 +1016,30 @@ abstract class AppLocalizations {
   /// **'Student deleted'**
   String get studentDeleted;
 
+  /// No description provided for @restDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get restDay;
+
+  /// No description provided for @restDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A rest day — nothing to perform'**
+  String get restDayHint;
+
+  /// No description provided for @dayNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Day name'**
+  String get dayNameLabel;
+
+  /// No description provided for @dayNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Such as “Upper body” or “Legs” (optional)'**
+  String get dayNameHint;
+
   /// No description provided for @studentUpdated.
   ///
   /// In en, this message translates to:

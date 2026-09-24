@@ -25,3 +25,23 @@ final planExercisesProvider =
         ..orderBy([(e) => OrderingTerm.asc(e.position)]))
       .watch();
 });
+
+/// Live stream of a plan's days, in program order.
+///
+/// Reads the `plan_days` table rather than deriving from the movements: a
+/// rest day has no movements and would otherwise be invisible — and its
+/// whole point is that it exists.
+///
+/// Shared read model: the coach names days while authoring, the student
+/// reads the same name afterwards.
+final planDaysProvider =
+    StreamProvider.autoDispose.family<List<PlanDay>, int>((ref, planId) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.planDays)
+        ..where((d) => d.planId.equals(planId))
+        ..orderBy([
+          (d) => OrderingTerm.asc(d.weekNumber),
+          (d) => OrderingTerm.asc(d.dayNumber),
+        ]))
+      .watch();
+});

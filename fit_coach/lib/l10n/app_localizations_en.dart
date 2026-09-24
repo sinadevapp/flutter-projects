@@ -521,6 +521,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentDeleted => 'Student deleted';
 
   @override
+  String get restDay => 'Rest';
+
+  @override
+  String get restDayHint => 'A rest day — nothing to perform';
+
+  @override
+  String get dayNameLabel => 'Day name';
+
+  @override
+  String get dayNameHint => 'Such as “Upper body” or “Legs” (optional)';
+
+  @override
   String get studentUpdated => 'Student details updated';
 
   @override

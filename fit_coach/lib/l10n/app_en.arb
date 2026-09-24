@@ -337,6 +337,10 @@
     }
   },
   "studentDeleted": "Student deleted",
+  "restDay": "Rest",
+  "restDayHint": "A rest day — nothing to perform",
+  "dayNameLabel": "Day name",
+  "dayNameHint": "Such as “Upper body” or “Legs” (optional)",
   "studentUpdated": "Student details updated",
   "noPrivateStudents": "No private students yet",
   "noPublicStudents": "No group students yet",

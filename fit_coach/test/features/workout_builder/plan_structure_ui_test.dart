@@ -113,9 +113,12 @@ void main() {
       // before it exists — the copy is what proves the button worked.
       await scrollTo(tester, find.text('هفته ۲'));
       expect(find.text('هفته ۲'), findsOneWidget);
-      // Scrolling to the end builds the whole form, so both copies exist.
-      await scrollTo(tester, find.widgetWithText(FilledButton, 'ذخیره'));
-      expect(find.text('اسکوات'), findsNWidgets(2));
+
+      // Deliberately *not* `findsNWidgets(2)` on the movement names: ListView
+      // only builds children near the viewport, so how many rows happen to be
+      // alive is a property of the scroll position, not of the copy. Whether
+      // the week actually duplicated is asserted against the database below,
+      // which does not care what the frame built.
 
       await savePlan(tester);
 
@@ -306,6 +309,117 @@ void main() {
       expect(find.text('ادامه تمرین'), findsOneWidget);
       expect(find.text('ابتدا تمرین قبلی را پایان ده'), findsNWidgets(2));
       expect(find.text('شروع تمرین'), findsNothing);
+
+      await unmount(tester);
+    });
+  });
+
+  group('day names and rest days', () {
+    /// Saves a name from the day dialog.
+    ///
+    /// Scoped to the dialog: its "save" and the form's "save" are both
+    /// `FilledButton`s, and an unscoped finder would match both and throw.
+    Future<void> confirmDialogName(WidgetTester tester, String value) async {
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        value,
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.widgetWithText(FilledButton, 'ذخیره'),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a day can be named, and the name reaches the program', (
+      tester,
+    ) async {
+      await openAddPlan(tester);
+      await tester.enterText(find.byType(TextField).at(0), 'برنامه اول');
+      await fillMovement(tester, 0, 'اسکوات');
+
+      await scrollTo(tester, find.text('روز ۱'));
+      await tester.tap(find.text('روز ۱'));
+      await tester.pumpAndSettle();
+      expect(find.text('نام روز'), findsOneWidget);
+
+      await confirmDialogName(tester, 'پا دست');
+      expect(find.text('پا دست'), findsOneWidget);
+
+      await savePlan(tester);
+
+      final plans = await db.getPlansForStudent(student);
+      expect((await db.getDays(plans.single.id)).single.title, 'پا دست');
+
+      await unmount(tester);
+    });
+
+    testWidgets('marking a day as rest hides its movement rows', (
+      tester,
+    ) async {
+      await openAddPlan(tester);
+      await tester.enterText(find.byType(TextField).at(0), 'برنامه اول');
+      await fillMovement(tester, 0, 'اسکوات');
+
+      await scrollTo(tester, find.text('استراحت'));
+      await tester.tap(find.text('استراحت'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('این روز استراحت است — حرکتی برای اجرا ندارد'),
+        findsOneWidget,
+      );
+      // Asking for work on a day the coach just said is off would be
+      // contradictory, so the rows go away.
+      expect(find.text('افزودن حرکت'), findsNothing);
+      expect(find.text('اسکوات'), findsNothing);
+
+      await savePlan(tester);
+
+      final plans = await db.getPlansForStudent(student);
+      final days = await db.getDays(plans.single.id);
+      expect(days.single.isRestDay, isTrue);
+      // Hiding them is not discarding them: the movement typed before the
+      // toggle is still there, so un-toggling would restore the day.
+      expect(await db.getExercisesForPlan(plans.single.id), hasLength(1));
+
+      await unmount(tester);
+    });
+
+    testWidgets("the student sees the coach's name and its rest flag", (
+      tester,
+    ) async {
+      final planId = await db.insertWorkoutPlan(
+        WorkoutPlansCompanion.insert(studentId: student, title: 'برنامه'),
+      );
+      await db.insertExercise(ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: 3,
+        reps: 10,
+        weekNumber: Value(1),
+        dayNumber: Value(1),
+      ));
+      await db.setDayTitle(planId, week: 1, day: 1, title: 'پا دست');
+      await db.setDayRest(planId, week: 1, day: 2, isRest: true);
+
+      await pump(tester, PlanDetailScreen(plan: await db.getPlansForStudent(student).then((l) => l.single)));
+
+      // The coach's own name, not the numbered fallback.
+      expect(find.text('پا دست'), findsOneWidget);
+      expect(find.text('روز ۱'), findsNothing);
+
+      // And the day they planned as off — visible, and with nothing to start.
+      expect(find.text('استراحت'), findsOneWidget);
+      expect(
+        find.text('این روز استراحت است — حرکتی برای اجرا ندارد'),
+        findsOneWidget,
+      );
 
       await unmount(tester);
     });
