@@ -6,7 +6,7 @@ import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
-import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
+import 'package:fit_coach/core/database/workout_providers.dart';
 import 'package:fit_coach/features/workout_active/domain/workout_progress.dart';
 import 'package:fit_coach/features/workout_active/domain/workout_summary.dart';
 import 'package:fit_coach/features/workout_active/presentation/rest_timer_view.dart';

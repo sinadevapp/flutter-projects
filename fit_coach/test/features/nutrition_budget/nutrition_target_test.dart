@@ -1,4 +1,4 @@
-import 'package:fit_coach/features/nutrition_budget/domain/nutrition_target.dart';
+import 'package:fit_coach/core/nutrition/nutrition_target.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

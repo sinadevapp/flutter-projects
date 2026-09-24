@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
-import 'package:fit_coach/features/nutrition_budget/domain/nutrition_target.dart';
+import 'package:fit_coach/core/nutrition/nutrition_target.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A stored profile as the domain sees it.

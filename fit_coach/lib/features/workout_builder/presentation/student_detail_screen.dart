@@ -1,12 +1,10 @@
-import 'package:fit_coach/core/widgets/states.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:fit_coach/app/navigate.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/students_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
-import 'package:fit_coach/features/coach_hub/presentation/edit_student_screen.dart';
-import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_screen.dart';
-import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
+import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/features/workout_builder/presentation/add_plan_screen.dart';
 import 'package:fit_coach/features/workout_builder/presentation/plan_detail_edit_screen.dart';
 import 'package:flutter/material.dart';
@@ -48,32 +46,20 @@ class StudentDetailScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: context.l10n.editStudent,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => EditStudentScreen(student: student),
-              ),
-            ),
+            onPressed: () => context.openEditStudent(student),
           ),
           IconButton(
             icon: const Icon(Icons.insights),
             tooltip: context.l10n.progress,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ProgressScreen.forCoach(
-                  studentId: student.id,
-                  studentName: student.name,
-                ),
-              ),
+            onPressed: () => context.openStudentProgress(
+              studentId: student.id,
+              studentName: student.name,
             ),
           ),
           IconButton(
             icon: const Icon(Icons.restaurant),
             tooltip: context.l10n.nutrition,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => NutritionScreen(student: student),
-              ),
-            ),
+            onPressed: () => context.openCoachNutrition(student),
           ),
         ],
       ),

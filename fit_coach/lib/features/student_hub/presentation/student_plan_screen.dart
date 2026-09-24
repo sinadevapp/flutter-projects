@@ -1,3 +1,4 @@
+import 'package:fit_coach/app/navigate.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
@@ -6,12 +7,9 @@ import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/widgets/plan_title.dart';
 import 'package:fit_coach/core/widgets/states.dart';
-import 'package:fit_coach/features/nutrition_budget/presentation/student_nutrition_screen.dart';
-import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
-import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
-import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
-import 'package:fit_coach/features/workout_active/presentation/active_workout_screen.dart';
+import 'package:fit_coach/core/widgets/switch_role_button.dart';
+import 'package:fit_coach/core/database/workout_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,20 +30,12 @@ class StudentPlanScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.restaurant),
             tooltip: context.l10n.nutrition,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => StudentNutritionScreen(studentId: studentId),
-              ),
-            ),
+            onPressed: () => context.openStudentNutrition(studentId),
           ),
           IconButton(
             icon: const Icon(Icons.insights),
             tooltip: context.l10n.myProgress,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ProgressScreen(studentId: studentId),
-              ),
-            ),
+            onPressed: () => context.openMyProgress(studentId),
           ),
           const SwitchRoleButton(),
         ],
@@ -209,11 +199,7 @@ class PlanDetailScreen extends ConsumerWidget {
             dayNumber: day,
           );
     if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ActiveWorkoutScreen(sessionId: sessionId, plan: plan),
-      ),
-    );
+    await context.openActiveWorkout(sessionId: sessionId, plan: plan);
   }
 }
 

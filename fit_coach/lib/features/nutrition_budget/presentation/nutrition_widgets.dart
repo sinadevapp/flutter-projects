@@ -2,7 +2,7 @@ import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/core/utils/money_format.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/food_cost.dart';
-import 'package:fit_coach/features/nutrition_budget/domain/nutrition_target.dart';
+import 'package:fit_coach/core/nutrition/nutrition_target.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/protein_plan.dart';
 import 'package:flutter/material.dart';
 

@@ -1,13 +1,13 @@
+import 'package:fit_coach/app/navigate.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/students_provider.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/widgets/student_avatar.dart';
-import 'package:fit_coach/features/auth/presentation/switch_role_button.dart';
+import 'package:fit_coach/core/widgets/switch_role_button.dart';
 import 'package:fit_coach/features/coach_hub/domain/student_filter.dart';
 import 'package:fit_coach/features/coach_hub/presentation/add_student_screen.dart';
-import 'package:fit_coach/features/workout_builder/presentation/student_detail_screen.dart';
 import 'package:fit_coach/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,11 +153,7 @@ class _RosterPane extends ConsumerWidget {
           // Mirrored deliberately: in RTL a left chevron points at the next
           // screen.
           trailing: const Icon(Icons.chevron_left),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => StudentDetailScreen(student: students[i]),
-            ),
-          ),
+          onTap: () => context.openStudentDetail(students[i]),
         ),
       ),
     );

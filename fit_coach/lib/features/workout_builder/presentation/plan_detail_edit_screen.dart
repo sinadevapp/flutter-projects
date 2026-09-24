@@ -1,3 +1,4 @@
+import 'package:fit_coach/app/navigate.dart';
 import 'package:fit_coach/core/widgets/plan_title.dart';
 import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
@@ -7,7 +8,6 @@ import 'package:fit_coach/core/l10n/category_label.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
-import 'package:fit_coach/features/workout_active/presentation/active_workout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -172,11 +172,7 @@ class PlanDetailEditScreen extends ConsumerWidget {
           dayNumber: 1,
         );
     if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ActiveWorkoutScreen(sessionId: sessionId, plan: plan),
-      ),
-    );
+    await context.openActiveWorkout(sessionId: sessionId, plan: plan);
   }
 
   Future<void> _rename(BuildContext context, WidgetRef ref) async {

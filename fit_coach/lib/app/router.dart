@@ -1,6 +1,6 @@
 import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
-import 'package:fit_coach/features/auth/application/active_session_provider.dart';
+import 'package:fit_coach/core/session/active_session_provider.dart';
 import 'package:fit_coach/features/auth/presentation/role_picker_screen.dart';
 import 'package:fit_coach/features/coach_hub/presentation/coach_hub_screen.dart';
 import 'package:fit_coach/features/student_hub/presentation/student_picker_screen.dart';

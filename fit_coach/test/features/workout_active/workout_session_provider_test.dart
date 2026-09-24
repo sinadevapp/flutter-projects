@@ -1,7 +1,7 @@
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/test_database.dart';
-import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
+import 'package:fit_coach/core/database/workout_providers.dart';
 import 'package:fit_coach/features/workout_active/domain/workout_progress.dart';
 import 'package:fit_coach/features/workout_active/domain/workout_summary.dart';
 import 'package:flutter/material.dart';

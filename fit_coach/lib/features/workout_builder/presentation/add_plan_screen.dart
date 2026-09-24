@@ -1,12 +1,12 @@
+import 'package:fit_coach/app/navigate.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/l10n/category_label.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
-import 'package:fit_coach/features/nutrition_budget/application/target_providers.dart';
-import 'package:fit_coach/features/nutrition_budget/domain/nutrition_target.dart';
-import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_screen.dart';
+import 'package:fit_coach/core/nutrition/target_providers.dart';
+import 'package:fit_coach/core/nutrition/nutrition_target.dart';
 import 'package:fit_coach/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -424,11 +424,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                 '${l10n.kcalUnit(localizeNumber(locale, targets.calories.round()))}',
               ),
         trailing: const Icon(Icons.chevron_left),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => NutritionScreen(student: widget.student),
-          ),
-        ),
+        onTap: () => context.openCoachNutrition(widget.student),
       ),
     );
   }

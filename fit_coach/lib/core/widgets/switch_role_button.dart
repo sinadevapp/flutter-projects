@@ -1,5 +1,5 @@
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
-import 'package:fit_coach/features/auth/application/active_session_provider.dart';
+import 'package:fit_coach/core/session/active_session_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

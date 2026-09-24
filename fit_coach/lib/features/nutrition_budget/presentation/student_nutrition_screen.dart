@@ -1,6 +1,6 @@
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/features/nutrition_budget/application/food_providers.dart';
-import 'package:fit_coach/features/nutrition_budget/application/target_providers.dart';
+import 'package:fit_coach/core/nutrition/target_providers.dart';
 import 'package:fit_coach/features/nutrition_budget/domain/food_cost.dart';
 import 'package:fit_coach/features/nutrition_budget/presentation/nutrition_widgets.dart';
 import 'package:flutter/material.dart';
