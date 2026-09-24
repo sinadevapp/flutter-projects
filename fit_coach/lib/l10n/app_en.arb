@@ -236,6 +236,25 @@
   "ageLabel": "Age",
   "heightLabel": "Height (cm)",
   "weightLabel": "Weight (kg)",
+  "lastTime": "Last time: {weight} × {reps}",
+  "lastTimeNoLoad": "Last time: {reps} reps",
+  "@lastTime": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "@lastTimeNoLoad": {
+    "placeholders": {
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
   "activityLabel": "Activity level",
   "activitySedentary": "Sedentary",
   "activityLight": "Light",

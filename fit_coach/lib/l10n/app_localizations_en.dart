@@ -91,9 +91,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repsLabel => 'Reps';
 
   @override
-  String get weightLabel => 'Weight (kg)';
-
-  @override
   String setsXReps(String sets, String reps) {
     return '$sets × $reps';
   }
@@ -379,6 +376,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get heightLabel => 'Height (cm)';
+
+  @override
+  String get weightLabel => 'Weight (kg)';
+
+  @override
+  String lastTime(String weight, String reps) {
+    return 'Last time: $weight × $reps';
+  }
+
+  @override
+  String lastTimeNoLoad(String reps) {
+    return 'Last time: $reps reps';
+  }
 
   @override
   String get activityLabel => 'Activity level';

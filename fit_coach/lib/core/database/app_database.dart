@@ -952,6 +952,22 @@ class AppDatabase extends _$AppDatabase {
     ),
   );
 
+  /// The most recent set logged for [exerciseId], newest first.
+  ///
+  /// Ordered by row id rather than by timestamp: ids grow with insertion, so
+  /// two sets written in the same millisecond still have an unambiguous
+  /// winner, and a clock that happens to be wrong cannot reverse the answer.
+  Future<SetLog?> latestSetLog(int exerciseId) =>
+      (select(setLogs)
+            ..where((l) => l.exerciseId.equals(exerciseId))
+            ..orderBy([(l) => OrderingTerm.desc(l.id)])
+            ..limit(1))
+          .getSingleOrNull();
+
+  Future<Exercise?> getExercise(int id) => (select(exercises)
+        ..where((e) => e.id.equals(id)))
+      .getSingleOrNull();
+
   /// Every set logged so far in one workout, oldest first.
   Future<List<SetLog>> getSetLogs(int sessionId) =>
       (select(setLogs)

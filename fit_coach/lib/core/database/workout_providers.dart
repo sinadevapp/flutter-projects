@@ -40,3 +40,51 @@ final setLogsProvider =
         ..orderBy([(l) => OrderingTerm.asc(l.id)]))
       .watch();
 });
+
+/// What a student last did for one movement, and when.
+///
+/// Lives here rather than in a feature because both need it: the student reads
+/// it mid-set, a coach reads it while writing next week. Features may not
+/// import each other, so a read two of them share belongs in `core`.
+class LastPerformance {
+  const LastPerformance({
+    required this.weightKg,
+    required this.reps,
+    required this.at,
+  });
+
+  /// Kilos lifted. Null for a bodyweight movement, or for a set logged
+  /// before loads were recorded.
+  final double? weightKg;
+
+  /// Reps performed, falling back to what the plan asked when the set was
+  /// logged without a count — the same rule [WorkoutSummary] uses.
+  final int? reps;
+
+  final DateTime at;
+
+  bool get hasLoad => weightKg != null;
+}
+
+/// The most recent logged set for one movement, across every session.
+///
+/// Ordered by row id rather than by timestamp. Ids grow with insertion, so two
+/// sets written in the same millisecond still have an unambiguous winner, and
+/// a clock that happens to be wrong cannot reverse the answer.
+final lastPerformanceProvider =
+    FutureProvider.autoDispose.family<LastPerformance?, int>(
+  (ref, exerciseId) async {
+    final db = ref.watch(appDatabaseProvider);
+
+    final log = await db.latestSetLog(exerciseId);
+    if (log == null) return null;
+
+    final movement = await db.getExercise(exerciseId);
+
+    return LastPerformance(
+      weightKg: log.weightKg,
+      reps: log.repsPerformed ?? movement?.reps,
+      at: log.completedAt,
+    );
+  },
+);

@@ -3,6 +3,7 @@ import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/l10n/app_localizations.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
@@ -100,6 +101,37 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
   Future<void> _finish() async {
     await ref.read(appDatabaseProvider).finishWorkoutSession(widget.sessionId);
+  }
+
+  /// What this student managed last time they trained [movement].
+  ///
+  /// The number that decides what goes on the bar now — not the plan's guess.
+  /// Shown quietly under the load fields, and *absent* rather than reading
+  /// zero when there is no history: there is no last time to show, and
+  /// "آخرین بار: ۰" would be inventing one.
+  Widget _lastPerformed(
+    Exercise movement,
+    AppLocalizations l10n,
+    Locale locale,
+  ) {
+    final perf = ref.watch(lastPerformanceProvider(movement.id)).value;
+    if (perf == null || perf.reps == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Text(
+        perf.hasLoad
+            ? l10n.lastTime(
+                localizeNumber(locale, perf.weightKg!),
+                localizeNumber(locale, perf.reps!),
+              )
+            : l10n.lastTimeNoLoad(localizeNumber(locale, perf.reps!)),
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+      ),
+    );
   }
 
   @override
@@ -264,6 +296,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     ),
                   ],
                 ),
+                _lastPerformed(current, l10n, locale),
                 const SizedBox(height: 32),
                 FilledButton.icon(
                   onPressed: () =>

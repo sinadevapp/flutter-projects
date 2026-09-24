@@ -254,12 +254,6 @@ abstract class AppLocalizations {
   /// **'Reps'**
   String get repsLabel;
 
-  /// No description provided for @weightLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight (kg)'**
-  String get weightLabel;
-
   /// No description provided for @setsXReps.
   ///
   /// In en, this message translates to:
@@ -769,6 +763,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Height (cm)'**
   String get heightLabel;
+
+  /// No description provided for @weightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get weightLabel;
+
+  /// No description provided for @lastTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Last time: {weight} × {reps}'**
+  String lastTime(String weight, String reps);
+
+  /// No description provided for @lastTimeNoLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Last time: {reps} reps'**
+  String lastTimeNoLoad(String reps);
 
   /// No description provided for @activityLabel.
   ///

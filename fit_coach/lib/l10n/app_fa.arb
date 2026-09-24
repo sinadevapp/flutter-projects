@@ -136,6 +136,25 @@
   "ageLabel": "سن",
   "heightLabel": "قد (سانتی‌متر)",
   "weightLabel": "وزن (کیلوگرم)",
+  "lastTime": "آخرین بار: {weight} × {reps}",
+  "lastTimeNoLoad": "آخرین بار: {reps} تکرار",
+  "@lastTime": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "@lastTimeNoLoad": {
+    "placeholders": {
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
   "activityLabel": "سطح فعالیت",
   "activitySedentary": "بی‌تحرک",
   "activityLight": "کم",
