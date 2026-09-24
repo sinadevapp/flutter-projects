@@ -341,6 +341,14 @@
   "restDayHint": "A rest day — nothing to perform",
   "dayNameLabel": "Day name",
   "dayNameHint": "Such as “Upper body” or “Legs” (optional)",
+  "programLength": "{n} weeks",
+  "@programLength": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "studentUpdated": "Student details updated",
   "noPrivateStudents": "No private students yet",
   "noPublicStudents": "No group students yet",

@@ -532,6 +532,11 @@ class AppLocalizationsFa extends AppLocalizations {
   String get dayNameHint => 'مثل «بالاتنه» یا «پا دست» (اختیاری)';
 
   @override
+  String programLength(String n) {
+    return '$n هفته';
+  }
+
+  @override
   String get studentUpdated => 'اطلاعات شاگرد به‌روز شد';
 
   @override

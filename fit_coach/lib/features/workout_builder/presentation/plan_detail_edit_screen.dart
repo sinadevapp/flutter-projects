@@ -1,3 +1,4 @@
+import 'package:fit_coach/core/widgets/plan_title.dart';
 import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
@@ -27,7 +28,10 @@ class PlanDetailEditScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(plan.title),
+        title: PlanAppBarTitle(
+          title: plan.title,
+          durationWeeks: plan.durationWeeks,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.drive_file_rename_outline),

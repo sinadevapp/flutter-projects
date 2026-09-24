@@ -275,6 +275,14 @@
   "restDayHint": "این روز استراحت است — حرکتی برای اجرا ندارد",
   "dayNameLabel": "نام روز",
   "dayNameHint": "مثل «بالاتنه» یا «پا دست» (اختیاری)",
+  "programLength": "{n} هفته",
+  "@programLength": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "studentUpdated": "اطلاعات شاگرد به‌روز شد",
   "noPrivateStudents": "شاگرد خصوصی‌ای ثبت نشده",
   "noPublicStudents": "شاگرد گروهی‌ای ثبت نشده",

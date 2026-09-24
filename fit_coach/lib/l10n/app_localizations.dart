@@ -1040,6 +1040,12 @@ abstract class AppLocalizations {
   /// **'Such as “Upper body” or “Legs” (optional)'**
   String get dayNameHint;
 
+  /// No description provided for @programLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} weeks'**
+  String programLength(String n);
+
   /// No description provided for @studentUpdated.
   ///
   /// In en, this message translates to:

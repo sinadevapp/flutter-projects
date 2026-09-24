@@ -4,6 +4,7 @@ import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
+import 'package:fit_coach/core/widgets/plan_title.dart';
 import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/features/nutrition_budget/presentation/student_nutrition_screen.dart';
 import 'package:fit_coach/features/progress_tracker/presentation/progress_screen.dart';
@@ -106,7 +107,12 @@ class PlanDetailScreen extends ConsumerWidget {
     final active = ref.watch(activeWorkoutProvider(plan.studentId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(plan.title)),
+      appBar: AppBar(
+        title: PlanAppBarTitle(
+          title: plan.title,
+          durationWeeks: plan.durationWeeks,
+        ),
+      ),
       body: exercises.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => const ErrorState(),

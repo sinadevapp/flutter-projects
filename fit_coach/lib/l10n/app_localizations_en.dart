@@ -533,6 +533,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dayNameHint => 'Such as “Upper body” or “Legs” (optional)';
 
   @override
+  String programLength(String n) {
+    return '$n weeks';
+  }
+
+  @override
   String get studentUpdated => 'Student details updated';
 
   @override
