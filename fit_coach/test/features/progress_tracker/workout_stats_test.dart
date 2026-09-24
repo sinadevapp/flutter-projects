@@ -4,29 +4,34 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Exercise exercise(int id, String name, int reps) => Exercise(
-      id: id,
-      planId: 1,
-      name: name,
-      sets: 3,
-      reps: reps,
-      position: id,
-    );
+  id: id,
+  planId: 1,
+  name: name,
+  sets: 3,
+  reps: reps,
+  position: id,
+  weekNumber: 1,
+  dayNumber: 1,
+  category: ExerciseCategory.compound,
+);
 
 SetLog log(int id, int exerciseId, DateTime at) => SetLog(
-      id: id,
-      sessionId: 1,
-      exerciseId: exerciseId,
-      setNumber: 1,
-      completedAt: at,
-    );
+  id: id,
+  sessionId: 1,
+  exerciseId: exerciseId,
+  setNumber: 1,
+  completedAt: at,
+);
 
 WorkoutSession session(int id, DateTime? finishedAt) => WorkoutSession(
-      id: id,
-      planId: 1,
-      studentId: 1,
-      startedAt: DateTime(2026, 9, 21),
-      finishedAt: finishedAt,
-    );
+  id: id,
+  planId: 1,
+  studentId: 1,
+  startedAt: DateTime(2026, 9, 21),
+  finishedAt: finishedAt,
+  weekNumber: 1,
+  dayNumber: 1,
+);
 
 void main() {
   const fa = Locale('fa');

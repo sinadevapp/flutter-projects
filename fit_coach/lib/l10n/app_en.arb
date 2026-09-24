@@ -329,5 +329,58 @@
   "studentUpdated": "Student details updated",
   "noPrivateStudents": "No private students yet",
   "noPublicStudents": "No group students yet",
-  "emptyTabHint": "These students are under another tab"
+  "emptyTabHint": "These students are under another tab",
+  "weekLabel": "Week {n}",
+  "dayLabel": "Day {n}",
+  "finishPreviousFirst": "Finish the workout you started first",
+  "catLegs": "Legs",
+  "catChest": "Chest",
+  "catShoulders": "Shoulders",
+  "catBack": "Back",
+  "catArms": "Arms",
+  "catCore": "Core",
+  "catCompound": "Compound",
+  "planForStudent": "Plan for {name}",
+  "@planForStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "durationWeeksLabel": "Program length (weeks)",
+  "addWeek": "Add week {n}",
+  "addDay": "Add day",
+  "weekCopied": "Week {n} copied",
+  "weekNotEmpty": "This week already has movements",
+  "categoryLabel": "Category",
+  "nutritionForThisPlan": "This student's nutrition",
+  "@weekLabel": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@dayLabel": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@addWeek": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@weekCopied": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  }
 }

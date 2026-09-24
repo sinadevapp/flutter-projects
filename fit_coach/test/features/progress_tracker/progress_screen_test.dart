@@ -21,7 +21,10 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(db)],
-        child: testApp(home: const RolePickerScreen(), locale: const Locale('en')),
+        child: testApp(
+          home: const RolePickerScreen(),
+          locale: const Locale('en'),
+        ),
       ),
     );
     expect(find.text('Choose your role'), findsOneWidget);
@@ -39,67 +42,83 @@ void main() {
     expect(find.text('Coach'), findsNothing);
   });
 
-  testWidgets('progress history dates are Jalali in Persian, Gregorian in English',
-      (tester) async {
-    Future<void> pumpProgress(Locale locale) async {
-      final db = createTestDatabase();
-      addTearDown(db.close);
+  testWidgets(
+    'progress history dates are Jalali in Persian, Gregorian in English',
+    (tester) async {
+      Future<void> pumpProgress(Locale locale) async {
+        final db = createTestDatabase();
+        addTearDown(db.close);
 
-      final studentId = await db.insertUser(
-        UsersCompanion.insert(name: 'علی', role: UserRole.student),
-      );
-      final planId = await db.insertWorkoutPlan(
-        WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه حجم'),
-      );
-      final squatId = await db.insertExercise(ExercisesCompanion.insert(
-        planId: planId,
-        name: 'اسکوات',
-        sets: 1,
-        reps: 10,
-      ));
-      final sessionId = await db.startWorkoutSession(
-        planId: planId,
-        studentId: studentId,
-      );
-      await db.logSet(sessionId: sessionId, exerciseId: squatId, setNumber: 1);
-      await db.finishWorkoutSession(sessionId);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [appDatabaseProvider.overrideWithValue(db)],
-          child: testApp(
-            home: ProgressScreen(studentId: studentId),
-            locale: locale,
+        final studentId = await db.insertUser(
+          UsersCompanion.insert(name: 'علی', role: UserRole.student),
+        );
+        final planId = await db.insertWorkoutPlan(
+          WorkoutPlansCompanion.insert(
+            studentId: studentId,
+            title: 'برنامه حجم',
           ),
-        ),
+        );
+        final squatId = await db.insertExercise(
+          ExercisesCompanion.insert(
+            planId: planId,
+            name: 'اسکوات',
+            sets: 1,
+            reps: 10,
+          ),
+        );
+        final sessionId = await db.startWorkoutSession(
+          planId: planId,
+          studentId: studentId,
+          weekNumber: 1,
+          dayNumber: 1,
+        );
+        await db.logSet(
+          sessionId: sessionId,
+          exerciseId: squatId,
+          setNumber: 1,
+        );
+        await db.finishWorkoutSession(sessionId);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [appDatabaseProvider.overrideWithValue(db)],
+            child: testApp(
+              home: ProgressScreen(studentId: studentId),
+              locale: locale,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await pumpProgress(const Locale('fa'));
+      expect(find.text('پیشرفت من'), findsOneWidget);
+      expect(
+        find.text('۱'),
+        findsWidgets,
+      ); // one completed workout, Persian digit
+      // The week label uses the Persian calendar; ask the calendar library what
+      // this week's Jalali year is, rather than hard-coding one. The charts sit
+      // above the list, so scroll to where the week rows actually are.
+      final jalaliYear = fa(Jalali.fromDateTime(DateTime.now()).year);
+      await tester.scrollUntilVisible(
+        find.textContaining(jalaliYear),
+        200,
+        scrollable: find.byType(Scrollable).first,
       );
+      expect(find.textContaining(jalaliYear), findsWidgets);
+
+      await pumpProgress(const Locale('en'));
+      expect(find.text('My progress'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.textContaining('${DateTime.now().year}/'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.textContaining('${DateTime.now().year}/'), findsWidgets);
+
+      await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
-    }
-
-    await pumpProgress(const Locale('fa'));
-    expect(find.text('پیشرفت من'), findsOneWidget);
-    expect(find.text('۱'), findsWidgets); // one completed workout, Persian digit
-    // The week label uses the Persian calendar; ask the calendar library what
-    // this week's Jalali year is, rather than hard-coding one. The charts sit
-    // above the list, so scroll to where the week rows actually are.
-    final jalaliYear = fa(Jalali.fromDateTime(DateTime.now()).year);
-    await tester.scrollUntilVisible(
-      find.textContaining(jalaliYear),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.textContaining(jalaliYear), findsWidgets);
-
-    await pumpProgress(const Locale('en'));
-    expect(find.text('My progress'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.textContaining('${DateTime.now().year}/'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.textContaining('${DateTime.now().year}/'), findsWidgets);
-
-    await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
-  });
+    },
+  );
 }

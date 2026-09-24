@@ -4,6 +4,7 @@ import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
+import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/workout_active/application/workout_providers.dart';
 import 'package:fit_coach/features/workout_active/domain/workout_progress.dart';
@@ -46,7 +47,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   bool _resting = false;
 
   Future<void> _logSet(int exerciseId, int setNumber) async {
-    await ref.read(appDatabaseProvider).logSet(
+    await ref
+        .read(appDatabaseProvider)
+        .logSet(
           sessionId: widget.sessionId,
           exerciseId: exerciseId,
           setNumber: setNumber,
@@ -57,9 +60,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   Future<void> _finish() async {
-    await ref
-        .read(appDatabaseProvider)
-        .finishWorkoutSession(widget.sessionId);
+    await ref.read(appDatabaseProvider).finishWorkoutSession(widget.sessionId);
   }
 
   @override
@@ -68,24 +69,44 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     final logs = ref.watch(setLogsProvider(widget.sessionId));
     final session = ref.watch(workoutSessionProvider(widget.sessionId));
 
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.plan.title)),
-      body: exercises.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => const ErrorState(),
-        data: (list) => logs.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => const ErrorState(),
-          data: (logs) => _body(list, logs, session.value),
-        ),
-      ),
+    // The session row says which day this is, and it is read first on purpose:
+    // deriving the day from anything else would land on the wrong day after
+    // the app is killed mid-workout. Until it loads there is nothing honest
+    // to show, so the plan as a whole is not flashed.
+    return session.when(
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => const Scaffold(body: ErrorState()),
+      data: (row) {
+        // The id does not resolve — there is no day to show, and guessing one
+        // would render a workout that is not happening.
+        if (row == null) {
+          return const Scaffold(body: ErrorState());
+        }
+        return Scaffold(
+          appBar: AppBar(title: Text(widget.plan.title)),
+          body: exercises.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => const ErrorState(),
+            data: (list) => logs.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => const ErrorState(),
+              data: (logs) => _body(
+                exercisesForDay(list, row.weekNumber, row.dayNumber),
+                logs,
+                row,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _body(
     List<Exercise> exercises,
     List<SetLog> logs,
-    WorkoutSession? session,
+    WorkoutSession session,
   ) {
     final locale = Localizations.localeOf(context);
     final l10n = context.l10n;
@@ -93,22 +114,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     final current = progress.currentExercise;
 
     if (current == null) {
-      // The plan is done. The summary is shown before finishing so the student
+      // The day is done. The summary is shown before finishing so the student
       // sees what they did; finishing writes the end time on the way out.
       //
-      // The duration is measured from the session's real start. Until it has
-      // loaded, the summary still renders — an unknown start is reported as
-      // zero rather than guessed at from the first logged set.
+      // Only this day's movements are counted — the summary describes one
+      // session's work, not the whole week's.
       return WorkoutSummaryView(
         summary: WorkoutSummary.from(
-          session: session ??
-              WorkoutSession(
-                id: widget.sessionId,
-                planId: widget.plan.id,
-                studentId: widget.plan.studentId,
-                startedAt: logs.isEmpty ? DateTime.now() : logs.first.completedAt,
-                finishedAt: DateTime.now(),
-              ),
+          session: session,
           logs: logs,
           exercises: exercises,
         ),
@@ -148,8 +161,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   ),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 // A bare bar would not say how far along the workout is, so
@@ -162,8 +175,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         ? 0
                         : progress.completedSets / progress.totalSets,
                     minHeight: 8,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -189,5 +203,4 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       ],
     );
   }
-
 }

@@ -40,8 +40,9 @@ void main() {
     expect(spots.map((s) => s.y).toList(), [3.0, 5.0, 2.0]);
   });
 
-  testWidgets('the movement chart draws a bar chart, busiest first',
-      (tester) async {
+  testWidgets('the movement chart draws a bar chart, busiest first', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       testApp(
         home: Scaffold(
@@ -91,8 +92,9 @@ void main() {
     expect(find.text('۲۰'), findsNothing);
   });
 
-  testWidgets('a single point still draws and still labels its axis',
-      (tester) async {
+  testWidgets('a single point still draws and still labels its axis', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       testApp(
         home: Scaffold(body: WeeklyVolumeChart(points: [week(19, 3)])),
@@ -105,8 +107,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('an empty series draws nothing rather than an empty frame',
-      (tester) async {
+  testWidgets('an empty series draws nothing rather than an empty frame', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       testApp(
         home: const Scaffold(body: WeeklyVolumeChart(points: [])),
@@ -129,15 +132,19 @@ void main() {
     final planId = await db.insertWorkoutPlan(
       WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه'),
     );
-    final squatId = await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'اسکوات',
-      sets: 2,
-      reps: 10,
-    ));
+    final squatId = await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: 2,
+        reps: 10,
+      ),
+    );
     final sessionId = await db.startWorkoutSession(
       planId: planId,
       studentId: studentId,
+      weekNumber: 1,
+      dayNumber: 1,
     );
     for (var i = 1; i <= 2; i++) {
       await db.logSet(sessionId: sessionId, exerciseId: squatId, setNumber: i);
@@ -149,9 +156,7 @@ void main() {
         overrides: [appDatabaseProvider.overrideWithValue(db)],
         child: testApp(
           home: Scaffold(
-            body: Builder(
-              builder: (context) => const SizedBox.shrink(),
-            ),
+            body: Builder(builder: (context) => const SizedBox.shrink()),
           ),
         ),
       ),

@@ -4,38 +4,45 @@ import 'package:fit_coach/features/workout_active/domain/workout_summary.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Exercise exercise(int id, String name, int sets, int reps) => Exercise(
-      id: id,
-      planId: 1,
-      name: name,
-      sets: sets,
-      reps: reps,
-      position: id,
-    );
+  id: id,
+  planId: 1,
+  name: name,
+  sets: sets,
+  reps: reps,
+  position: id,
+  weekNumber: 1,
+  dayNumber: 1,
+  category: ExerciseCategory.compound,
+);
 
 SetLog log(int id, int exerciseId, DateTime at) => SetLog(
-      id: id,
-      sessionId: 1,
-      exerciseId: exerciseId,
-      setNumber: 1,
-      completedAt: at,
-    );
+  id: id,
+  sessionId: 1,
+  exerciseId: exerciseId,
+  setNumber: 1,
+  completedAt: at,
+);
 
 WorkoutSession session({
   required DateTime startedAt,
   DateTime? finishedAt,
   int id = 1,
-}) =>
-    WorkoutSession(
-      id: id,
-      planId: 1,
-      studentId: 1,
-      startedAt: startedAt,
-      finishedAt: finishedAt,
-    );
+}) => WorkoutSession(
+  id: id,
+  planId: 1,
+  studentId: 1,
+  startedAt: startedAt,
+  finishedAt: finishedAt,
+  weekNumber: 1,
+  dayNumber: 1,
+);
 
 /// What the student sees after finishing: how long it took, how much they did.
 void main() {
-  final exercises = [exercise(1, 'اسکوات', 3, 10), exercise(2, 'پرس سینه', 2, 8)];
+  final exercises = [
+    exercise(1, 'اسکوات', 3, 10),
+    exercise(2, 'پرس سینه', 2, 8),
+  ];
 
   test('a workout with nothing logged summarises as empty', () {
     final summary = WorkoutSummary.from(

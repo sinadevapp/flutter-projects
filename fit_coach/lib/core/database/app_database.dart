@@ -44,15 +44,36 @@ class Users extends Table {
       intEnum<StudentVisibility>().withDefault(const Constant(0))();
 }
 
+/// What a movement trains, so the coach can group a day's work.
+///
+/// Deliberately flat, mixing muscle group with `compound`: that is how the
+/// question was asked, and a tag the coach cannot set is a tag the coach will
+/// not set. Muscle group and compound-vs-isolation are genuinely two axes —
+/// a back squat is both "legs" and "compound" — so splitting them is the
+/// honest next step if the UI ever wants to filter on both at once.
+///
+/// Lives in `core/` beside [UserRole] because every feature that renders a
+/// movement needs the tag, and features must not import each other.
+enum ExerciseCategory { legs, chest, shoulders, back, arms, core, compound }
+
 /// A training plan a coach builds for one student.
 class WorkoutPlans extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get studentId => integer().references(Users, #id)();
   TextColumn get title => text().withLength(min: 1, max: 100)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  /// How many weeks the program runs. Null = not decided / open-ended.
+  IntColumn get durationWeeks => integer().nullable()();
 }
 
 /// One movement inside a training plan (e.g. squat, 4 sets of 10).
+/// One movement, and the slot of the program it belongs to.
+///
+/// Week and day are *coordinates of the movement*, not tables of their own:
+/// an exercise lives in week 2 day 3, and a day with no movements in it does
+/// not exist. That is also what makes migration additive — three plain
+/// columns, no new rows to create and none to move.
 class Exercises extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get planId => integer().references(WorkoutPlans, #id)();
@@ -60,7 +81,20 @@ class Exercises extends Table {
   IntColumn get sets => integer()();
   IntColumn get reps => integer()();
 
-  /// Display order inside the plan.
+  /// 1-based week within the plan.
+  IntColumn get weekNumber => integer().withDefault(const Constant(1))();
+
+  /// 1-based day within its week.
+  IntColumn get dayNumber => integer().withDefault(const Constant(1))();
+
+  /// Index of [ExerciseCategory]; `6` = compound, the quiet default.
+  IntColumn get category =>
+      intEnum<ExerciseCategory>().withDefault(const Constant(6))();
+
+  /// Display order **inside its own day**.
+  ///
+  /// Positions restart at 0 in every day, so reading them without first
+  /// selecting the day interleaves one day into another.
   IntColumn get position => integer().withDefault(const Constant(0))();
 }
 
@@ -82,12 +116,18 @@ class Sessions extends Table {
 /// One performed workout: opened when the student starts training and closed
 /// with [finishedAt]. An open row (finishedAt == null) is the workout in
 /// progress — it lives on disk so closing the app mid-workout resumes it.
+/// A performed workout: one *day's* work, not the whole program.
 class WorkoutSessions extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get planId => integer().references(WorkoutPlans, #id)();
   IntColumn get studentId => integer().references(Users, #id)();
   DateTimeColumn get startedAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get finishedAt => dateTime().nullable()();
+
+  /// Which week this session trained — carried here so reopening the app
+  /// lands on the same day it was started for.
+  IntColumn get weekNumber => integer().withDefault(const Constant(1))();
+  IntColumn get dayNumber => integer().withDefault(const Constant(1))();
 }
 
 /// One completed set inside a [WorkoutSessions] row.
@@ -188,75 +228,118 @@ class AppDatabase extends _$AppDatabase {
   /// Platform-appropriate connection:
   /// native (Android/Windows) uses the bundled sqlite3,
   /// web uses the WASM build via web/sqlite3.wasm + web/drift_worker.js.
-  AppDatabase({QueryExecutor? executor})
-      : super(executor ?? _openConnection());
+  AppDatabase({QueryExecutor? executor}) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.createTable(workoutPlans);
-            await m.createTable(exercises);
-          }
-          if (from < 3) {
-            // Created with the current definition, student_id included.
-            await m.createTable(sessions);
-          }
-          if (from == 3) {
-            // Only an install that already had schema-3 sessions lacks the
-            // column — a from<3 upgrade just created the table complete.
-            await customStatement(
-              'ALTER TABLE sessions ADD COLUMN student_id INTEGER '
-              'REFERENCES users(id)',
-            );
-          }
-          if (from < 5) {
-            await m.createTable(workoutSessions);
-            await m.createTable(setLogs);
-          }
-          if (from < 6) {
-            await m.createTable(appSettings);
-          }
-          if (from < 7) {
-            await m.createTable(foodItems);
-            await _seedFoods();
-          }
-          if (from < 8) {
-            await m.createTable(nutritionTargets);
-          }
-          // Both columns go on `users`, and **no earlier branch creates that
-          // table** — `onUpgrade` only ever runs on a database that already
-          // has it, since every table comes from `onCreate`.
-          //
-          // This is why the guard is `from < 9` and *not* the `from == 8` the
-          // migration note in CLAUDE.md prescribes for column additions. That
-          // narrower guard is only correct when an earlier branch's
-          // `createTable` already emits the column (the `sessions.student_id`
-          // case). Using `from == 8` here would skip the ALTER for anyone
-          // upgrading from 6 or 7 and leave the app without the columns.
-          if (from < 9) {
-            await customStatement('ALTER TABLE users ADD COLUMN photo BLOB');
-            await customStatement(
-              'ALTER TABLE users ADD COLUMN visibility '
-              'INTEGER NOT NULL DEFAULT 0',
-            );
-          }
-        },
-        // A *fresh* install never runs onUpgrade, so the seed has to happen
-        // here as well as in the `from < 7` branch. Both paths run exactly
-        // once per database, so the coach can still delete every food and
-        // have it stay deleted.
-        onCreate: (m) async {
-          await m.createAll();
-          await _seedFoods();
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(workoutPlans);
+        await m.createTable(exercises);
+      }
+      if (from < 3) {
+        // Created with the current definition, student_id included.
+        await m.createTable(sessions);
+      }
+      if (from == 3) {
+        // Only an install that already had schema-3 sessions lacks the
+        // column — a from<3 upgrade just created the table complete.
+        await customStatement(
+          'ALTER TABLE sessions ADD COLUMN student_id INTEGER '
+          'REFERENCES users(id)',
+        );
+      }
+      if (from < 5) {
+        await m.createTable(workoutSessions);
+        await m.createTable(setLogs);
+      }
+      if (from < 6) {
+        await m.createTable(appSettings);
+      }
+      if (from < 7) {
+        await m.createTable(foodItems);
+        await _seedFoods();
+      }
+      if (from < 8) {
+        await m.createTable(nutritionTargets);
+      }
+      // Both columns go on `users`, and **no earlier branch creates that
+      // table** — `onUpgrade` only ever runs on a database that already
+      // has it, since every table comes from `onCreate`.
+      //
+      // This is why the guard is `from < 9` and *not* the `from == 8` the
+      // migration note in CLAUDE.md prescribes for column additions. That
+      // narrower guard is only correct when an earlier branch's
+      // `createTable` already emits the column (the `sessions.student_id`
+      // case). Using `from == 8` here would skip the ALTER for anyone
+      // upgrading from 6 or 7 and leave the app without the columns.
+      if (from < 9) {
+        await customStatement('ALTER TABLE users ADD COLUMN photo BLOB');
+        await customStatement(
+          'ALTER TABLE users ADD COLUMN visibility '
+          'INTEGER NOT NULL DEFAULT 0',
+        );
+      }
+      // Additive, with defaults chosen to mean *exactly what a flat list
+      // already was*: week 1, day 1, compound. That is why no UPDATE is
+      // needed — existing rows read correctly as soon as the columns
+      // exist, and `duration_weeks` is NULL because the length of an old
+      // program was never recorded anywhere.
+      //
+      // **The two inner guards are the whole trick.** `m.createTable` in
+      // an earlier branch emits the table's *current* shape, so anyone
+      // upgrading from 1–4 already got these columns for free from the
+      // `from < 2` branch, and anyone from 1–4 got them on
+      // `workout_sessions` from `from < 5`. A bare `from < 10` would then
+      // run `ADD COLUMN` on top of an existing column and fail with
+      // `duplicate column name` — the trap CLAUDE.md §7 documents, and the
+      // one `persistence_test.dart` was written to catch.
+      if (from < 10) {
+        if (from >= 2) {
+          await customStatement(
+            'ALTER TABLE workout_plans ADD COLUMN duration_weeks '
+            'INTEGER NULL',
+          );
+          await customStatement(
+            'ALTER TABLE exercises ADD COLUMN week_number '
+            'INTEGER NOT NULL DEFAULT 1',
+          );
+          await customStatement(
+            'ALTER TABLE exercises ADD COLUMN day_number '
+            'INTEGER NOT NULL DEFAULT 1',
+          );
+          await customStatement(
+            'ALTER TABLE exercises ADD COLUMN category '
+            'INTEGER NOT NULL DEFAULT 6',
+          );
+        }
+        if (from >= 5) {
+          await customStatement(
+            'ALTER TABLE workout_sessions ADD COLUMN week_number '
+            'INTEGER NOT NULL DEFAULT 1',
+          );
+          await customStatement(
+            'ALTER TABLE workout_sessions ADD COLUMN day_number '
+            'INTEGER NOT NULL DEFAULT 1',
+          );
+        }
+      }
+    },
+    // A *fresh* install never runs onUpgrade, so the seed has to happen
+    // here as well as in the `from < 7` branch. Both paths run exactly
+    // once per database, so the coach can still delete every food and
+    // have it stay deleted.
+    onCreate: (m) async {
+      await m.createAll();
+      await _seedFoods();
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 
   /// Starting set of Iranian staples, with macros but **no prices**.
   ///
@@ -266,59 +349,59 @@ class AppDatabase extends _$AppDatabase {
   /// Blank prices ask to be filled in, and the coach is the one who knows
   /// what things cost in their own market.
   Future<void> _seedFoods() => batch((b) {
-        b.insertAll(foodItems, [
-          FoodItemsCompanion.insert(
-            name: 'سینه مرغ',
-            proteinPer100g: 31,
-            kcalPer100g: 165,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'تخم مرغ',
-            proteinPer100g: 13,
-            kcalPer100g: 155,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'عدس',
-            proteinPer100g: 25,
-            kcalPer100g: 350,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'نخود',
-            proteinPer100g: 19,
-            kcalPer100g: 364,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'لوبیا قرمز',
-            proteinPer100g: 24,
-            kcalPer100g: 333,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'ماست',
-            proteinPer100g: 3.5,
-            kcalPer100g: 59,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'پنیر',
-            proteinPer100g: 14,
-            kcalPer100g: 260,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'شیر',
-            proteinPer100g: 3.4,
-            kcalPer100g: 61,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'برنج',
-            proteinPer100g: 7,
-            kcalPer100g: 360,
-          ),
-          FoodItemsCompanion.insert(
-            name: 'پروتئین وی',
-            proteinPer100g: 80,
-            kcalPer100g: 400,
-          ),
-        ]);
-      });
+    b.insertAll(foodItems, [
+      FoodItemsCompanion.insert(
+        name: 'سینه مرغ',
+        proteinPer100g: 31,
+        kcalPer100g: 165,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'تخم مرغ',
+        proteinPer100g: 13,
+        kcalPer100g: 155,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'عدس',
+        proteinPer100g: 25,
+        kcalPer100g: 350,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'نخود',
+        proteinPer100g: 19,
+        kcalPer100g: 364,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'لوبیا قرمز',
+        proteinPer100g: 24,
+        kcalPer100g: 333,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'ماست',
+        proteinPer100g: 3.5,
+        kcalPer100g: 59,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'پنیر',
+        proteinPer100g: 14,
+        kcalPer100g: 260,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'شیر',
+        proteinPer100g: 3.4,
+        kcalPer100g: 61,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'برنج',
+        proteinPer100g: 7,
+        kcalPer100g: 360,
+      ),
+      FoodItemsCompanion.insert(
+        name: 'پروتئین وی',
+        proteinPer100g: 80,
+        kcalPer100g: 400,
+      ),
+    ]);
+  });
 
   Future<int> insertUser(UsersCompanion entry) => into(users).insert(entry);
 
@@ -331,36 +414,37 @@ class AppDatabase extends _$AppDatabase {
   ///
   /// Null means "no photo yet", which the UI renders as the default icon —
   /// deliberately distinct from an empty photo that would decode to garbage.
-  Future<void> updateStudentPhoto(int id, Uint8List? photo) =>
-      (update(users)..where((u) => u.id.equals(id)))
-          .write(UsersCompanion(photo: Value(photo)));
+  Future<void> updateStudentPhoto(int id, Uint8List? photo) => (update(
+    users,
+  )..where((u) => u.id.equals(id))).write(UsersCompanion(photo: Value(photo)));
 
   /// Moves a student between the private and public tabs.
   Future<void> updateStudentVisibility(int id, StudentVisibility visibility) =>
-      (update(users)..where((u) => u.id.equals(id)))
-          .write(UsersCompanion(visibility: Value(visibility)));
+      (update(users)..where((u) => u.id.equals(id))).write(
+        UsersCompanion(visibility: Value(visibility)),
+      );
 
   /// Corrects a student's name. The column carries its own length check.
-  Future<void> updateStudentName(int id, String name) =>
-      (update(users)..where((u) => u.id.equals(id)))
-          .write(UsersCompanion(name: Value(name)));
+  Future<void> updateStudentName(int id, String name) => (update(
+    users,
+  )..where((u) => u.id.equals(id))).write(UsersCompanion(name: Value(name)));
 
   /// Resets the local identity: drops every user *and* everything that hangs
   /// off them (plans, exercises) — deleting users first would trip the
   /// `workout_plans.studentId` foreign key. One transaction so a failure
   /// leaves the database untouched.
   Future<void> deleteAllUsers() => transaction(() async {
-        // Leaf-first, or the users delete trips a foreign key: set logs hang
-        // off sessions and movements; sessions off plans and users; plans,
-        // exercises and nutrition targets off users.
-        await delete(setLogs).go();
-        await delete(workoutSessions).go();
-        await delete(exercises).go();
-        await delete(workoutPlans).go();
-        await delete(nutritionTargets).go();
-        await delete(sessions).go();
-        await delete(users).go();
-      });
+    // Leaf-first, or the users delete trips a foreign key: set logs hang
+    // off sessions and movements; sessions off plans and users; plans,
+    // exercises and nutrition targets off users.
+    await delete(setLogs).go();
+    await delete(workoutSessions).go();
+    await delete(exercises).go();
+    await delete(workoutPlans).go();
+    await delete(nutritionTargets).go();
+    await delete(sessions).go();
+    await delete(users).go();
+  });
 
   Future<int> insertWorkoutPlan(WorkoutPlansCompanion entry) =>
       into(workoutPlans).insert(entry);
@@ -374,16 +458,48 @@ class AppDatabase extends _$AppDatabase {
             ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))
           .get();
 
+  /// Every movement of a plan, in program order: week, then day, then its
+  /// place within that day.
+  ///
+  /// Position alone would be wrong here — it restarts at 0 in each day, so
+  /// sorting by it would splice day 2 into day 1.
   Future<List<Exercise>> getExercisesForPlan(int planId) =>
       (select(exercises)
             ..where((e) => e.planId.equals(planId))
+            ..orderBy([
+              (e) => OrderingTerm.asc(e.weekNumber),
+              (e) => OrderingTerm.asc(e.dayNumber),
+              (e) => OrderingTerm.asc(e.position),
+            ]))
+          .get();
+
+  /// The movements of one day, in display order.
+  Future<List<Exercise>> getExercisesForDay(int planId, int week, int day) =>
+      (select(exercises)
+            ..where(
+              (e) =>
+                  e.planId.equals(planId) &
+                  e.weekNumber.equals(week) &
+                  e.dayNumber.equals(day),
+            )
             ..orderBy([(e) => OrderingTerm.asc(e.position)]))
+          .get();
+
+  /// The movements of one whole week, in day then position order.
+  Future<List<Exercise>> getExercisesForWeek(int planId, int week) =>
+      (select(exercises)
+            ..where((e) => e.planId.equals(planId) & e.weekNumber.equals(week))
+            ..orderBy([
+              (e) => OrderingTerm.asc(e.dayNumber),
+              (e) => OrderingTerm.asc(e.position),
+            ]))
           .get();
 
   /// Renames a plan. Its movements are untouched.
   Future<void> renamePlan(int planId, String title) =>
-      (update(workoutPlans)..where((p) => p.id.equals(planId)))
-          .write(WorkoutPlansCompanion(title: Value(title)));
+      (update(workoutPlans)..where((p) => p.id.equals(planId))).write(
+        WorkoutPlansCompanion(title: Value(title)),
+      );
 
   /// Corrects a movement. Anything not passed is left as it was.
   Future<void> updateExercise(
@@ -391,14 +507,13 @@ class AppDatabase extends _$AppDatabase {
     String? name,
     int? sets,
     int? reps,
-  }) =>
-      (update(exercises)..where((e) => e.id.equals(exerciseId))).write(
-        ExercisesCompanion(
-          name: name == null ? const Value.absent() : Value(name),
-          sets: sets == null ? const Value.absent() : Value(sets),
-          reps: reps == null ? const Value.absent() : Value(reps),
-        ),
-      );
+  }) => (update(exercises)..where((e) => e.id.equals(exerciseId))).write(
+    ExercisesCompanion(
+      name: name == null ? const Value.absent() : Value(name),
+      sets: sets == null ? const Value.absent() : Value(sets),
+      reps: reps == null ? const Value.absent() : Value(reps),
+    ),
+  );
 
   /// Removes a movement from its plan.
   ///
@@ -406,11 +521,9 @@ class AppDatabase extends _$AppDatabase {
   /// and history outlives the plan being edited. The foreign key from
   /// `set_logs.exerciseId` would otherwise block this delete.
   Future<void> deleteExercise(int exerciseId) => transaction(() async {
-        await (delete(setLogs)
-              ..where((l) => l.exerciseId.equals(exerciseId)))
-            .go();
-        await (delete(exercises)..where((e) => e.id.equals(exerciseId))).go();
-      });
+    await (delete(setLogs)..where((l) => l.exerciseId.equals(exerciseId))).go();
+    await (delete(exercises)..where((e) => e.id.equals(exerciseId))).go();
+  });
 
   /// Deletes a plan, its movements, and everything performed against it.
   ///
@@ -418,26 +531,27 @@ class AppDatabase extends _$AppDatabase {
   /// reference both the sessions and the movements, and `PRAGMA foreign_keys`
   /// is on, so any other order trips a constraint (code 787).
   Future<void> deletePlan(int planId) => transaction(() async {
-        final sessions = await (select(workoutSessions)
-              ..where((s) => s.planId.equals(planId)))
-            .get();
-        for (final session in sessions) {
-          await (delete(setLogs)..where((l) => l.sessionId.equals(session.id)))
-              .go();
-        }
-        await (delete(workoutSessions)..where((s) => s.planId.equals(planId)))
-            .go();
+    final sessions = await (select(
+      workoutSessions,
+    )..where((s) => s.planId.equals(planId))).get();
+    for (final session in sessions) {
+      await (delete(
+        setLogs,
+      )..where((l) => l.sessionId.equals(session.id))).go();
+    }
+    await (delete(workoutSessions)..where((s) => s.planId.equals(planId))).go();
 
-        final movements = await (select(exercises)
-              ..where((e) => e.planId.equals(planId)))
-            .get();
-        for (final movement in movements) {
-          await (delete(setLogs)..where((l) => l.exerciseId.equals(movement.id)))
-              .go();
-        }
-        await (delete(exercises)..where((e) => e.planId.equals(planId))).go();
-        await (delete(workoutPlans)..where((p) => p.id.equals(planId))).go();
-      });
+    final movements = await (select(
+      exercises,
+    )..where((e) => e.planId.equals(planId))).get();
+    for (final movement in movements) {
+      await (delete(
+        setLogs,
+      )..where((l) => l.exerciseId.equals(movement.id))).go();
+    }
+    await (delete(exercises)..where((e) => e.planId.equals(planId))).go();
+    await (delete(workoutPlans)..where((p) => p.id.equals(planId))).go();
+  });
 
   /// Copies a plan and its movements to [forStudent].
   ///
@@ -445,24 +559,31 @@ class AppDatabase extends _$AppDatabase {
   /// along — a copy is a fresh plan, not a history.
   Future<int> duplicatePlan(int planId, {required int forStudent}) =>
       transaction(() async {
-        final source = await (select(workoutPlans)
-              ..where((p) => p.id.equals(planId)))
-            .getSingle();
+        final source = await (select(
+          workoutPlans,
+        )..where((p) => p.id.equals(planId))).getSingle();
         final movements = await getExercisesForPlan(planId);
 
         final copyId = await insertWorkoutPlan(
           WorkoutPlansCompanion.insert(
             studentId: forStudent,
             title: source.title,
+            durationWeeks: Value(source.durationWeeks),
           ),
         );
         for (final movement in movements) {
+          // Week, day and category must come across too: copying only the
+          // movement rows would collapse a multi-week program onto week 1 day
+          // 1 and tag everything compound.
           await insertExercise(
             ExercisesCompanion.insert(
               planId: copyId,
+              weekNumber: Value(movement.weekNumber),
+              dayNumber: Value(movement.dayNumber),
               name: movement.name,
               sets: movement.sets,
               reps: movement.reps,
+              category: Value(movement.category),
               position: Value(movement.position),
             ),
           );
@@ -495,24 +616,44 @@ class AppDatabase extends _$AppDatabase {
   Future<void> clearActiveRole() => delete(sessions).go();
 
   /// Opens a workout session for [studentId] on [planId].
+  /// Starts a session for **one day** of a plan.
+  ///
+  /// [weekNumber] and [dayNumber] are required rather than defaulting to 1 on
+  /// purpose: a forgotten day would quietly log the workout under the wrong
+  /// day and look fine until someone read their own history. Failing to
+  /// compile is much better than that.
   Future<int> startWorkoutSession({
     required int planId,
     required int studentId,
-  }) =>
-      into(workoutSessions).insert(
-        WorkoutSessionsCompanion.insert(
-          planId: planId,
-          studentId: studentId,
-        ),
+    required int weekNumber,
+    required int dayNumber,
+  }) => into(workoutSessions).insert(
+    WorkoutSessionsCompanion.insert(
+      planId: planId,
+      studentId: studentId,
+      // Wrapped because the columns carry a default, and drift's `.insert`
+      // therefore wants a `Value`.
+      weekNumber: Value(weekNumber),
+      dayNumber: Value(dayNumber),
+    ),
+  );
+
+  /// Records how many weeks a program runs. Null means "not decided".
+  Future<void> setPlanDuration(int planId, int? weeks) =>
+      (update(workoutPlans)..where((p) => p.id.equals(planId))).write(
+        WorkoutPlansCompanion(durationWeeks: Value(weeks)),
       );
 
   /// The student's unfinished workout, if any — the one to resume on launch.
   Future<WorkoutSession?> getActiveWorkoutSession(int studentId) async {
-    final rows = await (select(workoutSessions)
-          ..where((s) => s.studentId.equals(studentId) & s.finishedAt.isNull())
-          ..orderBy([(s) => OrderingTerm.desc(s.startedAt)])
-          ..limit(1))
-        .get();
+    final rows =
+        await (select(workoutSessions)
+              ..where(
+                (s) => s.studentId.equals(studentId) & s.finishedAt.isNull(),
+              )
+              ..orderBy([(s) => OrderingTerm.desc(s.startedAt)])
+              ..limit(1))
+            .get();
     return rows.isEmpty ? null : rows.first;
   }
 
@@ -521,14 +662,13 @@ class AppDatabase extends _$AppDatabase {
     required int sessionId,
     required int exerciseId,
     required int setNumber,
-  }) =>
-      into(setLogs).insert(
-        SetLogsCompanion.insert(
-          sessionId: sessionId,
-          exerciseId: exerciseId,
-          setNumber: setNumber,
-        ),
-      );
+  }) => into(setLogs).insert(
+    SetLogsCompanion.insert(
+      sessionId: sessionId,
+      exerciseId: exerciseId,
+      setNumber: setNumber,
+    ),
+  );
 
   /// Every set logged so far in one workout, oldest first.
   Future<List<SetLog>> getSetLogs(int sessionId) =>
@@ -551,11 +691,11 @@ class AppDatabase extends _$AppDatabase {
 
   /// Remembers the chosen language.
   Future<void> setLocaleCode(String? code) => transaction(() async {
-        await delete(appSettings).go();
-        await into(appSettings).insert(
-          AppSettingsCompanion.insert(locale: Value(code)),
-        );
-      });
+    await delete(appSettings).go();
+    await into(
+      appSettings,
+    ).insert(AppSettingsCompanion.insert(locale: Value(code)));
+  });
 
   Future<int> insertFood(FoodItemsCompanion entry) =>
       into(foodItems).insert(entry);
@@ -587,10 +727,9 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteAllFoods() => delete(foodItems).go();
 
   /// One student's nutrition profile, or null before the coach has set one.
-  Future<NutritionTargetsRow?> getNutritionTarget(int studentId) =>
-      (select(nutritionTargets)
-            ..where((t) => t.studentId.equals(studentId)))
-          .getSingleOrNull();
+  Future<NutritionTargetsRow?> getNutritionTarget(int studentId) => (select(
+    nutritionTargets,
+  )..where((t) => t.studentId.equals(studentId))).getSingleOrNull();
 
   /// Stores a student's profile, replacing any they already had.
   ///

@@ -1021,6 +1021,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These students are under another tab'**
   String get emptyTabHint;
+
+  /// No description provided for @weekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Week {n}'**
+  String weekLabel(String n);
+
+  /// No description provided for @dayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {n}'**
+  String dayLabel(String n);
+
+  /// No description provided for @finishPreviousFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the workout you started first'**
+  String get finishPreviousFirst;
+
+  /// No description provided for @catLegs.
+  ///
+  /// In en, this message translates to:
+  /// **'Legs'**
+  String get catLegs;
+
+  /// No description provided for @catChest.
+  ///
+  /// In en, this message translates to:
+  /// **'Chest'**
+  String get catChest;
+
+  /// No description provided for @catShoulders.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoulders'**
+  String get catShoulders;
+
+  /// No description provided for @catBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get catBack;
+
+  /// No description provided for @catArms.
+  ///
+  /// In en, this message translates to:
+  /// **'Arms'**
+  String get catArms;
+
+  /// No description provided for @catCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Core'**
+  String get catCore;
+
+  /// No description provided for @catCompound.
+  ///
+  /// In en, this message translates to:
+  /// **'Compound'**
+  String get catCompound;
+
+  /// No description provided for @planForStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan for {name}'**
+  String planForStudent(String name);
+
+  /// No description provided for @durationWeeksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Program length (weeks)'**
+  String get durationWeeksLabel;
+
+  /// No description provided for @addWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Add week {n}'**
+  String addWeek(String n);
+
+  /// No description provided for @addDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Add day'**
+  String get addDay;
+
+  /// No description provided for @weekCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Week {n} copied'**
+  String weekCopied(String n);
+
+  /// No description provided for @weekNotEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This week already has movements'**
+  String get weekNotEmpty;
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryLabel;
+
+  /// No description provided for @nutritionForThisPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'This student\'s nutrition'**
+  String get nutritionForThisPlan;
 }
 
 class _AppLocalizationsDelegate

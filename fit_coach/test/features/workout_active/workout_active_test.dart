@@ -21,19 +21,23 @@ void main() {
     final planId = await db.insertWorkoutPlan(
       WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه حجم'),
     );
-    await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'اسکوات',
-      sets: 2,
-      reps: 10,
-    ));
-    await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'پرس سینه',
-      sets: 3,
-      reps: 8,
-      position: Value(1),
-    ));
+    await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: 2,
+        reps: 10,
+      ),
+    );
+    await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'پرس سینه',
+        sets: 3,
+        reps: 8,
+        position: Value(1),
+      ),
+    );
     plan = (await db.getPlansForStudent(studentId)).single;
   });
 
@@ -54,8 +58,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('starting a workout shows the first movement and set',
-      (tester) async {
+  testWidgets('starting a workout shows the first movement and set', (
+    tester,
+  ) async {
     await pumpPlan(tester);
 
     expect(find.text('شروع تمرین'), findsOneWidget);
@@ -69,8 +74,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('finishing a set advances the set, then the movement',
-      (tester) async {
+  testWidgets('finishing a set advances the set, then the movement', (
+    tester,
+  ) async {
     await pumpPlan(tester);
     await tester.tap(find.text('شروع تمرین'));
     await tester.pumpAndSettle();
@@ -88,8 +94,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('after the last set the workout can be finished and is closed',
-      (tester) async {
+  testWidgets('after the last set the workout can be finished and is closed', (
+    tester,
+  ) async {
     await pumpPlan(tester);
     await tester.tap(find.text('شروع تمرین'));
     await tester.pumpAndSettle();
@@ -113,8 +120,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('an interrupted workout is resumed from where it stopped',
-      (tester) async {
+  testWidgets('an interrupted workout is resumed from where it stopped', (
+    tester,
+  ) async {
     await pumpPlan(tester);
     await tester.tap(find.text('شروع تمرین'));
     await tester.pumpAndSettle();

@@ -26,15 +26,19 @@ void main() {
     final planId = await db.insertWorkoutPlan(
       WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه'),
     );
-    await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'اسکوات',
-      sets: 2,
-      reps: 10,
-    ));
+    await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: 2,
+        reps: 10,
+      ),
+    );
     sessionId = await db.startWorkoutSession(
       planId: planId,
       studentId: studentId,
+      weekNumber: 1,
+      dayNumber: 1,
     );
   });
   tearDown(() => db.close());
@@ -82,8 +86,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('an unknown id resolves to null rather than throwing',
-      (tester) async {
+  testWidgets('an unknown id resolves to null rather than throwing', (
+    tester,
+  ) async {
     sessionId = 9999;
     final text = await pumpSessionLine(tester);
     expect(text, 'none');

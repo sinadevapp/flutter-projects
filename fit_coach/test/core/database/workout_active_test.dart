@@ -20,18 +20,22 @@ void main() {
     planId = await db.insertWorkoutPlan(
       WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه حجم'),
     );
-    squatId = await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'اسکوات',
-      sets: 2,
-      reps: 10,
-    ));
-    benchId = await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'پرس سینه',
-      sets: 3,
-      reps: 8,
-    ));
+    squatId = await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: 2,
+        reps: 10,
+      ),
+    );
+    benchId = await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'پرس سینه',
+        sets: 3,
+        reps: 8,
+      ),
+    );
   });
 
   tearDown(() => db.close());
@@ -42,6 +46,8 @@ void main() {
     final sessionId = await db.startWorkoutSession(
       planId: planId,
       studentId: studentId,
+      weekNumber: 1,
+      dayNumber: 1,
     );
 
     final active = await db.getActiveWorkoutSession(studentId);
@@ -54,6 +60,8 @@ void main() {
     final sessionId = await db.startWorkoutSession(
       planId: planId,
       studentId: studentId,
+      weekNumber: 1,
+      dayNumber: 1,
     );
 
     await db.logSet(sessionId: sessionId, exerciseId: squatId, setNumber: 1);
@@ -66,64 +74,76 @@ void main() {
     expect(logs.map((l) => l.exerciseId).toList(), [squatId, squatId, benchId]);
   });
 
-  test('an unfinished workout is still there after reopening the database',
-      () async {
-    final dir = Directory.systemTemp.createTempSync('fit_coach_workout');
-    addTearDown(() => dir.deleteSync(recursive: true));
-    final file = File('${dir.path}/workout.sqlite');
+  test(
+    'an unfinished workout is still there after reopening the database',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('fit_coach_workout');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/workout.sqlite');
 
-    // Fresh database on disk: the coach's plan, then the student starts.
-    final first = AppDatabase(executor: NativeDatabase(file));
-    final student = await first.insertUser(
-      UsersCompanion.insert(name: 'علی', role: UserRole.student),
-    );
-    final plan = await first.insertWorkoutPlan(
-      WorkoutPlansCompanion.insert(studentId: student, title: 'برنامه حجم'),
-    );
-    final squat = await first.insertExercise(ExercisesCompanion.insert(
-      planId: plan,
-      name: 'اسکوات',
-      sets: 4,
-      reps: 10,
-    ));
-    final session = await first.startWorkoutSession(
-      planId: plan,
-      studentId: student,
-    );
-    await first.logSet(sessionId: session, exerciseId: squat, setNumber: 1);
-    await first.logSet(sessionId: session, exerciseId: squat, setNumber: 2);
-    await first.close();
+      // Fresh database on disk: the coach's plan, then the student starts.
+      final first = AppDatabase(executor: NativeDatabase(file));
+      final student = await first.insertUser(
+        UsersCompanion.insert(name: 'علی', role: UserRole.student),
+      );
+      final plan = await first.insertWorkoutPlan(
+        WorkoutPlansCompanion.insert(studentId: student, title: 'برنامه حجم'),
+      );
+      final squat = await first.insertExercise(
+        ExercisesCompanion.insert(
+          planId: plan,
+          name: 'اسکوات',
+          sets: 4,
+          reps: 10,
+        ),
+      );
+      final session = await first.startWorkoutSession(
+        planId: plan,
+        studentId: student,
+        weekNumber: 1,
+        dayNumber: 1,
+      );
+      await first.logSet(sessionId: session, exerciseId: squat, setNumber: 1);
+      await first.logSet(sessionId: session, exerciseId: squat, setNumber: 2);
+      await first.close();
 
-    // The app was killed mid-workout and is launched again.
-    final second = AppDatabase(executor: NativeDatabase(file));
-    addTearDown(second.close);
+      // The app was killed mid-workout and is launched again.
+      final second = AppDatabase(executor: NativeDatabase(file));
+      addTearDown(second.close);
 
-    final resumed = await second.getActiveWorkoutSession(student);
-    expect(resumed, isNotNull);
-    expect(resumed!.id, session);
-    expect((await second.getSetLogs(resumed.id)).length, 2);
-  });
+      final resumed = await second.getActiveWorkoutSession(student);
+      expect(resumed, isNotNull);
+      expect(resumed!.id, session);
+      expect((await second.getSetLogs(resumed.id)).length, 2);
+    },
+  );
 
-  test('a finished workout is not resumed, and a new one can be started',
-      () async {
-    final first = await db.startWorkoutSession(
-      planId: planId,
-      studentId: studentId,
-    );
-    await db.logSet(sessionId: first, exerciseId: squatId, setNumber: 1);
-    await db.finishWorkoutSession(first);
+  test(
+    'a finished workout is not resumed, and a new one can be started',
+    () async {
+      final first = await db.startWorkoutSession(
+        planId: planId,
+        studentId: studentId,
+        weekNumber: 1,
+        dayNumber: 1,
+      );
+      await db.logSet(sessionId: first, exerciseId: squatId, setNumber: 1);
+      await db.finishWorkoutSession(first);
 
-    expect(await db.getActiveWorkoutSession(studentId), isNull);
+      expect(await db.getActiveWorkoutSession(studentId), isNull);
 
-    final second = await db.startWorkoutSession(
-      planId: planId,
-      studentId: studentId,
-    );
-    expect(second, isNot(first));
-    expect((await db.getActiveWorkoutSession(studentId))!.id, second);
+      final second = await db.startWorkoutSession(
+        planId: planId,
+        studentId: studentId,
+        weekNumber: 1,
+        dayNumber: 1,
+      );
+      expect(second, isNot(first));
+      expect((await db.getActiveWorkoutSession(studentId))!.id, second);
 
-    // The finished workout's history is intact.
-    expect((await db.getSetLogs(first)).length, 1);
-    expect(await db.getSetLogs(second), isEmpty);
-  });
+      // The finished workout's history is intact.
+      expect((await db.getSetLogs(first)).length, 1);
+      expect(await db.getSetLogs(second), isEmpty);
+    },
+  );
 }

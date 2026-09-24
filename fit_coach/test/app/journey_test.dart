@@ -9,8 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// pick the coach role, add a student, build a plan for them, leave the coach
 /// area and come back — everything the coach created must still be there.
 void main() {
-  testWidgets('student and plan survive leaving the coach area and returning',
-      (tester) async {
+  testWidgets('student and plan survive leaving the coach area and returning', (
+    tester,
+  ) async {
     final db = createTestDatabase();
     addTearDown(db.close);
     // The primary language, so assertions read in Persian.
@@ -38,8 +39,11 @@ void main() {
     await tester.enterText(find.byType(TextField), 'علی');
     await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
     await tester.pumpAndSettle();
-    expect(find.byType(BackButton), findsNothing,
-        reason: 'the add-student form closes itself after saving');
+    expect(
+      find.byType(BackButton),
+      findsNothing,
+      reason: 'the add-student form closes itself after saving',
+    );
     expect(find.text('علی'), findsOneWidget);
 
     // 3. Build a plan for that student.
@@ -47,11 +51,22 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('برنامه جدید'));
     await tester.pumpAndSettle();
+    // Title, then the optional length, then the movement's name/sets/reps.
     await tester.enterText(find.byType(TextField).at(0), 'برنامه حجم');
-    await tester.enterText(find.byType(TextField).at(1), 'اسکوات');
-    await tester.enterText(find.byType(TextField).at(2), '4');
-    await tester.enterText(find.byType(TextField).at(3), '10');
-    await tester.tap(find.widgetWithText(FilledButton, 'ذخیره'));
+    await tester.enterText(find.byType(TextField).at(1), '4');
+    await tester.enterText(find.byType(TextField).at(2), 'اسکوات');
+    await tester.enterText(find.byType(TextField).at(3), '4');
+    await tester.enterText(find.byType(TextField).at(4), '10');
+    // The form now carries weeks and days, so save is below the fold.
+    final saveButton = find.widgetWithText(FilledButton, 'ذخیره');
+    await tester.scrollUntilVisible(
+      saveButton,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(saveButton);
+    await tester.pumpAndSettle();
+    await tester.tap(saveButton);
     await tester.pumpAndSettle();
     expect(find.text('برنامه حجم'), findsOneWidget);
     await tester.tap(find.byType(BackButton));

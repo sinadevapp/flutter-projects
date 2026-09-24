@@ -427,8 +427,25 @@ class $WorkoutPlansTable extends WorkoutPlans
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _durationWeeksMeta = const VerificationMeta(
+    'durationWeeks',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, studentId, title, createdAt];
+  late final GeneratedColumn<int> durationWeeks = GeneratedColumn<int>(
+    'duration_weeks',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    studentId,
+    title,
+    createdAt,
+    durationWeeks,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -466,6 +483,15 @@ class $WorkoutPlansTable extends WorkoutPlans
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('duration_weeks')) {
+      context.handle(
+        _durationWeeksMeta,
+        durationWeeks.isAcceptableOrUnknown(
+          data['duration_weeks']!,
+          _durationWeeksMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -491,6 +517,10 @@ class $WorkoutPlansTable extends WorkoutPlans
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      durationWeeks: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_weeks'],
+      ),
     );
   }
 
@@ -505,11 +535,15 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
   final int studentId;
   final String title;
   final DateTime createdAt;
+
+  /// How many weeks the program runs. Null = not decided / open-ended.
+  final int? durationWeeks;
   const WorkoutPlan({
     required this.id,
     required this.studentId,
     required this.title,
     required this.createdAt,
+    this.durationWeeks,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -518,6 +552,9 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
     map['student_id'] = Variable<int>(studentId);
     map['title'] = Variable<String>(title);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || durationWeeks != null) {
+      map['duration_weeks'] = Variable<int>(durationWeeks);
+    }
     return map;
   }
 
@@ -527,6 +564,9 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
       studentId: Value(studentId),
       title: Value(title),
       createdAt: Value(createdAt),
+      durationWeeks: durationWeeks == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationWeeks),
     );
   }
 
@@ -540,6 +580,7 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
       studentId: serializer.fromJson<int>(json['studentId']),
       title: serializer.fromJson<String>(json['title']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      durationWeeks: serializer.fromJson<int?>(json['durationWeeks']),
     );
   }
   @override
@@ -550,6 +591,7 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
       'studentId': serializer.toJson<int>(studentId),
       'title': serializer.toJson<String>(title),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'durationWeeks': serializer.toJson<int?>(durationWeeks),
     };
   }
 
@@ -558,11 +600,15 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
     int? studentId,
     String? title,
     DateTime? createdAt,
+    Value<int?> durationWeeks = const Value.absent(),
   }) => WorkoutPlan(
     id: id ?? this.id,
     studentId: studentId ?? this.studentId,
     title: title ?? this.title,
     createdAt: createdAt ?? this.createdAt,
+    durationWeeks: durationWeeks.present
+        ? durationWeeks.value
+        : this.durationWeeks,
   );
   WorkoutPlan copyWithCompanion(WorkoutPlansCompanion data) {
     return WorkoutPlan(
@@ -570,6 +616,9 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
       studentId: data.studentId.present ? data.studentId.value : this.studentId,
       title: data.title.present ? data.title.value : this.title,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      durationWeeks: data.durationWeeks.present
+          ? data.durationWeeks.value
+          : this.durationWeeks,
     );
   }
 
@@ -579,13 +628,15 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
           ..write('id: $id, ')
           ..write('studentId: $studentId, ')
           ..write('title: $title, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('durationWeeks: $durationWeeks')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, studentId, title, createdAt);
+  int get hashCode =>
+      Object.hash(id, studentId, title, createdAt, durationWeeks);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -593,7 +644,8 @@ class WorkoutPlan extends DataClass implements Insertable<WorkoutPlan> {
           other.id == this.id &&
           other.studentId == this.studentId &&
           other.title == this.title &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.durationWeeks == this.durationWeeks);
 }
 
 class WorkoutPlansCompanion extends UpdateCompanion<WorkoutPlan> {
@@ -601,17 +653,20 @@ class WorkoutPlansCompanion extends UpdateCompanion<WorkoutPlan> {
   final Value<int> studentId;
   final Value<String> title;
   final Value<DateTime> createdAt;
+  final Value<int?> durationWeeks;
   const WorkoutPlansCompanion({
     this.id = const Value.absent(),
     this.studentId = const Value.absent(),
     this.title = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.durationWeeks = const Value.absent(),
   });
   WorkoutPlansCompanion.insert({
     this.id = const Value.absent(),
     required int studentId,
     required String title,
     this.createdAt = const Value.absent(),
+    this.durationWeeks = const Value.absent(),
   }) : studentId = Value(studentId),
        title = Value(title);
   static Insertable<WorkoutPlan> custom({
@@ -619,12 +674,14 @@ class WorkoutPlansCompanion extends UpdateCompanion<WorkoutPlan> {
     Expression<int>? studentId,
     Expression<String>? title,
     Expression<DateTime>? createdAt,
+    Expression<int>? durationWeeks,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (studentId != null) 'student_id': studentId,
       if (title != null) 'title': title,
       if (createdAt != null) 'created_at': createdAt,
+      if (durationWeeks != null) 'duration_weeks': durationWeeks,
     });
   }
 
@@ -633,12 +690,14 @@ class WorkoutPlansCompanion extends UpdateCompanion<WorkoutPlan> {
     Value<int>? studentId,
     Value<String>? title,
     Value<DateTime>? createdAt,
+    Value<int?>? durationWeeks,
   }) {
     return WorkoutPlansCompanion(
       id: id ?? this.id,
       studentId: studentId ?? this.studentId,
       title: title ?? this.title,
       createdAt: createdAt ?? this.createdAt,
+      durationWeeks: durationWeeks ?? this.durationWeeks,
     );
   }
 
@@ -657,6 +716,9 @@ class WorkoutPlansCompanion extends UpdateCompanion<WorkoutPlan> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (durationWeeks.present) {
+      map['duration_weeks'] = Variable<int>(durationWeeks.value);
+    }
     return map;
   }
 
@@ -666,7 +728,8 @@ class WorkoutPlansCompanion extends UpdateCompanion<WorkoutPlan> {
           ..write('id: $id, ')
           ..write('studentId: $studentId, ')
           ..write('title: $title, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('durationWeeks: $durationWeeks')
           ..write(')'))
         .toString();
   }
@@ -734,6 +797,40 @@ class $ExercisesTable extends Exercises
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _weekNumberMeta = const VerificationMeta(
+    'weekNumber',
+  );
+  @override
+  late final GeneratedColumn<int> weekNumber = GeneratedColumn<int>(
+    'week_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _dayNumberMeta = const VerificationMeta(
+    'dayNumber',
+  );
+  @override
+  late final GeneratedColumn<int> dayNumber = GeneratedColumn<int>(
+    'day_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExerciseCategory, int> category =
+      GeneratedColumn<int>(
+        'category',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(6),
+      ).withConverter<ExerciseCategory>($ExercisesTable.$convertercategory);
   static const VerificationMeta _positionMeta = const VerificationMeta(
     'position',
   );
@@ -753,6 +850,9 @@ class $ExercisesTable extends Exercises
     name,
     sets,
     reps,
+    weekNumber,
+    dayNumber,
+    category,
     position,
   ];
   @override
@@ -802,6 +902,18 @@ class $ExercisesTable extends Exercises
     } else if (isInserting) {
       context.missing(_repsMeta);
     }
+    if (data.containsKey('week_number')) {
+      context.handle(
+        _weekNumberMeta,
+        weekNumber.isAcceptableOrUnknown(data['week_number']!, _weekNumberMeta),
+      );
+    }
+    if (data.containsKey('day_number')) {
+      context.handle(
+        _dayNumberMeta,
+        dayNumber.isAcceptableOrUnknown(data['day_number']!, _dayNumberMeta),
+      );
+    }
     if (data.containsKey('position')) {
       context.handle(
         _positionMeta,
@@ -837,6 +949,20 @@ class $ExercisesTable extends Exercises
         DriftSqlType.int,
         data['${effectivePrefix}reps'],
       )!,
+      weekNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}week_number'],
+      )!,
+      dayNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}day_number'],
+      )!,
+      category: $ExercisesTable.$convertercategory.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}category'],
+        )!,
+      ),
       position: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}position'],
@@ -848,6 +974,9 @@ class $ExercisesTable extends Exercises
   $ExercisesTable createAlias(String alias) {
     return $ExercisesTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<ExerciseCategory, int, int> $convertercategory =
+      const EnumIndexConverter<ExerciseCategory>(ExerciseCategory.values);
 }
 
 class Exercise extends DataClass implements Insertable<Exercise> {
@@ -857,7 +986,19 @@ class Exercise extends DataClass implements Insertable<Exercise> {
   final int sets;
   final int reps;
 
-  /// Display order inside the plan.
+  /// 1-based week within the plan.
+  final int weekNumber;
+
+  /// 1-based day within its week.
+  final int dayNumber;
+
+  /// Index of [ExerciseCategory]; `6` = compound, the quiet default.
+  final ExerciseCategory category;
+
+  /// Display order **inside its own day**.
+  ///
+  /// Positions restart at 0 in every day, so reading them without first
+  /// selecting the day interleaves one day into another.
   final int position;
   const Exercise({
     required this.id,
@@ -865,6 +1006,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     required this.name,
     required this.sets,
     required this.reps,
+    required this.weekNumber,
+    required this.dayNumber,
+    required this.category,
     required this.position,
   });
   @override
@@ -875,6 +1019,13 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     map['name'] = Variable<String>(name);
     map['sets'] = Variable<int>(sets);
     map['reps'] = Variable<int>(reps);
+    map['week_number'] = Variable<int>(weekNumber);
+    map['day_number'] = Variable<int>(dayNumber);
+    {
+      map['category'] = Variable<int>(
+        $ExercisesTable.$convertercategory.toSql(category),
+      );
+    }
     map['position'] = Variable<int>(position);
     return map;
   }
@@ -886,6 +1037,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       name: Value(name),
       sets: Value(sets),
       reps: Value(reps),
+      weekNumber: Value(weekNumber),
+      dayNumber: Value(dayNumber),
+      category: Value(category),
       position: Value(position),
     );
   }
@@ -901,6 +1055,11 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       name: serializer.fromJson<String>(json['name']),
       sets: serializer.fromJson<int>(json['sets']),
       reps: serializer.fromJson<int>(json['reps']),
+      weekNumber: serializer.fromJson<int>(json['weekNumber']),
+      dayNumber: serializer.fromJson<int>(json['dayNumber']),
+      category: $ExercisesTable.$convertercategory.fromJson(
+        serializer.fromJson<int>(json['category']),
+      ),
       position: serializer.fromJson<int>(json['position']),
     );
   }
@@ -913,6 +1072,11 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       'name': serializer.toJson<String>(name),
       'sets': serializer.toJson<int>(sets),
       'reps': serializer.toJson<int>(reps),
+      'weekNumber': serializer.toJson<int>(weekNumber),
+      'dayNumber': serializer.toJson<int>(dayNumber),
+      'category': serializer.toJson<int>(
+        $ExercisesTable.$convertercategory.toJson(category),
+      ),
       'position': serializer.toJson<int>(position),
     };
   }
@@ -923,6 +1087,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     String? name,
     int? sets,
     int? reps,
+    int? weekNumber,
+    int? dayNumber,
+    ExerciseCategory? category,
     int? position,
   }) => Exercise(
     id: id ?? this.id,
@@ -930,6 +1097,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     name: name ?? this.name,
     sets: sets ?? this.sets,
     reps: reps ?? this.reps,
+    weekNumber: weekNumber ?? this.weekNumber,
+    dayNumber: dayNumber ?? this.dayNumber,
+    category: category ?? this.category,
     position: position ?? this.position,
   );
   Exercise copyWithCompanion(ExercisesCompanion data) {
@@ -939,6 +1109,11 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       name: data.name.present ? data.name.value : this.name,
       sets: data.sets.present ? data.sets.value : this.sets,
       reps: data.reps.present ? data.reps.value : this.reps,
+      weekNumber: data.weekNumber.present
+          ? data.weekNumber.value
+          : this.weekNumber,
+      dayNumber: data.dayNumber.present ? data.dayNumber.value : this.dayNumber,
+      category: data.category.present ? data.category.value : this.category,
       position: data.position.present ? data.position.value : this.position,
     );
   }
@@ -951,13 +1126,26 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ..write('name: $name, ')
           ..write('sets: $sets, ')
           ..write('reps: $reps, ')
+          ..write('weekNumber: $weekNumber, ')
+          ..write('dayNumber: $dayNumber, ')
+          ..write('category: $category, ')
           ..write('position: $position')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, planId, name, sets, reps, position);
+  int get hashCode => Object.hash(
+    id,
+    planId,
+    name,
+    sets,
+    reps,
+    weekNumber,
+    dayNumber,
+    category,
+    position,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -967,6 +1155,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           other.name == this.name &&
           other.sets == this.sets &&
           other.reps == this.reps &&
+          other.weekNumber == this.weekNumber &&
+          other.dayNumber == this.dayNumber &&
+          other.category == this.category &&
           other.position == this.position);
 }
 
@@ -976,6 +1167,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
   final Value<String> name;
   final Value<int> sets;
   final Value<int> reps;
+  final Value<int> weekNumber;
+  final Value<int> dayNumber;
+  final Value<ExerciseCategory> category;
   final Value<int> position;
   const ExercisesCompanion({
     this.id = const Value.absent(),
@@ -983,6 +1177,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     this.name = const Value.absent(),
     this.sets = const Value.absent(),
     this.reps = const Value.absent(),
+    this.weekNumber = const Value.absent(),
+    this.dayNumber = const Value.absent(),
+    this.category = const Value.absent(),
     this.position = const Value.absent(),
   });
   ExercisesCompanion.insert({
@@ -991,6 +1188,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     required String name,
     required int sets,
     required int reps,
+    this.weekNumber = const Value.absent(),
+    this.dayNumber = const Value.absent(),
+    this.category = const Value.absent(),
     this.position = const Value.absent(),
   }) : planId = Value(planId),
        name = Value(name),
@@ -1002,6 +1202,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Expression<String>? name,
     Expression<int>? sets,
     Expression<int>? reps,
+    Expression<int>? weekNumber,
+    Expression<int>? dayNumber,
+    Expression<int>? category,
     Expression<int>? position,
   }) {
     return RawValuesInsertable({
@@ -1010,6 +1213,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       if (name != null) 'name': name,
       if (sets != null) 'sets': sets,
       if (reps != null) 'reps': reps,
+      if (weekNumber != null) 'week_number': weekNumber,
+      if (dayNumber != null) 'day_number': dayNumber,
+      if (category != null) 'category': category,
       if (position != null) 'position': position,
     });
   }
@@ -1020,6 +1226,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Value<String>? name,
     Value<int>? sets,
     Value<int>? reps,
+    Value<int>? weekNumber,
+    Value<int>? dayNumber,
+    Value<ExerciseCategory>? category,
     Value<int>? position,
   }) {
     return ExercisesCompanion(
@@ -1028,6 +1237,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       name: name ?? this.name,
       sets: sets ?? this.sets,
       reps: reps ?? this.reps,
+      weekNumber: weekNumber ?? this.weekNumber,
+      dayNumber: dayNumber ?? this.dayNumber,
+      category: category ?? this.category,
       position: position ?? this.position,
     );
   }
@@ -1050,6 +1262,17 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     if (reps.present) {
       map['reps'] = Variable<int>(reps.value);
     }
+    if (weekNumber.present) {
+      map['week_number'] = Variable<int>(weekNumber.value);
+    }
+    if (dayNumber.present) {
+      map['day_number'] = Variable<int>(dayNumber.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<int>(
+        $ExercisesTable.$convertercategory.toSql(category.value),
+      );
+    }
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
@@ -1064,6 +1287,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
           ..write('name: $name, ')
           ..write('sets: $sets, ')
           ..write('reps: $reps, ')
+          ..write('weekNumber: $weekNumber, ')
+          ..write('dayNumber: $dayNumber, ')
+          ..write('category: $category, ')
           ..write('position: $position')
           ..write(')'))
         .toString();
@@ -1394,6 +1620,30 @@ class $WorkoutSessionsTable extends WorkoutSessions
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _weekNumberMeta = const VerificationMeta(
+    'weekNumber',
+  );
+  @override
+  late final GeneratedColumn<int> weekNumber = GeneratedColumn<int>(
+    'week_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _dayNumberMeta = const VerificationMeta(
+    'dayNumber',
+  );
+  @override
+  late final GeneratedColumn<int> dayNumber = GeneratedColumn<int>(
+    'day_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1401,6 +1651,8 @@ class $WorkoutSessionsTable extends WorkoutSessions
     studentId,
     startedAt,
     finishedAt,
+    weekNumber,
+    dayNumber,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1445,6 +1697,18 @@ class $WorkoutSessionsTable extends WorkoutSessions
         finishedAt.isAcceptableOrUnknown(data['finished_at']!, _finishedAtMeta),
       );
     }
+    if (data.containsKey('week_number')) {
+      context.handle(
+        _weekNumberMeta,
+        weekNumber.isAcceptableOrUnknown(data['week_number']!, _weekNumberMeta),
+      );
+    }
+    if (data.containsKey('day_number')) {
+      context.handle(
+        _dayNumberMeta,
+        dayNumber.isAcceptableOrUnknown(data['day_number']!, _dayNumberMeta),
+      );
+    }
     return context;
   }
 
@@ -1474,6 +1738,14 @@ class $WorkoutSessionsTable extends WorkoutSessions
         DriftSqlType.dateTime,
         data['${effectivePrefix}finished_at'],
       ),
+      weekNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}week_number'],
+      )!,
+      dayNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}day_number'],
+      )!,
     );
   }
 
@@ -1489,12 +1761,19 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
   final int studentId;
   final DateTime startedAt;
   final DateTime? finishedAt;
+
+  /// Which week this session trained — carried here so reopening the app
+  /// lands on the same day it was started for.
+  final int weekNumber;
+  final int dayNumber;
   const WorkoutSession({
     required this.id,
     required this.planId,
     required this.studentId,
     required this.startedAt,
     this.finishedAt,
+    required this.weekNumber,
+    required this.dayNumber,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1506,6 +1785,8 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
     if (!nullToAbsent || finishedAt != null) {
       map['finished_at'] = Variable<DateTime>(finishedAt);
     }
+    map['week_number'] = Variable<int>(weekNumber);
+    map['day_number'] = Variable<int>(dayNumber);
     return map;
   }
 
@@ -1518,6 +1799,8 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
       finishedAt: finishedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(finishedAt),
+      weekNumber: Value(weekNumber),
+      dayNumber: Value(dayNumber),
     );
   }
 
@@ -1532,6 +1815,8 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
       studentId: serializer.fromJson<int>(json['studentId']),
       startedAt: serializer.fromJson<DateTime>(json['startedAt']),
       finishedAt: serializer.fromJson<DateTime?>(json['finishedAt']),
+      weekNumber: serializer.fromJson<int>(json['weekNumber']),
+      dayNumber: serializer.fromJson<int>(json['dayNumber']),
     );
   }
   @override
@@ -1543,6 +1828,8 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
       'studentId': serializer.toJson<int>(studentId),
       'startedAt': serializer.toJson<DateTime>(startedAt),
       'finishedAt': serializer.toJson<DateTime?>(finishedAt),
+      'weekNumber': serializer.toJson<int>(weekNumber),
+      'dayNumber': serializer.toJson<int>(dayNumber),
     };
   }
 
@@ -1552,12 +1839,16 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
     int? studentId,
     DateTime? startedAt,
     Value<DateTime?> finishedAt = const Value.absent(),
+    int? weekNumber,
+    int? dayNumber,
   }) => WorkoutSession(
     id: id ?? this.id,
     planId: planId ?? this.planId,
     studentId: studentId ?? this.studentId,
     startedAt: startedAt ?? this.startedAt,
     finishedAt: finishedAt.present ? finishedAt.value : this.finishedAt,
+    weekNumber: weekNumber ?? this.weekNumber,
+    dayNumber: dayNumber ?? this.dayNumber,
   );
   WorkoutSession copyWithCompanion(WorkoutSessionsCompanion data) {
     return WorkoutSession(
@@ -1568,6 +1859,10 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
       finishedAt: data.finishedAt.present
           ? data.finishedAt.value
           : this.finishedAt,
+      weekNumber: data.weekNumber.present
+          ? data.weekNumber.value
+          : this.weekNumber,
+      dayNumber: data.dayNumber.present ? data.dayNumber.value : this.dayNumber,
     );
   }
 
@@ -1578,13 +1873,23 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
           ..write('planId: $planId, ')
           ..write('studentId: $studentId, ')
           ..write('startedAt: $startedAt, ')
-          ..write('finishedAt: $finishedAt')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('weekNumber: $weekNumber, ')
+          ..write('dayNumber: $dayNumber')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, planId, studentId, startedAt, finishedAt);
+  int get hashCode => Object.hash(
+    id,
+    planId,
+    studentId,
+    startedAt,
+    finishedAt,
+    weekNumber,
+    dayNumber,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1593,7 +1898,9 @@ class WorkoutSession extends DataClass implements Insertable<WorkoutSession> {
           other.planId == this.planId &&
           other.studentId == this.studentId &&
           other.startedAt == this.startedAt &&
-          other.finishedAt == this.finishedAt);
+          other.finishedAt == this.finishedAt &&
+          other.weekNumber == this.weekNumber &&
+          other.dayNumber == this.dayNumber);
 }
 
 class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
@@ -1602,12 +1909,16 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
   final Value<int> studentId;
   final Value<DateTime> startedAt;
   final Value<DateTime?> finishedAt;
+  final Value<int> weekNumber;
+  final Value<int> dayNumber;
   const WorkoutSessionsCompanion({
     this.id = const Value.absent(),
     this.planId = const Value.absent(),
     this.studentId = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.finishedAt = const Value.absent(),
+    this.weekNumber = const Value.absent(),
+    this.dayNumber = const Value.absent(),
   });
   WorkoutSessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1615,6 +1926,8 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
     required int studentId,
     this.startedAt = const Value.absent(),
     this.finishedAt = const Value.absent(),
+    this.weekNumber = const Value.absent(),
+    this.dayNumber = const Value.absent(),
   }) : planId = Value(planId),
        studentId = Value(studentId);
   static Insertable<WorkoutSession> custom({
@@ -1623,6 +1936,8 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
     Expression<int>? studentId,
     Expression<DateTime>? startedAt,
     Expression<DateTime>? finishedAt,
+    Expression<int>? weekNumber,
+    Expression<int>? dayNumber,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1630,6 +1945,8 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
       if (studentId != null) 'student_id': studentId,
       if (startedAt != null) 'started_at': startedAt,
       if (finishedAt != null) 'finished_at': finishedAt,
+      if (weekNumber != null) 'week_number': weekNumber,
+      if (dayNumber != null) 'day_number': dayNumber,
     });
   }
 
@@ -1639,6 +1956,8 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
     Value<int>? studentId,
     Value<DateTime>? startedAt,
     Value<DateTime?>? finishedAt,
+    Value<int>? weekNumber,
+    Value<int>? dayNumber,
   }) {
     return WorkoutSessionsCompanion(
       id: id ?? this.id,
@@ -1646,6 +1965,8 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
       studentId: studentId ?? this.studentId,
       startedAt: startedAt ?? this.startedAt,
       finishedAt: finishedAt ?? this.finishedAt,
+      weekNumber: weekNumber ?? this.weekNumber,
+      dayNumber: dayNumber ?? this.dayNumber,
     );
   }
 
@@ -1667,6 +1988,12 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
     if (finishedAt.present) {
       map['finished_at'] = Variable<DateTime>(finishedAt.value);
     }
+    if (weekNumber.present) {
+      map['week_number'] = Variable<int>(weekNumber.value);
+    }
+    if (dayNumber.present) {
+      map['day_number'] = Variable<int>(dayNumber.value);
+    }
     return map;
   }
 
@@ -1677,7 +2004,9 @@ class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSession> {
           ..write('planId: $planId, ')
           ..write('studentId: $studentId, ')
           ..write('startedAt: $startedAt, ')
-          ..write('finishedAt: $finishedAt')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('weekNumber: $weekNumber, ')
+          ..write('dayNumber: $dayNumber')
           ..write(')'))
         .toString();
   }
@@ -3817,6 +4146,7 @@ typedef $$WorkoutPlansTableCreateCompanionBuilder =
       required int studentId,
       required String title,
       Value<DateTime> createdAt,
+      Value<int?> durationWeeks,
     });
 typedef $$WorkoutPlansTableUpdateCompanionBuilder =
     WorkoutPlansCompanion Function({
@@ -3824,6 +4154,7 @@ typedef $$WorkoutPlansTableUpdateCompanionBuilder =
       Value<int> studentId,
       Value<String> title,
       Value<DateTime> createdAt,
+      Value<int?> durationWeeks,
     });
 
 final class $$WorkoutPlansTableReferences
@@ -3911,6 +4242,11 @@ class $$WorkoutPlansTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationWeeks => $composableBuilder(
+    column: $table.durationWeeks,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4012,6 +4348,11 @@ class $$WorkoutPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get durationWeeks => $composableBuilder(
+    column: $table.durationWeeks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$UsersTableOrderingComposer get studentId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4053,6 +4394,11 @@ class $$WorkoutPlansTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get durationWeeks => $composableBuilder(
+    column: $table.durationWeeks,
+    builder: (column) => column,
+  );
 
   $$UsersTableAnnotationComposer get studentId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
@@ -4164,11 +4510,13 @@ class $$WorkoutPlansTableTableManager
                 Value<int> studentId = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<int?> durationWeeks = const Value.absent(),
               }) => WorkoutPlansCompanion(
                 id: id,
                 studentId: studentId,
                 title: title,
                 createdAt: createdAt,
+                durationWeeks: durationWeeks,
               ),
           createCompanionCallback:
               ({
@@ -4176,11 +4524,13 @@ class $$WorkoutPlansTableTableManager
                 required int studentId,
                 required String title,
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<int?> durationWeeks = const Value.absent(),
               }) => WorkoutPlansCompanion.insert(
                 id: id,
                 studentId: studentId,
                 title: title,
                 createdAt: createdAt,
+                durationWeeks: durationWeeks,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4313,6 +4663,9 @@ typedef $$ExercisesTableCreateCompanionBuilder =
       required String name,
       required int sets,
       required int reps,
+      Value<int> weekNumber,
+      Value<int> dayNumber,
+      Value<ExerciseCategory> category,
       Value<int> position,
     });
 typedef $$ExercisesTableUpdateCompanionBuilder =
@@ -4322,6 +4675,9 @@ typedef $$ExercisesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<int> sets,
       Value<int> reps,
+      Value<int> weekNumber,
+      Value<int> dayNumber,
+      Value<ExerciseCategory> category,
       Value<int> position,
     });
 
@@ -4395,6 +4751,22 @@ class $$ExercisesTableFilterComposer
   ColumnFilters<int> get reps => $composableBuilder(
     column: $table.reps,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dayNumber => $composableBuilder(
+    column: $table.dayNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ExerciseCategory, ExerciseCategory, int>
+  get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<int> get position => $composableBuilder(
@@ -4480,6 +4852,21 @@ class $$ExercisesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dayNumber => $composableBuilder(
+    column: $table.dayNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get position => $composableBuilder(
     column: $table.position,
     builder: (column) => ColumnOrderings(column),
@@ -4529,6 +4916,17 @@ class $$ExercisesTableAnnotationComposer
 
   GeneratedColumn<int> get reps =>
       $composableBuilder(column: $table.reps, builder: (column) => column);
+
+  GeneratedColumn<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get dayNumber =>
+      $composableBuilder(column: $table.dayNumber, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ExerciseCategory, int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
@@ -4615,6 +5013,9 @@ class $$ExercisesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<int> sets = const Value.absent(),
                 Value<int> reps = const Value.absent(),
+                Value<int> weekNumber = const Value.absent(),
+                Value<int> dayNumber = const Value.absent(),
+                Value<ExerciseCategory> category = const Value.absent(),
                 Value<int> position = const Value.absent(),
               }) => ExercisesCompanion(
                 id: id,
@@ -4622,6 +5023,9 @@ class $$ExercisesTableTableManager
                 name: name,
                 sets: sets,
                 reps: reps,
+                weekNumber: weekNumber,
+                dayNumber: dayNumber,
+                category: category,
                 position: position,
               ),
           createCompanionCallback:
@@ -4631,6 +5035,9 @@ class $$ExercisesTableTableManager
                 required String name,
                 required int sets,
                 required int reps,
+                Value<int> weekNumber = const Value.absent(),
+                Value<int> dayNumber = const Value.absent(),
+                Value<ExerciseCategory> category = const Value.absent(),
                 Value<int> position = const Value.absent(),
               }) => ExercisesCompanion.insert(
                 id: id,
@@ -4638,6 +5045,9 @@ class $$ExercisesTableTableManager
                 name: name,
                 sets: sets,
                 reps: reps,
+                weekNumber: weekNumber,
+                dayNumber: dayNumber,
+                category: category,
                 position: position,
               ),
           withReferenceMapper: (p0) => p0
@@ -5001,6 +5411,8 @@ typedef $$WorkoutSessionsTableCreateCompanionBuilder =
       required int studentId,
       Value<DateTime> startedAt,
       Value<DateTime?> finishedAt,
+      Value<int> weekNumber,
+      Value<int> dayNumber,
     });
 typedef $$WorkoutSessionsTableUpdateCompanionBuilder =
     WorkoutSessionsCompanion Function({
@@ -5009,6 +5421,8 @@ typedef $$WorkoutSessionsTableUpdateCompanionBuilder =
       Value<int> studentId,
       Value<DateTime> startedAt,
       Value<DateTime?> finishedAt,
+      Value<int> weekNumber,
+      Value<int> dayNumber,
     });
 
 final class $$WorkoutSessionsTableReferences
@@ -5101,6 +5515,16 @@ class $$WorkoutSessionsTableFilterComposer
 
   ColumnFilters<DateTime> get finishedAt => $composableBuilder(
     column: $table.finishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dayNumber => $composableBuilder(
+    column: $table.dayNumber,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5200,6 +5624,16 @@ class $$WorkoutSessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dayNumber => $composableBuilder(
+    column: $table.dayNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$WorkoutPlansTableOrderingComposer get planId {
     final $$WorkoutPlansTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5266,6 +5700,14 @@ class $$WorkoutSessionsTableAnnotationComposer
     column: $table.finishedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get weekNumber => $composableBuilder(
+    column: $table.weekNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get dayNumber =>
+      $composableBuilder(column: $table.dayNumber, builder: (column) => column);
 
   $$WorkoutPlansTableAnnotationComposer get planId {
     final $$WorkoutPlansTableAnnotationComposer composer = $composerBuilder(
@@ -5378,12 +5820,16 @@ class $$WorkoutSessionsTableTableManager
                 Value<int> studentId = const Value.absent(),
                 Value<DateTime> startedAt = const Value.absent(),
                 Value<DateTime?> finishedAt = const Value.absent(),
+                Value<int> weekNumber = const Value.absent(),
+                Value<int> dayNumber = const Value.absent(),
               }) => WorkoutSessionsCompanion(
                 id: id,
                 planId: planId,
                 studentId: studentId,
                 startedAt: startedAt,
                 finishedAt: finishedAt,
+                weekNumber: weekNumber,
+                dayNumber: dayNumber,
               ),
           createCompanionCallback:
               ({
@@ -5392,12 +5838,16 @@ class $$WorkoutSessionsTableTableManager
                 required int studentId,
                 Value<DateTime> startedAt = const Value.absent(),
                 Value<DateTime?> finishedAt = const Value.absent(),
+                Value<int> weekNumber = const Value.absent(),
+                Value<int> dayNumber = const Value.absent(),
               }) => WorkoutSessionsCompanion.insert(
                 id: id,
                 planId: planId,
                 studentId: studentId,
                 startedAt: startedAt,
                 finishedAt: finishedAt,
+                weekNumber: weekNumber,
+                dayNumber: dayNumber,
               ),
           withReferenceMapper: (p0) => p0
               .map(

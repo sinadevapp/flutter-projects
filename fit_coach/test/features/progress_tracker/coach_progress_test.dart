@@ -33,15 +33,19 @@ void main() {
     final planId = await db.insertWorkoutPlan(
       WorkoutPlansCompanion.insert(studentId: studentId, title: 'برنامه'),
     );
-    final exerciseId = await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'اسکوات',
-      sets: sets,
-      reps: reps,
-    ));
+    final exerciseId = await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: sets,
+        reps: reps,
+      ),
+    );
     final sessionId = await db.startWorkoutSession(
       planId: planId,
       studentId: studentId,
+      weekNumber: 1,
+      dayNumber: 1,
     );
     for (var i = 1; i <= sets; i++) {
       await db.logSet(
@@ -79,8 +83,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the coach view is framed around the student, not the reader',
-      (tester) async {
+  testWidgets('the coach view is framed around the student, not the reader', (
+    tester,
+  ) async {
     await train(ali, sets: 3);
     await pumpCoachView(tester, studentId: ali, studentName: 'علی');
 
@@ -91,8 +96,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the coach sees the same figures the student does',
-      (tester) async {
+  testWidgets('the coach sees the same figures the student does', (
+    tester,
+  ) async {
     await train(ali, sets: 3);
 
     await pumpCoachView(tester, studentId: ali, studentName: 'علی');
@@ -113,8 +119,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets("one student's history never leaks into another's",
-      (tester) async {
+  testWidgets("one student's history never leaks into another's", (
+    tester,
+  ) async {
     await train(ali, sets: 3);
     await train(reza, sets: 1);
 
@@ -127,8 +134,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a student who has not trained shows an empty state',
-      (tester) async {
+  testWidgets('a student who has not trained shows an empty state', (
+    tester,
+  ) async {
     await pumpCoachView(tester, studentId: ali, studentName: 'علی');
 
     expect(find.text('هنوز تمرینی ثبت نشده'), findsOneWidget);
@@ -136,20 +144,25 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('an unfinished workout does not count as completed',
-      (tester) async {
+  testWidgets('an unfinished workout does not count as completed', (
+    tester,
+  ) async {
     final planId = await db.insertWorkoutPlan(
       WorkoutPlansCompanion.insert(studentId: ali, title: 'برنامه'),
     );
-    final exerciseId = await db.insertExercise(ExercisesCompanion.insert(
-      planId: planId,
-      name: 'اسکوات',
-      sets: 3,
-      reps: 10,
-    ));
+    final exerciseId = await db.insertExercise(
+      ExercisesCompanion.insert(
+        planId: planId,
+        name: 'اسکوات',
+        sets: 3,
+        reps: 10,
+      ),
+    );
     final sessionId = await db.startWorkoutSession(
       planId: planId,
       studentId: ali,
+      weekNumber: 1,
+      dayNumber: 1,
     );
     await db.logSet(sessionId: sessionId, exerciseId: exerciseId, setNumber: 1);
     // Deliberately not finished — the student is still mid-workout.

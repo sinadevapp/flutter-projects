@@ -271,5 +271,58 @@
   "studentUpdated": "اطلاعات شاگرد به‌روز شد",
   "noPrivateStudents": "شاگرد خصوصی‌ای ثبت نشده",
   "noPublicStudents": "شاگرد گروهی‌ای ثبت نشده",
-  "emptyTabHint": "شاگردان این دسته در تب دیگری هستند"
+  "emptyTabHint": "شاگردان این دسته در تب دیگری هستند",
+  "weekLabel": "هفته {n}",
+  "dayLabel": "روز {n}",
+  "finishPreviousFirst": "ابتدا تمرین قبلی را پایان ده",
+  "catLegs": "پا",
+  "catChest": "سینه",
+  "catShoulders": "سرشانه",
+  "catBack": "پشت",
+  "catArms": "دست",
+  "catCore": "شکم",
+  "catCompound": "ترکیبی",
+  "planForStudent": "برنامه برای {name}",
+  "@planForStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "durationWeeksLabel": "مدت برنامه (هفته)",
+  "addWeek": "افزودن هفته {n}",
+  "addDay": "افزودن روز",
+  "weekCopied": "هفته {n} کپی شد",
+  "weekNotEmpty": "این هفته قبلاً حرکت دارد",
+  "categoryLabel": "دسته‌بندی",
+  "nutritionForThisPlan": "تغذیه این شاگرد",
+  "@weekLabel": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@dayLabel": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@addWeek": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@weekCopied": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -84,8 +84,9 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('pausing stops the countdown, resuming continues it',
-        (tester) async {
+    testWidgets('pausing stops the countdown, resuming continues it', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         testApp(
           home: const Scaffold(
@@ -117,45 +118,51 @@ void main() {
 
   group('workout summary view', () {
     WorkoutSummary summary({required bool complete}) => WorkoutSummary.from(
-          session: WorkoutSession(
-            id: 1,
-            planId: 1,
-            studentId: 1,
-            startedAt: DateTime(2026, 9, 22, 18),
-            finishedAt: DateTime(2026, 9, 22, 19, 15),
+      session: WorkoutSession(
+        id: 1,
+        planId: 1,
+        studentId: 1,
+        weekNumber: 1,
+        dayNumber: 1,
+        startedAt: DateTime(2026, 9, 22, 18),
+        finishedAt: DateTime(2026, 9, 22, 19, 15),
+      ),
+      logs: [
+        SetLog(
+          id: 1,
+          sessionId: 1,
+          exerciseId: 1,
+          setNumber: 1,
+          completedAt: DateTime(2026, 9, 22, 18, 5),
+        ),
+        if (complete)
+          SetLog(
+            id: 2,
+            sessionId: 1,
+            exerciseId: 1,
+            setNumber: 2,
+            completedAt: DateTime(2026, 9, 22, 18, 10),
           ),
-          logs: [
-            SetLog(
-              id: 1,
-              sessionId: 1,
-              exerciseId: 1,
-              setNumber: 1,
-              completedAt: DateTime(2026, 9, 22, 18, 5),
-            ),
-            if (complete)
-              SetLog(
-                id: 2,
-                sessionId: 1,
-                exerciseId: 1,
-                setNumber: 2,
-                completedAt: DateTime(2026, 9, 22, 18, 10),
-              ),
-          ],
-          exercises: [
-            Exercise(
-              id: 1,
-              planId: 1,
-              name: 'اسکوات',
-              // Two sets asked for, so `complete` decides whether it is done.
-              sets: 2,
-              reps: 10,
-              position: 1,
-            ),
-          ],
-        );
+      ],
+      exercises: [
+        Exercise(
+          id: 1,
+          planId: 1,
+          name: 'اسکوات',
+          // Two sets asked for, so `complete` decides whether it is done.
+          sets: 2,
+          reps: 10,
+          position: 1,
+          weekNumber: 1,
+          dayNumber: 1,
+          category: ExerciseCategory.compound,
+        ),
+      ],
+    );
 
-    testWidgets('a complete workout says so and shows the totals',
-        (tester) async {
+    testWidgets('a complete workout says so and shows the totals', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         testApp(
           home: Scaffold(

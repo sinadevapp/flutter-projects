@@ -30,18 +30,17 @@ void main() {
     List<(String, int, int)> movements = const [('اسکوات', 4, 10)],
   }) async {
     final planId = await db.insertWorkoutPlan(
-      WorkoutPlansCompanion.insert(
-        studentId: studentId ?? ali,
-        title: title,
-      ),
+      WorkoutPlansCompanion.insert(studentId: studentId ?? ali, title: title),
     );
     for (final (name, sets, reps) in movements) {
-      await db.insertExercise(ExercisesCompanion.insert(
-        planId: planId,
-        name: name,
-        sets: sets,
-        reps: reps,
-      ));
+      await db.insertExercise(
+        ExercisesCompanion.insert(
+          planId: planId,
+          name: name,
+          sets: sets,
+          reps: reps,
+        ),
+      );
     }
     return planId;
   }
@@ -84,10 +83,9 @@ void main() {
     });
 
     test('a movement can be removed from the plan', () async {
-      final planId = await makePlan(movements: [
-        ('اسکوات', 4, 10),
-        ('پرس سینه', 3, 8),
-      ]);
+      final planId = await makePlan(
+        movements: [('اسکوات', 4, 10), ('پرس سینه', 3, 8)],
+      );
       final squat = (await db.getExercisesForPlan(planId)).first;
 
       await db.deleteExercise(squat.id);
@@ -102,6 +100,8 @@ void main() {
       final sessionId = await db.startWorkoutSession(
         planId: planId,
         studentId: ali,
+        weekNumber: 1,
+        dayNumber: 1,
       );
       await db.logSet(
         sessionId: sessionId,
@@ -128,10 +128,9 @@ void main() {
 
   group('deleting a plan', () {
     test('removes the plan and its movements', () async {
-      final planId = await makePlan(movements: [
-        ('اسکوات', 4, 10),
-        ('پرس سینه', 3, 8),
-      ]);
+      final planId = await makePlan(
+        movements: [('اسکوات', 4, 10), ('پرس سینه', 3, 8)],
+      );
 
       await db.deletePlan(planId);
 
@@ -139,32 +138,36 @@ void main() {
       expect(await db.getExercisesForPlan(planId), isEmpty);
     });
 
-    test('a trained plan also takes its sessions and set logs with it',
-        () async {
-      final planId = await makePlan();
-      final exercise = (await db.getExercisesForPlan(planId)).single;
-      final sessionId = await db.startWorkoutSession(
-        planId: planId,
-        studentId: ali,
-      );
-      await db.logSet(
-        sessionId: sessionId,
-        exerciseId: exercise.id,
-        setNumber: 1,
-      );
-      await db.finishWorkoutSession(sessionId);
+    test(
+      'a trained plan also takes its sessions and set logs with it',
+      () async {
+        final planId = await makePlan();
+        final exercise = (await db.getExercisesForPlan(planId)).single;
+        final sessionId = await db.startWorkoutSession(
+          planId: planId,
+          studentId: ali,
+          weekNumber: 1,
+          dayNumber: 1,
+        );
+        await db.logSet(
+          sessionId: sessionId,
+          exerciseId: exercise.id,
+          setNumber: 1,
+        );
+        await db.finishWorkoutSession(sessionId);
 
-      // Foreign keys are on: this must delete leaf-first or fail.
-      await db.deletePlan(planId);
+        // Foreign keys are on: this must delete leaf-first or fail.
+        await db.deletePlan(planId);
 
-      expect(await db.getPlansForStudent(ali), isEmpty);
-      expect(
-        await db.select(db.workoutSessions).get(),
-        isEmpty,
-        reason: 'the plan was deleted, so its sessions cannot outlive it',
-      );
-      expect(await db.select(db.setLogs).get(), isEmpty);
-    });
+        expect(await db.getPlansForStudent(ali), isEmpty);
+        expect(
+          await db.select(db.workoutSessions).get(),
+          isEmpty,
+          reason: 'the plan was deleted, so its sessions cannot outlive it',
+        );
+        expect(await db.select(db.setLogs).get(), isEmpty);
+      },
+    );
 
     test('deleting one plan leaves the student\'s other plans alone', () async {
       final first = await makePlan(title: 'برنامه اول');
@@ -172,19 +175,17 @@ void main() {
 
       await db.deletePlan(first);
 
-      expect(
-        (await db.getPlansForStudent(ali)).map((p) => p.title).toList(),
-        ['برنامه دوم'],
-      );
+      expect((await db.getPlansForStudent(ali)).map((p) => p.title).toList(), [
+        'برنامه دوم',
+      ]);
     });
   });
 
   group('duplicating a plan', () {
     test('copies the movements to another student', () async {
-      final planId = await makePlan(movements: [
-        ('اسکوات', 4, 10),
-        ('پرس سینه', 3, 8),
-      ]);
+      final planId = await makePlan(
+        movements: [('اسکوات', 4, 10), ('پرس سینه', 3, 8)],
+      );
 
       final copyId = await db.duplicatePlan(planId, forStudent: reza);
 
@@ -232,39 +233,43 @@ void main() {
   });
 
   group('resetting the coach\'s data', () {
-    test('deleteAllUsers clears plans, sessions and nutrition targets',
-        () async {
-      final planId = await makePlan();
-      final exercise = (await db.getExercisesForPlan(planId)).single;
-      final sessionId = await db.startWorkoutSession(
-        planId: planId,
-        studentId: ali,
-      );
-      await db.logSet(
-        sessionId: sessionId,
-        exerciseId: exercise.id,
-        setNumber: 1,
-      );
-      await db.saveNutritionTarget(
-        NutritionTargetsCompanion.insert(
-          studentId: Value(ali),
-          sex: 0,
-          age: 30,
-          heightCm: 180,
-          weightKg: 80,
-          activity: 2,
-          goal: 1,
-        ),
-      );
+    test(
+      'deleteAllUsers clears plans, sessions and nutrition targets',
+      () async {
+        final planId = await makePlan();
+        final exercise = (await db.getExercisesForPlan(planId)).single;
+        final sessionId = await db.startWorkoutSession(
+          planId: planId,
+          studentId: ali,
+          weekNumber: 1,
+          dayNumber: 1,
+        );
+        await db.logSet(
+          sessionId: sessionId,
+          exerciseId: exercise.id,
+          setNumber: 1,
+        );
+        await db.saveNutritionTarget(
+          NutritionTargetsCompanion.insert(
+            studentId: Value(ali),
+            sex: 0,
+            age: 30,
+            heightCm: 180,
+            weightKg: 80,
+            activity: 2,
+            goal: 1,
+          ),
+        );
 
-      await db.deleteAllUsers();
+        await db.deleteAllUsers();
 
-      expect(await db.getAllUsers(), isEmpty);
-      expect(await db.select(db.workoutPlans).get(), isEmpty);
-      expect(await db.select(db.exercises).get(), isEmpty);
-      expect(await db.select(db.workoutSessions).get(), isEmpty);
-      expect(await db.select(db.setLogs).get(), isEmpty);
-      expect(await db.select(db.nutritionTargets).get(), isEmpty);
-    });
+        expect(await db.getAllUsers(), isEmpty);
+        expect(await db.select(db.workoutPlans).get(), isEmpty);
+        expect(await db.select(db.exercises).get(), isEmpty);
+        expect(await db.select(db.workoutSessions).get(), isEmpty);
+        expect(await db.select(db.setLogs).get(), isEmpty);
+        expect(await db.select(db.nutritionTargets).get(), isEmpty);
+      },
+    );
   });
 }

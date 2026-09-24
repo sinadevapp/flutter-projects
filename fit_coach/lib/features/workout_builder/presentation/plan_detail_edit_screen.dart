@@ -2,7 +2,9 @@ import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
+import 'package:fit_coach/core/l10n/category_label.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/utils/date_format.dart';
 import 'package:fit_coach/features/workout_active/presentation/active_workout_screen.dart';
 import 'package:flutter/material.dart';
@@ -44,39 +46,78 @@ class PlanDetailEditScreen extends ConsumerWidget {
         error: (e, _) => const ErrorState(),
         data: (list) => list.isEmpty
             ? Center(child: Text(l10n.planHasNoMovements))
-            : ListView(
-                children: [
-                  for (final exercise in list)
-                    ListTile(
-                      title: Text(exercise.name),
-                      trailing: Text(
-                        l10n.setsXReps(
-                          localizeNumber(
-                            Localizations.localeOf(context),
-                            exercise.sets,
-                          ),
-                          localizeNumber(
-                            Localizations.localeOf(context),
-                            exercise.reps,
-                          ),
-                        ),
-                      ),
-                      onTap: () => _editMovement(context, ref, exercise),
-                      onLongPress: () => _deleteMovement(context, ref, exercise),
-                    ),
-                ],
-              ),
+            : _grouped(context, ref, list),
       ),
       floatingActionButton: list(context, ref, exercises.value ?? const []),
     );
   }
 
+  /// Movements grouped under their week and day, each showing its category.
+  ///
+  /// Grouped the same way the student's view reads them, so the coach edits
+  /// in the order the program actually runs.
+  Widget _grouped(BuildContext context, WidgetRef ref, List<Exercise> list) {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
+    final items = <Widget>[];
+    int? lastWeek;
+
+    for (final (week, day) in daysOf(list)) {
+      if (lastWeek != week) {
+        lastWeek = week;
+        items.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+            child: Text(
+              l10n.weekLabel(localizeNumber(locale, week)),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+        );
+      }
+      items.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text(
+            l10n.dayLabel(localizeNumber(locale, day)),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+      for (final exercise in exercisesForDay(list, week, day)) {
+        items.add(
+          ListTile(
+            title: Text(exercise.name),
+            // The category is what tells a coach scanning the week which body
+            // part a movement belongs to, without reading every name.
+            subtitle: Text(
+              categoryLabel(l10n, exercise.category),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            trailing: Text(
+              l10n.setsXReps(
+                localizeNumber(locale, exercise.sets),
+                localizeNumber(locale, exercise.reps),
+              ),
+            ),
+            onTap: () => _editMovement(context, ref, exercise),
+            onLongPress: () => _deleteMovement(context, ref, exercise),
+          ),
+        );
+      }
+    }
+
+    return ListView(children: items);
+  }
+
   /// The start button, disabled until the plan has something to perform.
-  Widget? list(
-    BuildContext context,
-    WidgetRef ref,
-    List<Exercise> exercises,
-  ) {
+  Widget? list(BuildContext context, WidgetRef ref, List<Exercise> exercises) {
     if (exercises.isEmpty) return null;
     return FloatingActionButton.extended(
       onPressed: () => _start(context, ref),
@@ -85,10 +126,20 @@ class PlanDetailEditScreen extends ConsumerWidget {
     );
   }
 
+  /// Opens the program from the top — week 1 day 1 — as it did before weeks
+  /// existed.
+  ///
+  /// The coach does not train here, so this is a review of how the program
+  /// opens. The student picks the day to train from their own screen.
   Future<void> _start(BuildContext context, WidgetRef ref) async {
     final sessionId = await ref
         .read(appDatabaseProvider)
-        .startWorkoutSession(planId: plan.id, studentId: plan.studentId);
+        .startWorkoutSession(
+          planId: plan.id,
+          studentId: plan.studentId,
+          weekNumber: 1,
+          dayNumber: 1,
+        );
     if (!context.mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -108,17 +159,18 @@ class PlanDetailEditScreen extends ConsumerWidget {
     if (title == null) return;
     if (title.isEmpty) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.planTitleRequired)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.planTitleRequired)));
       }
       return;
     }
 
     await ref.read(appDatabaseProvider).renamePlan(plan.id, title);
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.l10n.planRenamed)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.planRenamed)));
     }
   }
 
@@ -134,8 +186,9 @@ class PlanDetailEditScreen extends ConsumerWidget {
 
     await ref.read(appDatabaseProvider).deletePlan(plan.id);
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.l10n.planDeleted)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.planDeleted)));
       Navigator.of(context).pop();
     }
   }
@@ -156,8 +209,9 @@ class PlanDetailEditScreen extends ConsumerWidget {
         .read(appDatabaseProvider)
         .updateExercise(exercise.id, name: name, sets: sets, reps: reps);
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.l10n.movementUpdated)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.movementUpdated)));
     }
   }
 
@@ -175,8 +229,9 @@ class PlanDetailEditScreen extends ConsumerWidget {
 
     await ref.read(appDatabaseProvider).deleteExercise(exercise.id);
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.l10n.movementDeleted)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.movementDeleted)));
     }
   }
 
@@ -217,8 +272,9 @@ class _RenameDialog extends StatefulWidget {
 }
 
 class _RenameDialogState extends State<_RenameDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialTitle);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialTitle,
+  );
 
   @override
   void dispose() {
@@ -262,12 +318,15 @@ class _MovementDialog extends StatefulWidget {
 }
 
 class _MovementDialogState extends State<_MovementDialog> {
-  late final TextEditingController _name =
-      TextEditingController(text: widget.exercise.name);
-  late final TextEditingController _sets =
-      TextEditingController(text: widget.exercise.sets.toString());
-  late final TextEditingController _reps =
-      TextEditingController(text: widget.exercise.reps.toString());
+  late final TextEditingController _name = TextEditingController(
+    text: widget.exercise.name,
+  );
+  late final TextEditingController _sets = TextEditingController(
+    text: widget.exercise.sets.toString(),
+  );
+  late final TextEditingController _reps = TextEditingController(
+    text: widget.exercise.reps.toString(),
+  );
 
   @override
   void dispose() {
@@ -283,10 +342,14 @@ class _MovementDialogState extends State<_MovementDialog> {
     final reps = int.tryParse(_reps.text.trim());
 
     // Leave the dialog open on nonsense rather than storing it.
-    if (name.isEmpty || sets == null || reps == null || sets <= 0 || reps <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.invalidNumber)),
-      );
+    if (name.isEmpty ||
+        sets == null ||
+        reps == null ||
+        sets <= 0 ||
+        reps <= 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.invalidNumber)));
       return;
     }
     Navigator.of(context).pop((name, sets, reps));

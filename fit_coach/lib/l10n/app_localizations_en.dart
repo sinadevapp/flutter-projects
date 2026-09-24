@@ -520,4 +520,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyTabHint => 'These students are under another tab';
+
+  @override
+  String weekLabel(String n) {
+    return 'Week $n';
+  }
+
+  @override
+  String dayLabel(String n) {
+    return 'Day $n';
+  }
+
+  @override
+  String get finishPreviousFirst => 'Finish the workout you started first';
+
+  @override
+  String get catLegs => 'Legs';
+
+  @override
+  String get catChest => 'Chest';
+
+  @override
+  String get catShoulders => 'Shoulders';
+
+  @override
+  String get catBack => 'Back';
+
+  @override
+  String get catArms => 'Arms';
+
+  @override
+  String get catCore => 'Core';
+
+  @override
+  String get catCompound => 'Compound';
+
+  @override
+  String planForStudent(String name) {
+    return 'Plan for $name';
+  }
+
+  @override
+  String get durationWeeksLabel => 'Program length (weeks)';
+
+  @override
+  String addWeek(String n) {
+    return 'Add week $n';
+  }
+
+  @override
+  String get addDay => 'Add day';
+
+  @override
+  String weekCopied(String n) {
+    return 'Week $n copied';
+  }
+
+  @override
+  String get weekNotEmpty => 'This week already has movements';
+
+  @override
+  String get categoryLabel => 'Category';
+
+  @override
+  String get nutritionForThisPlan => 'This student\'s nutrition';
 }

@@ -2,6 +2,7 @@ import 'package:fit_coach/core/database/app_database.dart';
 import 'package:fit_coach/core/database/database_provider.dart';
 import 'package:fit_coach/core/database/plan_providers.dart';
 import 'package:fit_coach/core/l10n/l10n_extension.dart';
+import 'package:fit_coach/core/schedule/exercise_schedule.dart';
 import 'package:fit_coach/core/theme/app_theme.dart';
 import 'package:fit_coach/core/widgets/states.dart';
 import 'package:fit_coach/features/nutrition_budget/presentation/student_nutrition_screen.dart';
@@ -84,7 +85,15 @@ class StudentPlanScreen extends ConsumerWidget {
   }
 }
 
-/// The movements of one plan, and the way to start (or resume) training it.
+/// The days of one plan, and the way to train each of them.
+///
+/// Grouped week → day rather than one flat list: a program spans several
+/// weeks now, and a single scroll of every movement ever written says nothing
+/// about what to do *today*.
+///
+/// Exactly one day can be running at a time. The day the open session belongs
+/// to offers to resume; the others say so rather than quietly resuming
+/// somewhere else — which is what the previous "start or resume" button did.
 class PlanDetailScreen extends ConsumerWidget {
   const PlanDetailScreen({super.key, required this.plan});
 
@@ -101,56 +110,179 @@ class PlanDetailScreen extends ConsumerWidget {
       body: exercises.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => const ErrorState(),
-        data: (list) => list.isEmpty
-            ? Center(child: Text(context.l10n.planHasNoMovements))
-            : ListView(
-                children: [
-                  for (final exercise in list)
-                    ListTile(
-                      title: Text(exercise.name),
-                      trailing: Text(
-                        context.l10n.setsXReps(
-                          localizeNumber(
-                            Localizations.localeOf(context),
-                            exercise.sets,
-                          ),
-                          localizeNumber(
-                            Localizations.localeOf(context),
-                            exercise.reps,
-                          ),
-                        ),
+        data: (list) => active.when(
+          // Until it is known whether something is running, every day would
+          // offer to start — say nothing rather than offering twice.
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => const ErrorState(),
+          data: (session) {
+            if (list.isEmpty) {
+              return Center(child: Text(context.l10n.planHasNoMovements));
+            }
+
+            final locale = Localizations.localeOf(context);
+            final days = <Widget>[];
+            int? lastWeek;
+
+            for (final (week, day) in daysOf(list)) {
+              // The week is printed once, where it starts — repeating it on
+              // every day would bury the day itself.
+              if (lastWeek != week) {
+                lastWeek = week;
+                days.add(
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+                    child: Text(
+                      context.l10n.weekLabel(localizeNumber(locale, week)),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                ],
-              ),
-      ),
-      floatingActionButton: active.when(
-        loading: () => null,
-        error: (_, __) => null,
-        data: (session) => FloatingActionButton.extended(
-          onPressed: () => _start(context, ref, session),
-          label: Text(session == null ? context.l10n.startWorkout : context.l10n.resumeWorkout),
-          icon: const Icon(Icons.play_arrow),
+                  ),
+                );
+              }
+              days.add(
+                _DayCard(
+                  day: day,
+                  movements: exercisesForDay(list, week, day),
+                  isTheOpenSession:
+                      session != null &&
+                      session.weekNumber == week &&
+                      session.dayNumber == day,
+                  anotherSessionOpen: session != null,
+                  onStart: () => _start(context, ref, week, day),
+                ),
+              );
+            }
+
+            return ListView(
+              padding: const EdgeInsets.all(AppTheme.pagePadding),
+              children: days,
+            );
+          },
         ),
       ),
     );
   }
 
-  /// Resumes the open session, or opens a new one, then shows the workout.
+  /// Trains one day, resuming it first if that is the session already running.
   Future<void> _start(
     BuildContext context,
     WidgetRef ref,
-    WorkoutSession? session,
+    int week,
+    int day,
   ) async {
-    final sessionId = session?.id ??
-        await ref.read(appDatabaseProvider).startWorkoutSession(
-              planId: plan.id,
-              studentId: plan.studentId,
-            );
+    final db = ref.read(appDatabaseProvider);
+    final open = await db.getActiveWorkoutSession(plan.studentId);
+
+    // A day that is still running belongs to the day it started on. Resuming
+    // it for a *different* day would write this day's sets into that one.
+    final sessionId = open != null
+        ? open.id
+        : await db.startWorkoutSession(
+            planId: plan.id,
+            studentId: plan.studentId,
+            weekNumber: week,
+            dayNumber: day,
+          );
     if (!context.mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ActiveWorkoutScreen(sessionId: sessionId, plan: plan),
+      ),
+    );
+  }
+}
+
+/// One day: its header, its movements, and what starting it would do.
+class _DayCard extends StatelessWidget {
+  const _DayCard({
+    required this.day,
+    required this.movements,
+    required this.isTheOpenSession,
+    required this.anotherSessionOpen,
+    required this.onStart,
+  });
+
+  final int day;
+  final List<Exercise> movements;
+
+  /// This day *is* the one running right now.
+  final bool isTheOpenSession;
+
+  /// Some day is running — possibly this one, possibly another.
+  final bool anotherSessionOpen;
+
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  l10n.dayLabel(localizeNumber(locale, day)),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (isTheOpenSession) ...[
+                  const SizedBox(width: 8),
+                  // The one place a running workout is flagged, so the
+                  // student can find it again after leaving the screen.
+                  Icon(
+                    Icons.play_circle,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            for (final movement in movements)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(movement.name),
+                trailing: Text(
+                  l10n.setsXReps(
+                    localizeNumber(locale, movement.sets),
+                    localizeNumber(locale, movement.reps),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 4),
+            if (isTheOpenSession)
+              FilledButton.icon(
+                onPressed: onStart,
+                icon: const Icon(Icons.play_arrow),
+                label: Text(l10n.resumeWorkout),
+              )
+            else if (anotherSessionOpen)
+              // Say why rather than silently doing the wrong thing: starting
+              // here would resume the *other* day and log sets against it.
+              OutlinedButton(
+                onPressed: null,
+                child: Text(l10n.finishPreviousFirst),
+              )
+            else
+              FilledButton.icon(
+                onPressed: onStart,
+                icon: const Icon(Icons.play_arrow),
+                label: Text(l10n.startWorkout),
+              ),
+          ],
+        ),
       ),
     );
   }

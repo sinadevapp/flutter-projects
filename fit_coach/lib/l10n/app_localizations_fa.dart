@@ -519,4 +519,68 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get emptyTabHint => 'شاگردان این دسته در تب دیگری هستند';
+
+  @override
+  String weekLabel(String n) {
+    return 'هفته $n';
+  }
+
+  @override
+  String dayLabel(String n) {
+    return 'روز $n';
+  }
+
+  @override
+  String get finishPreviousFirst => 'ابتدا تمرین قبلی را پایان ده';
+
+  @override
+  String get catLegs => 'پا';
+
+  @override
+  String get catChest => 'سینه';
+
+  @override
+  String get catShoulders => 'سرشانه';
+
+  @override
+  String get catBack => 'پشت';
+
+  @override
+  String get catArms => 'دست';
+
+  @override
+  String get catCore => 'شکم';
+
+  @override
+  String get catCompound => 'ترکیبی';
+
+  @override
+  String planForStudent(String name) {
+    return 'برنامه برای $name';
+  }
+
+  @override
+  String get durationWeeksLabel => 'مدت برنامه (هفته)';
+
+  @override
+  String addWeek(String n) {
+    return 'افزودن هفته $n';
+  }
+
+  @override
+  String get addDay => 'افزودن روز';
+
+  @override
+  String weekCopied(String n) {
+    return 'هفته $n کپی شد';
+  }
+
+  @override
+  String get weekNotEmpty => 'این هفته قبلاً حرکت دارد';
+
+  @override
+  String get categoryLabel => 'دسته‌بندی';
+
+  @override
+  String get nutritionForThisPlan => 'تغذیه این شاگرد';
 }
