@@ -24,6 +24,8 @@
   "movements": "حرکات",
   "addMovement": "افزودن حرکت",
   "movementNameLabel": "نام حرکت",
+  "pickFromLibrary": "انتخاب از کتابخانه",
+  "noLibraryForCategory": "برای این دسته حرکتی در کتابخانه نیست",
   "setsLabel": "ست",
   "repsLabel": "تکرار",
   "setsXReps": "{sets} × {reps}",

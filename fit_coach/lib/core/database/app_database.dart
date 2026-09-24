@@ -99,6 +99,26 @@ class PlanDays extends Table {
   BoolColumn get isRestDay => boolean().withDefault(const Constant(false))();
 }
 
+/// A named movement the coach can pick from.
+///
+/// The unique index is on **(name, category)**, not on the name alone: the
+/// same movement can legitimately belong to two ways of sorting it —
+/// «ددلیفت» is a back movement and the classic compound — and deduplicating
+/// across categories would silently drop one of them.
+@DataClassName('LibraryEntry')
+@TableIndex(
+  name: 'library_name_category',
+  unique: true,
+  columns: {#name, #category},
+)
+class ExerciseLibrary extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get name => text()();
+
+  IntColumn get category => intEnum<ExerciseCategory>()();
+}
+
 /// One movement inside a training plan (e.g. squat, 4 sets of 10).
 /// One movement, and the slot of the program it belongs to.
 ///
@@ -272,6 +292,7 @@ class NutritionTargets extends Table {
     FoodItems,
     NutritionTargets,
     PlanDays,
+    ExerciseLibrary,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -281,7 +302,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase({QueryExecutor? executor}) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -411,6 +432,13 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      // A new table with no creator branch — plain `from < 13` is correct,
+      // the same reasoning as `plan_days`. The seed runs here as well as in
+      // `onCreate`, because an upgrading install needs the library too.
+      if (from < 13) {
+        await m.createTable(exerciseLibrary);
+        await _seedLibrary();
+      }
     },
     // A *fresh* install never runs onUpgrade, so the seed has to happen
     // here as well as in the `from < 7` branch. Both paths run exactly
@@ -419,6 +447,7 @@ class AppDatabase extends _$AppDatabase {
     onCreate: (m) async {
       await m.createAll();
       await _seedFoods();
+      await _seedLibrary();
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -486,6 +515,66 @@ class AppDatabase extends _$AppDatabase {
       ),
     ]);
   });
+
+  /// Movements the coach can pick from instead of retyping.
+  ///
+  /// Ordered rather than alphabetised: within a category the common movement
+  /// comes first, so reaching for «پا» and pressing the first entry gives the
+  /// squat. Alphabetising would put it behind three obscure machines and
+  /// defeat the point of having a list.
+  ///
+  /// Runs on both paths — a fresh install and an upgrade — so a database
+  /// created before schema 13 is not left with an empty library.
+  Future<void> _seedLibrary() {
+    const seed = <(String, ExerciseCategory)>[
+      // Legs
+      ('اسکوات', ExerciseCategory.legs),
+      ('لانج', ExerciseCategory.legs),
+      ('پرس پا', ExerciseCategory.legs),
+      ('کشیدن پا', ExerciseCategory.legs),
+      ('ساق پا', ExerciseCategory.legs),
+      // Chest
+      ('پرس سینه', ExerciseCategory.chest),
+      ('پروانه', ExerciseCategory.chest),
+      ('پرس دمبل', ExerciseCategory.chest),
+      ('زیر سینه دستگیره‌دار', ExerciseCategory.chest),
+      // Shoulders
+      ('پرس سر شانه', ExerciseCategory.shoulders),
+      ('پرواز جانبی', ExerciseCategory.shoulders),
+      ('نشر افقی', ExerciseCategory.shoulders),
+      // Back
+      ('بارفیکس', ExerciseCategory.back),
+      ('زیر بغل هالتر', ExerciseCategory.back),
+      ('رویه ران پای ثابت', ExerciseCategory.back),
+      // A Latin name so search is exercised against ASCII too.
+      ('Barbell row', ExerciseCategory.back),
+      // Arms
+      ('جلو بازو هالتر', ExerciseCategory.arms),
+      ('پشت بازو سیم کش', ExerciseCategory.arms),
+      ('پرس آرنج', ExerciseCategory.arms),
+      // Core
+      ('کرانچ', ExerciseCategory.core),
+      ('پلانک', ExerciseCategory.core),
+      ('زیر شکم', ExerciseCategory.core),
+      ('توییست روسی', ExerciseCategory.core),
+      // Compound
+      ('ددلیفت', ExerciseCategory.compound),
+      ('تمیز و پرس', ExerciseCategory.compound),
+      ('پرس نظامی', ExerciseCategory.compound),
+      ('اسکوات کامل', ExerciseCategory.compound),
+    ];
+
+    return batch((b) {
+      b.insertAll(
+        exerciseLibrary,
+        [
+          for (final (name, category) in seed)
+            ExerciseLibraryCompanion.insert(name: name, category: category),
+        ],
+        mode: InsertMode.insertOrIgnore,
+      );
+    });
+  }
 
   Future<int> insertUser(UsersCompanion entry) => into(users).insert(entry);
 
@@ -967,6 +1056,52 @@ class AppDatabase extends _$AppDatabase {
   Future<Exercise?> getExercise(int id) => (select(exercises)
         ..where((e) => e.id.equals(id)))
       .getSingleOrNull();
+
+  /// The library, or just one category's worth of it. Null = everything.
+  ///
+  /// Ordered by id, which for a seeded library is the order above — so the
+  /// first entry of a category is the one the coach most likely wants.
+  Future<List<LibraryEntry>> libraryFor(ExerciseCategory? category) {
+    final query = select(exerciseLibrary);
+    if (category != null) {
+      query.where((l) => l.category.equals(category.index));
+    }
+    return (query..orderBy([(l) => OrderingTerm.asc(l.id)])).get();
+  }
+
+  /// Library entries whose name begins with [query], across all categories.
+  ///
+  /// A name search is not a category filter: someone typing "اسک" is looking
+  /// for that word, not for every leg movement that happens to start with a
+  /// similar letter.
+  ///
+  /// SQLite's `LIKE` is ASCII case-insensitive, so `Barbell` finds
+  /// `barbell row` without needing to case-fold anything here.
+  Future<List<LibraryEntry>> searchLibrary(String query) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return libraryFor(null);
+    return (select(exerciseLibrary)
+          ..where((l) => l.name.like('$trimmed%'))
+          ..orderBy([(l) => OrderingTerm.asc(l.id)]))
+        .get();
+  }
+
+  /// Adds a movement the coach named themselves.
+  ///
+  /// Ignoring an existing (name, category) rather than failing: the coach
+  /// retyping a movement is not an error to be told about, and a plain insert
+  /// would throw on the unique index.
+  Future<void> addToLibrary({
+    required String name,
+    required ExerciseCategory category,
+  }) async {
+    final cleaned = name.trim();
+    if (cleaned.isEmpty) return;
+    await into(exerciseLibrary).insert(
+      ExerciseLibraryCompanion.insert(name: cleaned, category: category),
+      mode: InsertMode.insertOrIgnore,
+    );
+  }
 
   /// Every set logged so far in one workout, oldest first.
   Future<List<SetLog>> getSetLogs(int sessionId) =>

@@ -173,6 +173,48 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     });
   }
 
+  /// Offers this row's category from the library and fills the name with it.
+  ///
+  /// A list rather than an autocomplete so the field stays the single source
+  /// of truth: `_save` reads `draft.name`, and a widget with its own internal
+  /// controller would write there while the draft read here — two places for
+  /// one name to disagree.
+  Future<void> _pickMovement(_ExerciseDraft draft) async {
+    final db = ref.read(appDatabaseProvider);
+    final entries = await db.libraryFor(draft.category);
+    if (!mounted) return;
+
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: SizedBox(
+          height: 360,
+          child: entries.isEmpty
+              ? Center(child: Text(context.l10n.noLibraryForCategory))
+              : ListView.separated(
+                  itemCount: entries.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (sheetContext, i) => ListTile(
+                    title: Text(entries[i].name),
+                    // The category matches the row's, so picking one also
+                    // confirms the tag rather than contradicting it.
+                    trailing: Text(
+                      categoryLabel(context.l10n, entries[i].category),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    onTap: () => Navigator.of(sheetContext).pop(entries[i].name),
+                  ),
+                ),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+
+    setState(() => draft.name.text = picked);
+  }
+
   /// A day's heading: its name, tappable to change, and a rest switch.
   Widget _dayHeader(
     AppLocalizations l10n,
@@ -436,12 +478,24 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       padding: const EdgeInsets.only(bottom: 8, top: 4),
       child: Column(
         children: [
-          TextField(
-            controller: draft.name,
-            decoration: InputDecoration(
-              labelText: l10n.movementNameLabel,
-              border: const OutlineInputBorder(),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: draft.name,
+                  decoration: InputDecoration(
+                    labelText: l10n.movementNameLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: l10n.pickFromLibrary,
+                onPressed: () => _pickMovement(draft),
+                icon: const Icon(Icons.list_alt),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Row(

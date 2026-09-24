@@ -242,6 +242,18 @@ abstract class AppLocalizations {
   /// **'Movement name'**
   String get movementNameLabel;
 
+  /// No description provided for @pickFromLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from the library'**
+  String get pickFromLibrary;
+
+  /// No description provided for @noLibraryForCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No movements in the library for this category'**
+  String get noLibraryForCategory;
+
   /// No description provided for @setsLabel.
   ///
   /// In en, this message translates to:

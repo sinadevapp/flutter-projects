@@ -31,6 +31,8 @@
   "movements": "Movements",
   "addMovement": "Add movement",
   "movementNameLabel": "Movement name",
+  "pickFromLibrary": "Choose from the library",
+  "noLibraryForCategory": "No movements in the library for this category",
   "setsLabel": "Sets",
   "repsLabel": "Reps",
   "setsXReps": "{sets} × {reps}",

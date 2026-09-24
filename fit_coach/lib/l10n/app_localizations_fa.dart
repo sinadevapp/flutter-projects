@@ -85,6 +85,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get movementNameLabel => 'نام حرکت';
 
   @override
+  String get pickFromLibrary => 'انتخاب از کتابخانه';
+
+  @override
+  String get noLibraryForCategory => 'برای این دسته حرکتی در کتابخانه نیست';
+
+  @override
   String get setsLabel => 'ست';
 
   @override

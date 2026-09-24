@@ -85,6 +85,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get movementNameLabel => 'Movement name';
 
   @override
+  String get pickFromLibrary => 'Choose from the library';
+
+  @override
+  String get noLibraryForCategory =>
+      'No movements in the library for this category';
+
+  @override
   String get setsLabel => 'Sets';
 
   @override

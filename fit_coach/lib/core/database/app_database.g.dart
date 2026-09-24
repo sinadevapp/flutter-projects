@@ -4096,6 +4096,262 @@ class PlanDaysCompanion extends UpdateCompanion<PlanDay> {
   }
 }
 
+class $ExerciseLibraryTable extends ExerciseLibrary
+    with TableInfo<$ExerciseLibraryTable, LibraryEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExerciseLibraryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExerciseCategory, int> category =
+      GeneratedColumn<int>(
+        'category',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<ExerciseCategory>(
+        $ExerciseLibraryTable.$convertercategory,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, category];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'exercise_library';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LibraryEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LibraryEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LibraryEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      category: $ExerciseLibraryTable.$convertercategory.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}category'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $ExerciseLibraryTable createAlias(String alias) {
+    return $ExerciseLibraryTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ExerciseCategory, int, int> $convertercategory =
+      const EnumIndexConverter<ExerciseCategory>(ExerciseCategory.values);
+}
+
+class LibraryEntry extends DataClass implements Insertable<LibraryEntry> {
+  final int id;
+  final String name;
+  final ExerciseCategory category;
+  const LibraryEntry({
+    required this.id,
+    required this.name,
+    required this.category,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    {
+      map['category'] = Variable<int>(
+        $ExerciseLibraryTable.$convertercategory.toSql(category),
+      );
+    }
+    return map;
+  }
+
+  ExerciseLibraryCompanion toCompanion(bool nullToAbsent) {
+    return ExerciseLibraryCompanion(
+      id: Value(id),
+      name: Value(name),
+      category: Value(category),
+    );
+  }
+
+  factory LibraryEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LibraryEntry(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      category: $ExerciseLibraryTable.$convertercategory.fromJson(
+        serializer.fromJson<int>(json['category']),
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'category': serializer.toJson<int>(
+        $ExerciseLibraryTable.$convertercategory.toJson(category),
+      ),
+    };
+  }
+
+  LibraryEntry copyWith({int? id, String? name, ExerciseCategory? category}) =>
+      LibraryEntry(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        category: category ?? this.category,
+      );
+  LibraryEntry copyWithCompanion(ExerciseLibraryCompanion data) {
+    return LibraryEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      category: data.category.present ? data.category.value : this.category,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('category: $category')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, category);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LibraryEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.category == this.category);
+}
+
+class ExerciseLibraryCompanion extends UpdateCompanion<LibraryEntry> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<ExerciseCategory> category;
+  const ExerciseLibraryCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.category = const Value.absent(),
+  });
+  ExerciseLibraryCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required ExerciseCategory category,
+  }) : name = Value(name),
+       category = Value(category);
+  static Insertable<LibraryEntry> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? category,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (category != null) 'category': category,
+    });
+  }
+
+  ExerciseLibraryCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<ExerciseCategory>? category,
+  }) {
+    return ExerciseLibraryCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<int>(
+        $ExerciseLibraryTable.$convertercategory.toSql(category.value),
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExerciseLibraryCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('category: $category')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4113,9 +4369,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $PlanDaysTable planDays = $PlanDaysTable(this);
+  late final $ExerciseLibraryTable exerciseLibrary = $ExerciseLibraryTable(
+    this,
+  );
   late final Index planDaysSlot = Index(
     'plan_days_slot',
     'CREATE UNIQUE INDEX plan_days_slot ON plan_days (plan_id, week_number, day_number)',
+  );
+  late final Index libraryNameCategory = Index(
+    'library_name_category',
+    'CREATE UNIQUE INDEX library_name_category ON exercise_library (name, category)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -4132,7 +4395,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     foodItems,
     nutritionTargets,
     planDays,
+    exerciseLibrary,
     planDaysSlot,
+    libraryNameCategory,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -8162,6 +8427,165 @@ typedef $$PlanDaysTableProcessedTableManager =
       PlanDay,
       PrefetchHooks Function({bool planId})
     >;
+typedef $$ExerciseLibraryTableCreateCompanionBuilder =
+    ExerciseLibraryCompanion Function({
+      Value<int> id,
+      required String name,
+      required ExerciseCategory category,
+    });
+typedef $$ExerciseLibraryTableUpdateCompanionBuilder =
+    ExerciseLibraryCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<ExerciseCategory> category,
+    });
+
+class $$ExerciseLibraryTableFilterComposer
+    extends Composer<_$AppDatabase, $ExerciseLibraryTable> {
+  $$ExerciseLibraryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ExerciseCategory, ExerciseCategory, int>
+  get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+}
+
+class $$ExerciseLibraryTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExerciseLibraryTable> {
+  $$ExerciseLibraryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExerciseLibraryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExerciseLibraryTable> {
+  $$ExerciseLibraryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ExerciseCategory, int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+}
+
+class $$ExerciseLibraryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExerciseLibraryTable,
+          LibraryEntry,
+          $$ExerciseLibraryTableFilterComposer,
+          $$ExerciseLibraryTableOrderingComposer,
+          $$ExerciseLibraryTableAnnotationComposer,
+          $$ExerciseLibraryTableCreateCompanionBuilder,
+          $$ExerciseLibraryTableUpdateCompanionBuilder,
+          (
+            LibraryEntry,
+            BaseReferences<_$AppDatabase, $ExerciseLibraryTable, LibraryEntry>,
+          ),
+          LibraryEntry,
+          PrefetchHooks Function()
+        > {
+  $$ExerciseLibraryTableTableManager(
+    _$AppDatabase db,
+    $ExerciseLibraryTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExerciseLibraryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExerciseLibraryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExerciseLibraryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<ExerciseCategory> category = const Value.absent(),
+              }) => ExerciseLibraryCompanion(
+                id: id,
+                name: name,
+                category: category,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required ExerciseCategory category,
+              }) => ExerciseLibraryCompanion.insert(
+                id: id,
+                name: name,
+                category: category,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExerciseLibraryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExerciseLibraryTable,
+      LibraryEntry,
+      $$ExerciseLibraryTableFilterComposer,
+      $$ExerciseLibraryTableOrderingComposer,
+      $$ExerciseLibraryTableAnnotationComposer,
+      $$ExerciseLibraryTableCreateCompanionBuilder,
+      $$ExerciseLibraryTableUpdateCompanionBuilder,
+      (
+        LibraryEntry,
+        BaseReferences<_$AppDatabase, $ExerciseLibraryTable, LibraryEntry>,
+      ),
+      LibraryEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8186,4 +8610,6 @@ class $AppDatabaseManager {
       $$NutritionTargetsTableTableManager(_db, _db.nutritionTargets);
   $$PlanDaysTableTableManager get planDays =>
       $$PlanDaysTableTableManager(_db, _db.planDays);
+  $$ExerciseLibraryTableTableManager get exerciseLibrary =>
+      $$ExerciseLibraryTableTableManager(_db, _db.exerciseLibrary);
 }
