@@ -191,4 +191,110 @@ void main() {
     expect(summary.totalSets, progress.completedSets);
     expect(summary.plannedSets, progress.totalSets);
   });
+
+  test('reps actually done win over the ones the plan asked for', () {
+    final sessionRow = WorkoutSession(
+      id: 1,
+      planId: 1,
+      studentId: 1,
+      weekNumber: 1,
+      dayNumber: 1,
+      startedAt: DateTime(2026, 9, 24, 18),
+      finishedAt: DateTime(2026, 9, 24, 19),
+    );
+
+    // The plan asked for 3 sets of 10 = 30. The student managed 7, then 7,
+    // then gave up on the last set — and a set they could not complete has no
+    // recorded rep count, so it falls back to what was prescribed.
+    final summary = WorkoutSummary.from(
+      session: sessionRow,
+      logs: [
+        SetLog(
+          id: 1,
+          sessionId: 1,
+          exerciseId: 1,
+          setNumber: 1,
+          completedAt: DateTime(2026, 9, 24, 18, 5),
+          repsPerformed: 7,
+        ),
+        SetLog(
+          id: 2,
+          sessionId: 1,
+          exerciseId: 1,
+          setNumber: 2,
+          completedAt: DateTime(2026, 9, 24, 18, 10),
+          repsPerformed: 7,
+        ),
+        SetLog(
+          id: 3,
+          sessionId: 1,
+          exerciseId: 1,
+          setNumber: 3,
+          completedAt: DateTime(2026, 9, 24, 18, 15),
+          repsPerformed: null,
+        ),
+      ],
+      exercises: [
+        Exercise(
+          id: 1,
+          planId: 1,
+          name: 'اسکوات',
+          sets: 3,
+          reps: 10,
+          position: 1,
+          weekNumber: 1,
+          dayNumber: 1,
+          category: ExerciseCategory.compound,
+        ),
+      ],
+    );
+
+    expect(summary.totalReps, 7 + 7 + 10);
+    expect(summary.movementBreakdown().single.reps, 7 + 7 + 10);
+    // The set count is unaffected: three sets happened either way.
+    expect(summary.totalSets, 3);
+  });
+
+  test('a set logged with no load still counts its reps', () {
+    final summary = WorkoutSummary.from(
+      session: WorkoutSession(
+        id: 1,
+        planId: 1,
+        studentId: 1,
+        weekNumber: 1,
+        dayNumber: 1,
+        startedAt: DateTime(2026, 9, 24, 18),
+        finishedAt: DateTime(2026, 9, 24, 18, 20),
+      ),
+      logs: [
+        SetLog(
+          id: 1,
+          sessionId: 1,
+          exerciseId: 1,
+          setNumber: 1,
+          completedAt: DateTime(2026, 9, 24, 18, 5),
+          repsPerformed: 8,
+          weightKg: null,
+        ),
+      ],
+      exercises: [
+        Exercise(
+          id: 1,
+          planId: 1,
+          name: 'بارفیکس',
+          sets: 3,
+          reps: 8,
+          position: 1,
+          weekNumber: 1,
+          dayNumber: 1,
+          category: ExerciseCategory.compound,
+        ),
+      ],
+    );
+
+    // Bodyweight: no load recorded, but the work still happened.
+    expect(summary.totalReps, 8);
+    expect(summary.totalSets, 1);
+  });
+
 }

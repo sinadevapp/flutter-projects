@@ -91,6 +91,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get repsLabel => 'تکرار';
 
   @override
+  String get weightLabel => 'وزن (کیلوگرم)';
+
+  @override
   String setsXReps(String sets, String reps) {
     return '$sets × $reps';
   }
@@ -376,9 +379,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get heightLabel => 'قد (سانتی‌متر)';
-
-  @override
-  String get weightLabel => 'وزن (کیلوگرم)';
 
   @override
   String get activityLabel => 'سطح فعالیت';

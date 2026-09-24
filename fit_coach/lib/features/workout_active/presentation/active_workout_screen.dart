@@ -46,13 +46,52 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   /// at a finished timer.
   bool _resting = false;
 
+  final _weight = TextEditingController();
+  final _reps = TextEditingController();
+
+  /// Which movement these fields were filled from.
+  ///
+  /// Refilled once per movement rather than once per set: the coach's number
+  /// seeds set 1, and whatever the student then lifts carries forward to set
+  /// 2 — which is what actually happens in a gym, and re-typing 82.5 three
+  /// times is not a feature.
+  int? _seededForExercise;
+
+  @override
+  void dispose() {
+    _weight.dispose();
+    _reps.dispose();
+    super.dispose();
+  }
+
+  void _seedFrom(Exercise movement) {
+    if (_seededForExercise == movement.id) return;
+    _seededForExercise = movement.id;
+
+    final target = movement.targetWeightKg;
+    _weight.text = target == null
+        ? ''
+        : target == target.truncateToDouble()
+            ? target.toStringAsFixed(0)
+            : target.toString();
+    _reps.text = movement.reps.toString();
+  }
+
+  /// Parses a weight field: empty or unparseable means "no load recorded".
+  ///
+  /// Garbage is not stored as a number, because a bad keystroke becoming
+  /// "82 kg" in the history would be worse than leaving the set unmeasured.
+  double? _enteredWeight() => double.tryParse(_weight.text.trim());
+
+  int? _enteredReps() => int.tryParse(_reps.text.trim());
+
   Future<void> _logSet(int exerciseId, int setNumber) async {
-    await ref
-        .read(appDatabaseProvider)
-        .logSet(
+    await ref.read(appDatabaseProvider).logSet(
           sessionId: widget.sessionId,
           exerciseId: exerciseId,
           setNumber: setNumber,
+          weightKg: _enteredWeight(),
+          reps: _enteredReps(),
         );
     // A short buzz on logging, so the tap registers without looking.
     await HapticFeedback.lightImpact();
@@ -132,6 +171,9 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       );
     }
 
+    // Seed the load fields once per movement — see `_seededForExercise`.
+    _seedFrom(current);
+
     return Column(
       children: [
         if (_resting)
@@ -188,6 +230,39 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   ),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 24),
+                // The attempt, not the prescription: what they actually
+                // lifted and actually managed. Filled from the plan for set 1
+                // and carried across the rest of the movement.
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _weight,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: l10n.weightLabel,
+                          prefixIcon: const Icon(Icons.fitness_center),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _reps,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: l10n.repsLabel,
+                          prefixIcon: const Icon(Icons.repeat),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 32),
                 FilledButton.icon(

@@ -50,10 +50,22 @@ class WorkoutSummary {
     required List<SetLog> logs,
     required List<Exercise> exercises,
   }) {
+    final byId = {for (final exercise in exercises) exercise.id: exercise};
+
     final setsPerMovement = <int, int>{};
+    final repsPerMovement = <int, int>{};
     for (final log in logs) {
       setsPerMovement[log.exerciseId] =
           (setsPerMovement[log.exerciseId] ?? 0) + 1;
+
+      final exercise = byId[log.exerciseId];
+      if (exercise == null) continue;
+      // The attempt wins over the prescription. A set logged without a rep
+      // count — every set logged before that column existed — falls back to
+      // the plan's number, which is the only figure available for it.
+      repsPerMovement[log.exerciseId] =
+          (repsPerMovement[log.exerciseId] ?? 0) +
+          (log.repsPerformed ?? exercise.reps);
     }
 
     final movements = <MovementSummary>[];
@@ -65,7 +77,7 @@ class WorkoutSummary {
       movements.add(MovementSummary(
         name: exercise.name,
         sets: sets,
-        reps: sets * exercise.reps,
+        reps: repsPerMovement[exercise.id] ?? 0,
       ));
     }
 

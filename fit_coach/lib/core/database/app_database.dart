@@ -113,6 +113,14 @@ class Exercises extends Table {
   IntColumn get sets => integer()();
   IntColumn get reps => integer()();
 
+  /// Kilos the coach prescribed, when they prescribed any.
+  ///
+  /// Nullable because plenty of movements have no load: a pull-up is
+  /// bodyweight, and a beginner's squat may be the empty bar. It is the
+  /// *prescription* — what a student actually lifted lives on the set log and
+  /// is never rewritten by it.
+  RealColumn get targetWeightKg => real().nullable()();
+
   /// 1-based week within the plan.
   IntColumn get weekNumber => integer().withDefault(const Constant(1))();
 
@@ -168,6 +176,15 @@ class SetLogs extends Table {
   IntColumn get sessionId => integer().references(WorkoutSessions, #id)();
   IntColumn get exerciseId => integer().references(Exercises, #id)();
   IntColumn get setNumber => integer()();
+
+  /// Kilos actually lifted. Null where no load was recorded — bodyweight
+  /// moves have none, and sets logged before this column existed have none
+  /// either. Null is not zero: zero would mean the bar alone.
+  RealColumn get weightKg => real().nullable()();
+
+  /// Reps actually done, which is usually *not* the number the plan asked
+  /// for. Null means "not recorded", not "zero".
+  IntColumn get repsPerformed => integer().nullable()();
   DateTimeColumn get completedAt =>
       dateTime().withDefault(currentDateAndTime)();
 }
@@ -264,7 +281,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase({QueryExecutor? executor}) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -373,6 +390,26 @@ class AppDatabase extends _$AppDatabase {
           'SELECT DISTINCT plan_id, week_number, day_number '
           'FROM exercises',
         );
+      }
+      // Load recording. Both tables are created by an earlier branch's
+      // `createTable`, which emits the *current* shape — so each ALTER is
+      // gated on the version whose branch builds it, exactly as for schema
+      // 10. Unguarded, these would fail with `duplicate column name` for
+      // anyone upgrading from 1 or 4.
+      if (from < 12) {
+        if (from >= 2) {
+          await customStatement(
+            'ALTER TABLE exercises ADD COLUMN target_weight_kg REAL NULL',
+          );
+        }
+        if (from >= 5) {
+          await customStatement(
+            'ALTER TABLE set_logs ADD COLUMN weight_kg REAL NULL',
+          );
+          await customStatement(
+            'ALTER TABLE set_logs ADD COLUMN reps_performed INTEGER NULL',
+          );
+        }
       }
     },
     // A *fresh* install never runs onUpgrade, so the seed has to happen
@@ -706,18 +743,28 @@ class AppDatabase extends _$AppDatabase {
       );
 
   /// Corrects a movement. Anything not passed is left as it was.
+  /// Corrects a movement. Anything not passed is left as it was.
+  ///
+  /// [targetWeightKg] takes a [Value] rather than a bare `double?` because
+  /// this column distinguishes *no prescription* from *not asked*: `Value(80)`
+  /// sets it, `const Value(null)` clears it (the movement is bodyweight), and
+  /// the default `Value.absent()` leaves it alone. A plain `double?` could
+  /// never say "clear it".
   Future<void> updateExercise(
     int exerciseId, {
     String? name,
     int? sets,
     int? reps,
-  }) => (update(exercises)..where((e) => e.id.equals(exerciseId))).write(
-    ExercisesCompanion(
-      name: name == null ? const Value.absent() : Value(name),
-      sets: sets == null ? const Value.absent() : Value(sets),
-      reps: reps == null ? const Value.absent() : Value(reps),
-    ),
-  );
+    Value<double?> targetWeightKg = const Value.absent(),
+  }) =>
+      (update(exercises)..where((e) => e.id.equals(exerciseId))).write(
+        ExercisesCompanion(
+          name: name == null ? const Value.absent() : Value(name),
+          sets: sets == null ? const Value.absent() : Value(sets),
+          reps: reps == null ? const Value.absent() : Value(reps),
+          targetWeightKg: targetWeightKg,
+        ),
+      );
 
   /// Removes a movement from its plan.
   ///
@@ -883,15 +930,25 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Records one finished set.
+  /// Records one completed set, and what it actually cost.
+  ///
+  /// [weightKg] and [reps] are the attempt, not the prescription: a student
+  /// who was given 4×10 may well manage 82.5 kg for 7. Omitting them keeps
+  /// the pre-existing behaviour — a set with no recorded load, which is how
+  /// every set logged before this existed reads.
   Future<int> logSet({
     required int sessionId,
     required int exerciseId,
     required int setNumber,
+    double? weightKg,
+    int? reps,
   }) => into(setLogs).insert(
     SetLogsCompanion.insert(
       sessionId: sessionId,
       exerciseId: exerciseId,
       setNumber: setNumber,
+      weightKg: Value(weightKg),
+      repsPerformed: Value(reps),
     ),
   );
 

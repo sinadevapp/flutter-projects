@@ -797,6 +797,17 @@ class $ExercisesTable extends Exercises
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _targetWeightKgMeta = const VerificationMeta(
+    'targetWeightKg',
+  );
+  @override
+  late final GeneratedColumn<double> targetWeightKg = GeneratedColumn<double>(
+    'target_weight_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _weekNumberMeta = const VerificationMeta(
     'weekNumber',
   );
@@ -850,6 +861,7 @@ class $ExercisesTable extends Exercises
     name,
     sets,
     reps,
+    targetWeightKg,
     weekNumber,
     dayNumber,
     category,
@@ -902,6 +914,15 @@ class $ExercisesTable extends Exercises
     } else if (isInserting) {
       context.missing(_repsMeta);
     }
+    if (data.containsKey('target_weight_kg')) {
+      context.handle(
+        _targetWeightKgMeta,
+        targetWeightKg.isAcceptableOrUnknown(
+          data['target_weight_kg']!,
+          _targetWeightKgMeta,
+        ),
+      );
+    }
     if (data.containsKey('week_number')) {
       context.handle(
         _weekNumberMeta,
@@ -949,6 +970,10 @@ class $ExercisesTable extends Exercises
         DriftSqlType.int,
         data['${effectivePrefix}reps'],
       )!,
+      targetWeightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}target_weight_kg'],
+      ),
       weekNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}week_number'],
@@ -986,6 +1011,14 @@ class Exercise extends DataClass implements Insertable<Exercise> {
   final int sets;
   final int reps;
 
+  /// Kilos the coach prescribed, when they prescribed any.
+  ///
+  /// Nullable because plenty of movements have no load: a pull-up is
+  /// bodyweight, and a beginner's squat may be the empty bar. It is the
+  /// *prescription* — what a student actually lifted lives on the set log and
+  /// is never rewritten by it.
+  final double? targetWeightKg;
+
   /// 1-based week within the plan.
   final int weekNumber;
 
@@ -1006,6 +1039,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     required this.name,
     required this.sets,
     required this.reps,
+    this.targetWeightKg,
     required this.weekNumber,
     required this.dayNumber,
     required this.category,
@@ -1019,6 +1053,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     map['name'] = Variable<String>(name);
     map['sets'] = Variable<int>(sets);
     map['reps'] = Variable<int>(reps);
+    if (!nullToAbsent || targetWeightKg != null) {
+      map['target_weight_kg'] = Variable<double>(targetWeightKg);
+    }
     map['week_number'] = Variable<int>(weekNumber);
     map['day_number'] = Variable<int>(dayNumber);
     {
@@ -1037,6 +1074,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       name: Value(name),
       sets: Value(sets),
       reps: Value(reps),
+      targetWeightKg: targetWeightKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetWeightKg),
       weekNumber: Value(weekNumber),
       dayNumber: Value(dayNumber),
       category: Value(category),
@@ -1055,6 +1095,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       name: serializer.fromJson<String>(json['name']),
       sets: serializer.fromJson<int>(json['sets']),
       reps: serializer.fromJson<int>(json['reps']),
+      targetWeightKg: serializer.fromJson<double?>(json['targetWeightKg']),
       weekNumber: serializer.fromJson<int>(json['weekNumber']),
       dayNumber: serializer.fromJson<int>(json['dayNumber']),
       category: $ExercisesTable.$convertercategory.fromJson(
@@ -1072,6 +1113,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       'name': serializer.toJson<String>(name),
       'sets': serializer.toJson<int>(sets),
       'reps': serializer.toJson<int>(reps),
+      'targetWeightKg': serializer.toJson<double?>(targetWeightKg),
       'weekNumber': serializer.toJson<int>(weekNumber),
       'dayNumber': serializer.toJson<int>(dayNumber),
       'category': serializer.toJson<int>(
@@ -1087,6 +1129,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     String? name,
     int? sets,
     int? reps,
+    Value<double?> targetWeightKg = const Value.absent(),
     int? weekNumber,
     int? dayNumber,
     ExerciseCategory? category,
@@ -1097,6 +1140,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     name: name ?? this.name,
     sets: sets ?? this.sets,
     reps: reps ?? this.reps,
+    targetWeightKg: targetWeightKg.present
+        ? targetWeightKg.value
+        : this.targetWeightKg,
     weekNumber: weekNumber ?? this.weekNumber,
     dayNumber: dayNumber ?? this.dayNumber,
     category: category ?? this.category,
@@ -1109,6 +1155,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       name: data.name.present ? data.name.value : this.name,
       sets: data.sets.present ? data.sets.value : this.sets,
       reps: data.reps.present ? data.reps.value : this.reps,
+      targetWeightKg: data.targetWeightKg.present
+          ? data.targetWeightKg.value
+          : this.targetWeightKg,
       weekNumber: data.weekNumber.present
           ? data.weekNumber.value
           : this.weekNumber,
@@ -1126,6 +1175,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ..write('name: $name, ')
           ..write('sets: $sets, ')
           ..write('reps: $reps, ')
+          ..write('targetWeightKg: $targetWeightKg, ')
           ..write('weekNumber: $weekNumber, ')
           ..write('dayNumber: $dayNumber, ')
           ..write('category: $category, ')
@@ -1141,6 +1191,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     name,
     sets,
     reps,
+    targetWeightKg,
     weekNumber,
     dayNumber,
     category,
@@ -1155,6 +1206,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           other.name == this.name &&
           other.sets == this.sets &&
           other.reps == this.reps &&
+          other.targetWeightKg == this.targetWeightKg &&
           other.weekNumber == this.weekNumber &&
           other.dayNumber == this.dayNumber &&
           other.category == this.category &&
@@ -1167,6 +1219,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
   final Value<String> name;
   final Value<int> sets;
   final Value<int> reps;
+  final Value<double?> targetWeightKg;
   final Value<int> weekNumber;
   final Value<int> dayNumber;
   final Value<ExerciseCategory> category;
@@ -1177,6 +1230,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     this.name = const Value.absent(),
     this.sets = const Value.absent(),
     this.reps = const Value.absent(),
+    this.targetWeightKg = const Value.absent(),
     this.weekNumber = const Value.absent(),
     this.dayNumber = const Value.absent(),
     this.category = const Value.absent(),
@@ -1188,6 +1242,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     required String name,
     required int sets,
     required int reps,
+    this.targetWeightKg = const Value.absent(),
     this.weekNumber = const Value.absent(),
     this.dayNumber = const Value.absent(),
     this.category = const Value.absent(),
@@ -1202,6 +1257,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Expression<String>? name,
     Expression<int>? sets,
     Expression<int>? reps,
+    Expression<double>? targetWeightKg,
     Expression<int>? weekNumber,
     Expression<int>? dayNumber,
     Expression<int>? category,
@@ -1213,6 +1269,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       if (name != null) 'name': name,
       if (sets != null) 'sets': sets,
       if (reps != null) 'reps': reps,
+      if (targetWeightKg != null) 'target_weight_kg': targetWeightKg,
       if (weekNumber != null) 'week_number': weekNumber,
       if (dayNumber != null) 'day_number': dayNumber,
       if (category != null) 'category': category,
@@ -1226,6 +1283,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Value<String>? name,
     Value<int>? sets,
     Value<int>? reps,
+    Value<double?>? targetWeightKg,
     Value<int>? weekNumber,
     Value<int>? dayNumber,
     Value<ExerciseCategory>? category,
@@ -1237,6 +1295,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       name: name ?? this.name,
       sets: sets ?? this.sets,
       reps: reps ?? this.reps,
+      targetWeightKg: targetWeightKg ?? this.targetWeightKg,
       weekNumber: weekNumber ?? this.weekNumber,
       dayNumber: dayNumber ?? this.dayNumber,
       category: category ?? this.category,
@@ -1261,6 +1320,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     }
     if (reps.present) {
       map['reps'] = Variable<int>(reps.value);
+    }
+    if (targetWeightKg.present) {
+      map['target_weight_kg'] = Variable<double>(targetWeightKg.value);
     }
     if (weekNumber.present) {
       map['week_number'] = Variable<int>(weekNumber.value);
@@ -1287,6 +1349,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
           ..write('name: $name, ')
           ..write('sets: $sets, ')
           ..write('reps: $reps, ')
+          ..write('targetWeightKg: $targetWeightKg, ')
           ..write('weekNumber: $weekNumber, ')
           ..write('dayNumber: $dayNumber, ')
           ..write('category: $category, ')
@@ -2069,6 +2132,28 @@ class $SetLogsTable extends SetLogs with TableInfo<$SetLogsTable, SetLog> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repsPerformedMeta = const VerificationMeta(
+    'repsPerformed',
+  );
+  @override
+  late final GeneratedColumn<int> repsPerformed = GeneratedColumn<int>(
+    'reps_performed',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _completedAtMeta = const VerificationMeta(
     'completedAt',
   );
@@ -2087,6 +2172,8 @@ class $SetLogsTable extends SetLogs with TableInfo<$SetLogsTable, SetLog> {
     sessionId,
     exerciseId,
     setNumber,
+    weightKg,
+    repsPerformed,
     completedAt,
   ];
   @override
@@ -2128,6 +2215,21 @@ class $SetLogsTable extends SetLogs with TableInfo<$SetLogsTable, SetLog> {
     } else if (isInserting) {
       context.missing(_setNumberMeta);
     }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    }
+    if (data.containsKey('reps_performed')) {
+      context.handle(
+        _repsPerformedMeta,
+        repsPerformed.isAcceptableOrUnknown(
+          data['reps_performed']!,
+          _repsPerformedMeta,
+        ),
+      );
+    }
     if (data.containsKey('completed_at')) {
       context.handle(
         _completedAtMeta,
@@ -2162,6 +2264,14 @@ class $SetLogsTable extends SetLogs with TableInfo<$SetLogsTable, SetLog> {
         DriftSqlType.int,
         data['${effectivePrefix}set_number'],
       )!,
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      ),
+      repsPerformed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reps_performed'],
+      ),
       completedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_at'],
@@ -2180,12 +2290,23 @@ class SetLog extends DataClass implements Insertable<SetLog> {
   final int sessionId;
   final int exerciseId;
   final int setNumber;
+
+  /// Kilos actually lifted. Null where no load was recorded — bodyweight
+  /// moves have none, and sets logged before this column existed have none
+  /// either. Null is not zero: zero would mean the bar alone.
+  final double? weightKg;
+
+  /// Reps actually done, which is usually *not* the number the plan asked
+  /// for. Null means "not recorded", not "zero".
+  final int? repsPerformed;
   final DateTime completedAt;
   const SetLog({
     required this.id,
     required this.sessionId,
     required this.exerciseId,
     required this.setNumber,
+    this.weightKg,
+    this.repsPerformed,
     required this.completedAt,
   });
   @override
@@ -2195,6 +2316,12 @@ class SetLog extends DataClass implements Insertable<SetLog> {
     map['session_id'] = Variable<int>(sessionId);
     map['exercise_id'] = Variable<int>(exerciseId);
     map['set_number'] = Variable<int>(setNumber);
+    if (!nullToAbsent || weightKg != null) {
+      map['weight_kg'] = Variable<double>(weightKg);
+    }
+    if (!nullToAbsent || repsPerformed != null) {
+      map['reps_performed'] = Variable<int>(repsPerformed);
+    }
     map['completed_at'] = Variable<DateTime>(completedAt);
     return map;
   }
@@ -2205,6 +2332,12 @@ class SetLog extends DataClass implements Insertable<SetLog> {
       sessionId: Value(sessionId),
       exerciseId: Value(exerciseId),
       setNumber: Value(setNumber),
+      weightKg: weightKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightKg),
+      repsPerformed: repsPerformed == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repsPerformed),
       completedAt: Value(completedAt),
     );
   }
@@ -2219,6 +2352,8 @@ class SetLog extends DataClass implements Insertable<SetLog> {
       sessionId: serializer.fromJson<int>(json['sessionId']),
       exerciseId: serializer.fromJson<int>(json['exerciseId']),
       setNumber: serializer.fromJson<int>(json['setNumber']),
+      weightKg: serializer.fromJson<double?>(json['weightKg']),
+      repsPerformed: serializer.fromJson<int?>(json['repsPerformed']),
       completedAt: serializer.fromJson<DateTime>(json['completedAt']),
     );
   }
@@ -2230,6 +2365,8 @@ class SetLog extends DataClass implements Insertable<SetLog> {
       'sessionId': serializer.toJson<int>(sessionId),
       'exerciseId': serializer.toJson<int>(exerciseId),
       'setNumber': serializer.toJson<int>(setNumber),
+      'weightKg': serializer.toJson<double?>(weightKg),
+      'repsPerformed': serializer.toJson<int?>(repsPerformed),
       'completedAt': serializer.toJson<DateTime>(completedAt),
     };
   }
@@ -2239,12 +2376,18 @@ class SetLog extends DataClass implements Insertable<SetLog> {
     int? sessionId,
     int? exerciseId,
     int? setNumber,
+    Value<double?> weightKg = const Value.absent(),
+    Value<int?> repsPerformed = const Value.absent(),
     DateTime? completedAt,
   }) => SetLog(
     id: id ?? this.id,
     sessionId: sessionId ?? this.sessionId,
     exerciseId: exerciseId ?? this.exerciseId,
     setNumber: setNumber ?? this.setNumber,
+    weightKg: weightKg.present ? weightKg.value : this.weightKg,
+    repsPerformed: repsPerformed.present
+        ? repsPerformed.value
+        : this.repsPerformed,
     completedAt: completedAt ?? this.completedAt,
   );
   SetLog copyWithCompanion(SetLogsCompanion data) {
@@ -2255,6 +2398,10 @@ class SetLog extends DataClass implements Insertable<SetLog> {
           ? data.exerciseId.value
           : this.exerciseId,
       setNumber: data.setNumber.present ? data.setNumber.value : this.setNumber,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      repsPerformed: data.repsPerformed.present
+          ? data.repsPerformed.value
+          : this.repsPerformed,
       completedAt: data.completedAt.present
           ? data.completedAt.value
           : this.completedAt,
@@ -2268,14 +2415,23 @@ class SetLog extends DataClass implements Insertable<SetLog> {
           ..write('sessionId: $sessionId, ')
           ..write('exerciseId: $exerciseId, ')
           ..write('setNumber: $setNumber, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('repsPerformed: $repsPerformed, ')
           ..write('completedAt: $completedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, sessionId, exerciseId, setNumber, completedAt);
+  int get hashCode => Object.hash(
+    id,
+    sessionId,
+    exerciseId,
+    setNumber,
+    weightKg,
+    repsPerformed,
+    completedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2284,6 +2440,8 @@ class SetLog extends DataClass implements Insertable<SetLog> {
           other.sessionId == this.sessionId &&
           other.exerciseId == this.exerciseId &&
           other.setNumber == this.setNumber &&
+          other.weightKg == this.weightKg &&
+          other.repsPerformed == this.repsPerformed &&
           other.completedAt == this.completedAt);
 }
 
@@ -2292,12 +2450,16 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
   final Value<int> sessionId;
   final Value<int> exerciseId;
   final Value<int> setNumber;
+  final Value<double?> weightKg;
+  final Value<int?> repsPerformed;
   final Value<DateTime> completedAt;
   const SetLogsCompanion({
     this.id = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.exerciseId = const Value.absent(),
     this.setNumber = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.repsPerformed = const Value.absent(),
     this.completedAt = const Value.absent(),
   });
   SetLogsCompanion.insert({
@@ -2305,6 +2467,8 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
     required int sessionId,
     required int exerciseId,
     required int setNumber,
+    this.weightKg = const Value.absent(),
+    this.repsPerformed = const Value.absent(),
     this.completedAt = const Value.absent(),
   }) : sessionId = Value(sessionId),
        exerciseId = Value(exerciseId),
@@ -2314,6 +2478,8 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
     Expression<int>? sessionId,
     Expression<int>? exerciseId,
     Expression<int>? setNumber,
+    Expression<double>? weightKg,
+    Expression<int>? repsPerformed,
     Expression<DateTime>? completedAt,
   }) {
     return RawValuesInsertable({
@@ -2321,6 +2487,8 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
       if (sessionId != null) 'session_id': sessionId,
       if (exerciseId != null) 'exercise_id': exerciseId,
       if (setNumber != null) 'set_number': setNumber,
+      if (weightKg != null) 'weight_kg': weightKg,
+      if (repsPerformed != null) 'reps_performed': repsPerformed,
       if (completedAt != null) 'completed_at': completedAt,
     });
   }
@@ -2330,6 +2498,8 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
     Value<int>? sessionId,
     Value<int>? exerciseId,
     Value<int>? setNumber,
+    Value<double?>? weightKg,
+    Value<int?>? repsPerformed,
     Value<DateTime>? completedAt,
   }) {
     return SetLogsCompanion(
@@ -2337,6 +2507,8 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
       sessionId: sessionId ?? this.sessionId,
       exerciseId: exerciseId ?? this.exerciseId,
       setNumber: setNumber ?? this.setNumber,
+      weightKg: weightKg ?? this.weightKg,
+      repsPerformed: repsPerformed ?? this.repsPerformed,
       completedAt: completedAt ?? this.completedAt,
     );
   }
@@ -2356,6 +2528,12 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
     if (setNumber.present) {
       map['set_number'] = Variable<int>(setNumber.value);
     }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
+    if (repsPerformed.present) {
+      map['reps_performed'] = Variable<int>(repsPerformed.value);
+    }
     if (completedAt.present) {
       map['completed_at'] = Variable<DateTime>(completedAt.value);
     }
@@ -2369,6 +2547,8 @@ class SetLogsCompanion extends UpdateCompanion<SetLog> {
           ..write('sessionId: $sessionId, ')
           ..write('exerciseId: $exerciseId, ')
           ..write('setNumber: $setNumber, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('repsPerformed: $repsPerformed, ')
           ..write('completedAt: $completedAt')
           ..write(')'))
         .toString();
@@ -5171,6 +5351,7 @@ typedef $$ExercisesTableCreateCompanionBuilder =
       required String name,
       required int sets,
       required int reps,
+      Value<double?> targetWeightKg,
       Value<int> weekNumber,
       Value<int> dayNumber,
       Value<ExerciseCategory> category,
@@ -5183,6 +5364,7 @@ typedef $$ExercisesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<int> sets,
       Value<int> reps,
+      Value<double?> targetWeightKg,
       Value<int> weekNumber,
       Value<int> dayNumber,
       Value<ExerciseCategory> category,
@@ -5258,6 +5440,11 @@ class $$ExercisesTableFilterComposer
 
   ColumnFilters<int> get reps => $composableBuilder(
     column: $table.reps,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get targetWeightKg => $composableBuilder(
+    column: $table.targetWeightKg,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5360,6 +5547,11 @@ class $$ExercisesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get targetWeightKg => $composableBuilder(
+    column: $table.targetWeightKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get weekNumber => $composableBuilder(
     column: $table.weekNumber,
     builder: (column) => ColumnOrderings(column),
@@ -5424,6 +5616,11 @@ class $$ExercisesTableAnnotationComposer
 
   GeneratedColumn<int> get reps =>
       $composableBuilder(column: $table.reps, builder: (column) => column);
+
+  GeneratedColumn<double> get targetWeightKg => $composableBuilder(
+    column: $table.targetWeightKg,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get weekNumber => $composableBuilder(
     column: $table.weekNumber,
@@ -5521,6 +5718,7 @@ class $$ExercisesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<int> sets = const Value.absent(),
                 Value<int> reps = const Value.absent(),
+                Value<double?> targetWeightKg = const Value.absent(),
                 Value<int> weekNumber = const Value.absent(),
                 Value<int> dayNumber = const Value.absent(),
                 Value<ExerciseCategory> category = const Value.absent(),
@@ -5531,6 +5729,7 @@ class $$ExercisesTableTableManager
                 name: name,
                 sets: sets,
                 reps: reps,
+                targetWeightKg: targetWeightKg,
                 weekNumber: weekNumber,
                 dayNumber: dayNumber,
                 category: category,
@@ -5543,6 +5742,7 @@ class $$ExercisesTableTableManager
                 required String name,
                 required int sets,
                 required int reps,
+                Value<double?> targetWeightKg = const Value.absent(),
                 Value<int> weekNumber = const Value.absent(),
                 Value<int> dayNumber = const Value.absent(),
                 Value<ExerciseCategory> category = const Value.absent(),
@@ -5553,6 +5753,7 @@ class $$ExercisesTableTableManager
                 name: name,
                 sets: sets,
                 reps: reps,
+                targetWeightKg: targetWeightKg,
                 weekNumber: weekNumber,
                 dayNumber: dayNumber,
                 category: category,
@@ -6470,6 +6671,8 @@ typedef $$SetLogsTableCreateCompanionBuilder =
       required int sessionId,
       required int exerciseId,
       required int setNumber,
+      Value<double?> weightKg,
+      Value<int?> repsPerformed,
       Value<DateTime> completedAt,
     });
 typedef $$SetLogsTableUpdateCompanionBuilder =
@@ -6478,6 +6681,8 @@ typedef $$SetLogsTableUpdateCompanionBuilder =
       Value<int> sessionId,
       Value<int> exerciseId,
       Value<int> setNumber,
+      Value<double?> weightKg,
+      Value<int?> repsPerformed,
       Value<DateTime> completedAt,
     });
 
@@ -6540,6 +6745,16 @@ class $$SetLogsTableFilterComposer
 
   ColumnFilters<int> get setNumber => $composableBuilder(
     column: $table.setNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get repsPerformed => $composableBuilder(
+    column: $table.repsPerformed,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6614,6 +6829,16 @@ class $$SetLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get repsPerformed => $composableBuilder(
+    column: $table.repsPerformed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
     builder: (column) => ColumnOrderings(column),
@@ -6680,6 +6905,14 @@ class $$SetLogsTableAnnotationComposer
 
   GeneratedColumn<int> get setNumber =>
       $composableBuilder(column: $table.setNumber, builder: (column) => column);
+
+  GeneratedColumn<double> get weightKg =>
+      $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<int> get repsPerformed => $composableBuilder(
+    column: $table.repsPerformed,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
@@ -6765,12 +6998,16 @@ class $$SetLogsTableTableManager
                 Value<int> sessionId = const Value.absent(),
                 Value<int> exerciseId = const Value.absent(),
                 Value<int> setNumber = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
+                Value<int?> repsPerformed = const Value.absent(),
                 Value<DateTime> completedAt = const Value.absent(),
               }) => SetLogsCompanion(
                 id: id,
                 sessionId: sessionId,
                 exerciseId: exerciseId,
                 setNumber: setNumber,
+                weightKg: weightKg,
+                repsPerformed: repsPerformed,
                 completedAt: completedAt,
               ),
           createCompanionCallback:
@@ -6779,12 +7016,16 @@ class $$SetLogsTableTableManager
                 required int sessionId,
                 required int exerciseId,
                 required int setNumber,
+                Value<double?> weightKg = const Value.absent(),
+                Value<int?> repsPerformed = const Value.absent(),
                 Value<DateTime> completedAt = const Value.absent(),
               }) => SetLogsCompanion.insert(
                 id: id,
                 sessionId: sessionId,
                 exerciseId: exerciseId,
                 setNumber: setNumber,
+                weightKg: weightKg,
+                repsPerformed: repsPerformed,
                 completedAt: completedAt,
               ),
           withReferenceMapper: (p0) => p0
